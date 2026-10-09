@@ -1,0 +1,12 @@
+# Private working material: never commit (repo is public)
+docs/inputs/
+# Temporary input files dropped in the repo root
+/*.pdf
+/*.pages
+/*.docx
+/*.xlsx
+/*.csv
+
+.DS_Store
+.env
+.env.*
