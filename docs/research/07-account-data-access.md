@@ -36,6 +36,17 @@ Banks want **6 months of statements for all accounts**. Our MVP and universal fa
   - Creditinfo Eesti's AIS: stopped May 2025.
 - **No Baltic bank has an MCP server.** The "European bank with MCP" is **Danske Bank**, piloting for corporate customers only. Community MCP servers on top of aggregators exist, e.g. `github.com/elcukro/bank-mcp` (supports Enable Banking). They are irrelevant to our flow.
 
+## Aggregator vs direct bank APIs
+
+Every Estonian bank exposes a PSD2 open-banking API. **Calling those APIs directly in production requires being a licensed TPP:** an FI-registered or passported AISP, holding eIDAS QWAC/QSEAL certificates. Apps without a licence use an aggregator that holds one.
+
+- **Precedent: Bilance** (an Estonian budgeting app) syncs accounts from all the Estonian banks. Per a GoCardless customer story, it does this through **GoCardless Bank Account Data** (formerly Nordigen), an aggregator. It does not use its own bank integrations.
+  - GoCardless reportedly stopped taking **new** sign-ups for this product in July 2025 [unverified]. That is why Enable Banking is our first pick for the same role.
+- **Options:**
+  - **(a) Aggregator** (Enable Banking, or GoCardless if it still onboards, Salt Edge, Accountscoring): one integration that covers every bank, under the aggregator's licence.
+  - **(b) Direct bank APIs:** a separate integration per bank, plus a licence and eIDAS certificates. Bank sandboxes (e.g. LHV) are free to try without a licence, but they don't lead to real data.
+- **Hackathon:** (a) is the only route to real accounts. (b) works in sandboxes only.
+
 ## Recommended ladder (best first)
 
 | # | Channel | Coverage | Friction | Authenticity | Hackathon |
@@ -123,6 +134,8 @@ Banks want **6 months of statements for all accounts**. Our MVP and universal fa
 8. **Real-data demo:** register a second app with environment Production, choose "Activate by linking accounts", and link team members' own accounts. This is for evaluation and non-commercial use only.
 
 ## Sources
+
+- Bilance via GoCardless: https://gocardless.com/stories/bilance ; https://intercom.help/bilance/en/articles/6112520-how-do-i-connect-my-bank-account
 
 - **Enable Banking**
   - Estonia market notes: https://enablebanking.com/docs/markets/ee/

@@ -33,6 +33,7 @@ Build a **borrower-facing** app that:
 | D19 | **Co-borrowers are not in the initial scope.** We only record that a co-borrower exists | 2026-10-10 |
 | D20 | **Upload priorities** — **Must:** loan contract (LLM extraction), statement as plain PDF (LLM + balance reconciliation), statement as **bank-sealed ASiC-E/BDOC** (verify the seal with digidoc4j, then parse the inner file). **Should:** camt.053 XML and CSV statements. **Stretch:** "connect your bank" via Enable Banking AIS (needs a sandbox account). **Could:** EMTA tax-data certificate and home-insurance policy. Every channel reduces to the same derived summary; raw transactions are discarded | 2026-10-10 |
 | D21 | **Up-front fields:** identity; old-loan facts incl. contract number; property (energy class auto-filled from EHR); household (co-borrower flag, marital status, property regime); other liabilities; 6 months of statements. **After a bank is chosen:** valuation, early-repayment application, notary | 2026-10-10 |
+| D22 | **Placeholder tracker values:** deadline **31.12.2026**; margin ladder €25M → 1.45%, €50M → 1.35%, €100M → 1.25%. Both live in config and can change | 2026-10-10 |
 
 ## Non-goals for the hackathon
 
@@ -167,5 +168,5 @@ Use transparent rules, not ML, so the result is explainable. Thresholds live in 
 
 ## Open questions (remaining)
 
-1. **Deadline D, target €N and margin ladder:** values to come from teammates (placeholders until then).
-2. **Enable Banking sandbox account:** if we want the stretch goal, someone on the team needs to sign up.
+1. **Target €N and the final margin ladder:** values to come from teammates. Placeholders are in D22.
+2. **Bank-connection approach** (the stretch goal): the user is evaluating it. See `07-account-data-access.md`, "Aggregator vs direct bank APIs".
