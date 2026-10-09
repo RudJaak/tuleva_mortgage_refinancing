@@ -2,19 +2,19 @@ import { describe, expect, it } from 'vitest'
 import { defaultCalculatorSettings, scenarioMargins } from './settings'
 
 describe('scenarioMargins', () => {
-  it('aims for the next ladder step that the pool has not reached', () => {
-    const margins = scenarioMargins({ ...defaultCalculatorSettings, committedVolume: 32_000_000 })
-
-    expect(margins).toEqual({ worst: 1.5, expected: 1.35, best: 1.25 })
+  it('maps the three ladder tiers to the modest, goal and best scenarios', () => {
+    expect(scenarioMargins(defaultCalculatorSettings)).toEqual({
+      worst: 1.3,
+      expected: 1.2,
+      best: 1.1,
+    })
   })
 
-  it('aims for the first step of an empty pool', () => {
-    expect(scenarioMargins(defaultCalculatorSettings).expected).toBe(1.45)
-  })
+  it('orders tiers by pool volume regardless of input order', () => {
+    const [first, second, third] = defaultCalculatorSettings.ladder
 
-  it('uses the best margin once every step is reached', () => {
-    const margins = scenarioMargins({ ...defaultCalculatorSettings, committedVolume: 150_000_000 })
-
-    expect(margins.expected).toBe(1.25)
+    expect(
+      scenarioMargins({ ...defaultCalculatorSettings, ladder: [third, first, second] }),
+    ).toEqual({ worst: 1.3, expected: 1.2, best: 1.1 })
   })
 })

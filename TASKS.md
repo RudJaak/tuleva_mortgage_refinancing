@@ -73,8 +73,8 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 
 ### T06 Config: pool, ladder, scenarios · D · 0.5h · after T02
 - `application.yml`:
-  - pool deadline `2026-12-31`, target volume, ladder `[25M→1.45, 50M→1.35, 100M→1.25]` (D22);
-  - calculator worst and best margins; default margin 1.70%; 6M Euribor anchor 2.936%; NPV discount 3%; switching cost €400;
+  - pool deadline `2026-12-31`, target volume, ladder `[25M→1.30, 50M→1.20, 100M→1.10]` (D23);
+  - default margin 1.70%; 6M Euribor anchor 2.936%; NPV discount 3%; switching cost €400;
   - risk-class thresholds.
 - `GET /v1/config/public` exposes what the frontend needs.
 - **Done when:** the frontend can read the config, and changing the YAML changes the UI.
@@ -116,7 +116,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - **Outcome:**
   - `components/calculator/`: a port of Tuleva's card, segmented scenario buttons, and a margin slider with a value bubble and a "Uute laenude keskmine ~1,6%" marker. The "Ei tea" option falls back to 1.70%.
   - Results show per month, until the end of the loan, NPV and break-even, with the compliance disclaimer. Inputs persist in `sessionStorage`. `validated` mode shows "✓ lepingust" badges.
-  - **Settings are static defaults for now** (`settings.ts` → `useCalculatorSettings`). T06 and T13 must feed them from `/v1/config/public` and `/v1/pool/stats`; the "expected" case = the next unreached ladder step.
+  - **Settings are static defaults for now** (`settings.ts` → `useCalculatorSettings`). T06 must feed them from `/v1/config/public`. The scenarios are the three ladder tiers (D23).
   - The review step (T34) still has to mount it in validated mode.
 
 ### T13 Pool tracker: API + component · D+B · 3h · after T03, T06, T10
