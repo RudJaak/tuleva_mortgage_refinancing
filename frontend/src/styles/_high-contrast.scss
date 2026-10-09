@@ -1,0 +1,77 @@
+// Adapted from TulevaEE/onboarding-client src/components/_high-contrast.scss (MIT, (c) 2017 Tuleva).
+
+// Switch needs to meet WCAG AA contrast requirements
+
+.high-contrast-toggle {
+  .form-check-input {
+    --bs-border-color: #{$text-tertiary};
+  }
+  .form-check-input,
+  .form-check-label {
+    cursor: pointer;
+  }
+  .form-check-label {
+    color: #{$text-body-primary};
+    user-select: none;
+    white-space: nowrap;
+  }
+}
+
+.form-switch .form-check-input {
+  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23#{str-slice(inspect($text-tertiary), 2)}'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:checked {
+  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23#{str-slice(inspect($white), 2)}'/%3e%3c/svg%3e");
+}
+
+// High contrast styles
+
+.high-contrast {
+  --bs-border-color: var(--gray-border-hc) !important;
+  --input-border-color: var(--input-border-color-hc) !important;
+
+  @each $n in (1, 2, 3) {
+    --gray-border-#{$n}: var(--gray-border-hc) !important;
+    --blue-border-#{$n}: var(--gray-border-hc) !important;
+  }
+
+  --bs-box-shadow: var(--box-shadow-hc) !important;
+  --bs-box-shadow-sm: var(--box-shadow-hc) !important;
+  --bs-box-shadow-lg: var(--box-shadow-hc) !important;
+
+  --box-shadow-calculator: var(--box-shadow-hc) !important;
+  --box-shadow-dropdown: var(--box-shadow-hc) !important;
+
+  a,
+  .btn-link {
+    text-decoration-color: currentColor !important;
+  }
+
+  .card {
+    &.card-primary {
+      border-color: var(--blue-border-hc) !important;
+      & .header-section,
+      & .middle-section,
+      & .footer-section {
+        border-color: var(--blue-border-hc) !important;
+      }
+    }
+  }
+
+  .tooltip-inner {
+    box-shadow: var(--box-shadow-hc);
+  }
+
+  .btn-light {
+    --bs-border-color: var(--input-border-color-hc) !important;
+  }
+
+  .form-switch .form-check-input {
+    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23#{str-slice(inspect($text-tertiary), 2)}'/%3e%3c/svg%3e");
+  }
+  .form-switch .form-check-input:checked {
+    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23#{str-slice(inspect($white), 2)}'/%3e%3c/svg%3e");
+  }
+
+  // domain specific styles
+}

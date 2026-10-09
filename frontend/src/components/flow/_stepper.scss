@@ -1,0 +1,41 @@
+.stepper {
+  gap: 1.5rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: $text-tertiary;
+  }
+
+  .stepper-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    border: 1px solid var(--gray-border-3);
+    font-size: $font-size-small;
+  }
+
+  .stepper-current {
+    color: $text-navy;
+    font-weight: $font-weight-medium;
+
+    .stepper-index {
+      border-color: $blue;
+      background: $blue;
+      color: $white;
+    }
+  }
+
+  .stepper-done {
+    color: $text-secondary;
+
+    .stepper-index {
+      border-color: $green;
+      color: $green;
+    }
+  }
+}

@@ -143,7 +143,7 @@ The reference implementation is `mandate/MandateController`. That fits our "comm
 **Recommendation for our new app:**
 - **Frontend:**
   - Keep Tuleva's *libraries and look*: Bootstrap 5.3 with their SCSS variables, react-intl with Estonian only, react-hook-form, react-query, Chart.js.
-  - Scaffold it with **Vite + React 18 + TS 5**, not CRA, which is deprecated and slow.
+  - Scaffold it with **Vite** (React 19, TS 6 as of the template), not CRA, which is deprecated and slow.
   - Keep the feature-folder structure so components can be ported later.
 - **Backend:**
   - Spring Boot 4 / Java 25 / Gradle KTS, copying the auth and signature packages above.

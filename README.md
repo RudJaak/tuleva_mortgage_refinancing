@@ -12,7 +12,7 @@ Estonian mortgage holders join a pool, upload their loan contract and account st
 
 ```
 backend/    Spring Boot 4 / Java 25 API (Gradle). See backend/CLAUDE.md
-frontend/   React + TypeScript (Vite). Coming in T10
+frontend/   React + TypeScript (Vite). See frontend/CLAUDE.md
 docs/       Research notes (docs/inputs/ is private and gitignored)
 .githooks/  Personal-data scanner and hooks. This repo is PUBLIC
 ```
@@ -24,13 +24,14 @@ git config core.hooksPath .githooks   # mandatory: blocks personal data from bei
 cp .env.example .env                  # optional: defaults run everything on offline stubs
 ```
 
-**Requirements:** JDK 25, Docker. Node 22+ is needed once the frontend exists.
+**Requirements:** JDK 25, Docker, Node 22+.
 
 ## Run locally
 
 ```bash
 docker compose up -d                  # Postgres on :5432
 cd backend && ./gradlew bootRun       # API on :9000, health at /actuator/health
+cd frontend && npm install && npm run dev   # app on :5173, proxies /v1 to :9000
 ```
 
 ## Test
@@ -39,6 +40,7 @@ cd backend && ./gradlew bootRun       # API on :9000, health at /actuator/health
 cd backend && ./gradlew test spotlessCheck   # tests use Testcontainers (Docker must be running)
 cd backend && ./gradlew spotlessApply        # format the code
 .githooks/pii-scan-test                      # self-test for the personal-data scanner
+cd frontend && npm test && npm run lint && npx tsc -b
 ```
 
 ## Integration modes

@@ -1,0 +1,405 @@
+// Adapted from TulevaEE/onboarding-client src/components/_base.scss (MIT, (c) 2017 Tuleva).
+
+// Extend width classes
+
+@for $i from 0 through 20 {
+  $pct: $i * 5%;
+  .w-#{$i * 5} {
+    width: $pct !important;
+  }
+}
+
+// Base
+
+html {
+  min-width: 320px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+hr {
+  margin: 0;
+  padding: 0;
+  border-color: $gray-border-3;
+  background-color: white;
+  opacity: 1;
+}
+
+// Links
+
+a,
+.btn-link {
+  text-decoration-color: color-mix(
+    in srgb,
+    currentColor $link-underline-opacity,
+    transparent
+  ) !important;
+  text-underline-offset: $link-underline-offset !important;
+  text-decoration-thickness: $link-underline-thickness !important;
+}
+
+a:hover,
+a:focus,
+.btn-link:hover,
+.btn-link:focus {
+  text-decoration-color: currentColor !important;
+}
+
+a abbr[title] {
+  cursor: inherit;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 100000;
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: $border-radius-sm;
+  background: $white;
+  font-weight: $font-weight-medium;
+  text-decoration: none !important;
+  color: $text-navy;
+}
+
+// Forms & Buttons
+
+input::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+select optgroup {
+  font-style: normal;
+}
+
+.form-control::placeholder {
+  color: $text-tertiary;
+}
+
+select.form-select {
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-light {
+  color: $blue;
+  border-color: var(--bs-border-color);
+  background: $white;
+}
+
+.form-check-label {
+  cursor: pointer;
+}
+
+.custom-select {
+  width: 100%;
+}
+
+.form-label {
+  font-weight: $font-weight-semibold;
+}
+
+.control-code {
+  font-size: 5em;
+  font-weight: bold;
+}
+
+.alert-success-notice {
+  background-color: rgba(11, 250, 67, 0.12);
+}
+
+// Tom Select
+
+.ts-dropdown {
+  overflow: hidden !important;
+  line-height: 1.2 !important;
+  border-radius: 0.5rem !important;
+}
+.ts-dropdown-content {
+  max-height: 320px !important;
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+.ts-dropdown .option,
+.ts-dropdown .optgroup-header,
+.ts-dropdown .no-results,
+.ts-dropdown .create {
+  padding: 0.5rem 1rem !important;
+}
+.ts-dropdown .optgroup-header {
+  line-height: 1.4286 !important;
+}
+
+.ts-wrapper.form-select {
+  background-image: none !important;
+}
+.ts-wrapper.multi .ts-control {
+  padding: 0.5rem 0.5rem 0.25rem !important;
+}
+.ts-wrapper.multi .ts-control > div {
+  margin: 0 0.25rem 0.25rem 0 !important;
+  padding: 0.25rem 0.75rem !important;
+}
+
+.ts-wrapper .ts-control > input,
+.ts-wrapper.has-items .ts-control > input {
+  margin: 0 0.25rem 0.25rem 0.5rem !important;
+}
+
+.ts-wrapper.plugin-remove_button:not(.rtl) .item .remove {
+  margin-left: 0.75rem !important;
+}
+.ts-wrapper.plugin-remove_button .item .remove {
+  padding: 0 0.5rem !important;
+  background: none !important;
+}
+
+// Typography
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-weight: $font-weight-medium;
+  text-wrap: pretty;
+}
+h1,
+.h1 {
+  font-size: $h1-font-size;
+  line-height: $h1-line-height !important;
+  font-weight: $font-weight-semibold;
+}
+h2,
+.h2 {
+  font-size: $h2-font-size;
+  line-height: $h2-line-height !important;
+}
+h3,
+.h3 {
+  font-size: $h3-font-size;
+  line-height: $h3-line-height !important;
+}
+h4,
+.h4 {
+  font-size: $h4-font-size;
+  line-height: $h4-line-height !important;
+}
+h5,
+.h5 {
+  font-size: $h5-font-size;
+  line-height: $h5-line-height !important;
+}
+h6,
+.h6 {
+  font-size: $h6-font-size;
+  line-height: $h6-line-height !important;
+}
+
+small {
+  font-size: $font-size-small;
+  color: $text-primary;
+}
+
+.lead {
+  font-size: $font-size-lead;
+  font-weight: $font-weight-normal;
+}
+
+.fs-xs {
+  font-size: $font-size-xs;
+}
+.fs-base {
+  font-size: $font-size-base;
+}
+.lh-base {
+  line-height: $line-height-base;
+}
+
+.ff-system {
+  font-family: $font-family-system;
+}
+
+.text-danger {
+  color: $red !important;
+}
+.text-success {
+  color: $text-green !important;
+}
+.text-body-secondary {
+  color: $text-body-secondary !important;
+}
+.text-body-tertiary {
+  color: $text-body-tertiary !important;
+}
+.text-navy {
+  color: $navy-blue !important;
+}
+
+.text-separator {
+  color: $text-body-secondary !important;
+  user-select: none;
+}
+
+// The text-color utilities above are !important, which would otherwise beat
+// the dropdown's interaction states and leave low-contrast text on the blue
+// active background — inside a dropdown, the state color must win.
+.dropdown-item {
+  &:hover,
+  &:focus {
+    color: var(--bs-dropdown-link-hover-color) !important;
+  }
+
+  &:active,
+  &.active {
+    color: var(--bs-dropdown-link-active-color) !important;
+  }
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+.scroll-margin-bottom {
+  scroll-margin-bottom: $spacer * 1.5;
+}
+
+.items-count-badge {
+  min-width: $font-size-base * 0.75 + $spacer * 0.25 + $spacer * 0.25;
+  margin-left: $spacer * 0.125;
+  padding: $spacer * 0.25 $spacer * 0.375;
+  font-size: $font-size-base * 0.75;
+  line-height: $font-size-base * 0.75;
+  text-align: center;
+}
+
+// Header
+
+.brand-logo {
+  max-width: 146px;
+}
+
+.app-header {
+  .brand-logo {
+    width: auto;
+    height: 60px;
+  }
+
+  // Logo and an optional label beside it (e.g. "Liikmete Häkaton"), aligned by the last
+  // baseline so the label's bottom line stands on the same line as the wordmark
+  .app-header__brand {
+    display: flex;
+    align-items: flex-end;
+    align-items: last baseline;
+  }
+
+  @media (max-width: 576px) {
+    .brand-logo {
+      height: 52px;
+    }
+  }
+  @media (max-width: 375px) {
+    /* iPhone 6 and newer */
+    .brand-logo {
+      height: 48px;
+    }
+  }
+  @media (max-width: 359px) {
+    .brand-logo {
+      height: 42px;
+    }
+  }
+}
+
+// Cards
+
+.card {
+  border-radius: 0.5rem;
+
+  &-primary {
+    border-color: $blue-light;
+    background-color: $blue-bg-2;
+  }
+
+  &-header {
+    &-collapsed {
+      border-bottom-width: 0;
+    }
+    & .form-check {
+      padding-left: 54px !important; // 24px + 30px
+    }
+    & .form-switch {
+      padding-left: 74px !important; // 24px + 50px
+    }
+  }
+}
+
+// Backgrounds
+
+.bg-gray-1 {
+  background-color: $gray-bg-1;
+}
+.bg-gray-2 {
+  background-color: $gray-bg-2;
+}
+
+.bg-blue-1 {
+  background-color: $blue-bg-1;
+}
+.bg-blue-2 {
+  background-color: $blue-bg-2;
+}
+
+// Borders
+
+.border-gray-1 {
+  border-color: $gray-border-1 !important;
+}
+.border-gray-2 {
+  border-color: $gray-border-2 !important;
+}
+.border-gray-3 {
+  border-color: $gray-border-3 !important;
+}
+
+.border-blue-1 {
+  border-color: $blue-border-1 !important;
+}
+.border-blue-2 {
+  border-color: $blue-border-2 !important;
+}
+.border-blue-3 {
+  border-color: $blue-border-3 !important;
+}
+
+.border-transparent {
+  border-color: transparent !important;
+}

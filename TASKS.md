@@ -79,13 +79,18 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - `GET /v1/config/public` exposes what the frontend needs.
 - **Done when:** the frontend can read the config, and changing the YAML changes the UI.
 
-### T10 Frontend skeleton · B · 2h · after T01
-- Vite + React 18 + TS 5 + Bootstrap 5.3.
+### T10 Frontend skeleton · B · 2h · after T01 · ✅ done
+- Vite + React + TS + Bootstrap 5.3.
 - **Tuleva SCSS**: `_variables.scss` and fonts (Roboto, Merriweather) from onboarding-client; logo from wordpress-theme, with an attribution note.
 - react-intl with `et` only (all strings in `translations.et.json`), react-router, react-query, react-hook-form.
 - Feature folders: `src/components/<feature>/`.
 - Routes: `/` landing; `/sisene` login; `/laen`, `/vara`, `/leibkond`, `/valjavotted`, `/kinnitus` flow steps; `/valmis` done.
 - **Done when:** the routes render with Tuleva styling at 1280 and 390 px.
+- **Outcome:**
+  - Kept the current Vite template: Vite 8, **React 19**, TS 6, react-router 7, TanStack Query 5, Vitest + RTL, oxlint, Prettier.
+  - Tuleva SCSS, the Roboto font and the logo are copied (MIT). Merriweather comes from Google Fonts.
+  - The flow stepper collapses to "Samm n/5" on mobile.
+  - The dev proxy to :9000 is verified. 10 route tests pass. Screenshots were checked at 1280 and 390 px.
 
 ---
 

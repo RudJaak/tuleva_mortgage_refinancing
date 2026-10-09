@@ -42,7 +42,7 @@ PLAN.md is the source of truth for decisions (D1…).
 - **Timebox:** 1–2 days of build. The demo **runs locally** and uses **real integrations where feasible**, with mocks behind the same interfaces otherwise.
 - **Stack:** match Tuleva so the result could be adopted later.
   - Backend: **Java + Spring Boot**, PostgreSQL with Flyway.
-  - Frontend: **React + TypeScript**, react-hook-form, react-intl.
+  - Frontend: **React + TypeScript** (Vite, React 19), Bootstrap 5.3 with Tuleva's SCSS, react-hook-form, react-intl, TanStack Query.
   - Reference repos: `github.com/TulevaEE/onboarding-service`, `onboarding-client` and `wordpress-theme` (tuleva.ee). All of them use the `master` branch.
   - **Tuleva has authorised the team to reuse all its resources**: code, website theme, calculators, design and logo. Copy rather than reimplement.
     - Keep the MIT notices from the MIT repos.
@@ -111,7 +111,7 @@ PLAN.md            – decisions (D1…), journey, scope
 TASKS.md           – build backlog (T01…), lanes, milestones, cut line, API sketch
 README.md          – setup, run and test commands
 backend/           – Spring Boot API (see backend/CLAUDE.md)
-frontend/          – React + TS app (from T10; will get its own CLAUDE.md)
+frontend/          – React + TS app (see frontend/CLAUDE.md)
 docker-compose.yml – local Postgres
 .githooks/         – personal-data scanner + pre-commit/pre-push (copied from Tuleva, MIT)
 docs/research/     – research notes (English), numbered
