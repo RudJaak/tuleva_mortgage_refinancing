@@ -107,12 +107,18 @@ The full research is in `docs/research/`. Verify before quoting numbers external
 
 ```
 CLAUDE.md          – this file
-PLAN.md            – phased plan, open questions, current scope
+PLAN.md            – decisions (D1…), journey, scope
 TASKS.md           – build backlog (T01…), lanes, milestones, cut line, API sketch
+README.md          – setup, run and test commands
+backend/           – Spring Boot API (see backend/CLAUDE.md)
+frontend/          – React + TS app (from T10; will get its own CLAUDE.md)
+docker-compose.yml – local Postgres
+.githooks/         – personal-data scanner + pre-commit/pre-push (copied from Tuleva, MIT)
 docs/research/     – research notes (English), numbered
 docs/inputs/       – PRIVATE raw inputs + private digests (gitignored, never commit)
 ```
-Code will live in `backend/` (Spring Boot) and `frontend/` (React).
+
+**One-time setup per clone:** `git config core.hooksPath .githooks`. The hooks block personal data and files from `docs/inputs/`. Never bypass them with `--no-verify`.
 
 ## Working agreements
 

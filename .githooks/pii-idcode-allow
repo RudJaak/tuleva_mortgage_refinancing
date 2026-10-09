@@ -1,0 +1,19 @@
+# Personal ID codes approved to appear in this repository. Only codes that
+# identify no real person may be listed: SK ID Solutions' published demo/test
+# identities (Smart-ID and Mobile-ID DEMO environments), and synthetic codes
+# invented for this repo's fixtures.
+#
+# Never add a real person's code. Prefer an official SK demo code below.
+# One code per line; anything else is ignored.
+#
+# Smart-ID DEMO test accounts (sk-eid.github.io/smart-id-documentation/test_accounts.html)
+40404040009
+40504040001
+50001029996
+39901012239
+30403039917
+30403039983
+# Mobile-ID DEMO test numbers (github.com/SK-EID/MID/wiki/Test-number-for-automated-testing-in-DEMO)
+60001017869
+60001019906
+51307149560

@@ -1,0 +1,3 @@
+# Salted SHA-256 of names that must not appear in this public repository.
+# Add names with .githooks/pii-roster-add, never in cleartext.
+salt=595500356676b3af

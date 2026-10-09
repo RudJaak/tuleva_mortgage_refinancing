@@ -1,0 +1,33 @@
+#!/bin/bash
+# This repository is PUBLIC: a pushed commit is published permanently.
+# Only the personal-data checks block; formatting is advisory so that nobody
+# is tempted to bypass the whole hook with --no-verify.
+
+set -uo pipefail
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo "🕵️  Checking for private files..."
+blocked=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^docs/inputs/|(^|/)\.env($|\.)' | grep -v '\.env\.example$' || true)
+if [ -n "$blocked" ]; then
+  echo "🛑 Private files are staged (docs/inputs/ and .env files must never be committed):"
+  echo "$blocked" | sed 's/^/   /'
+  exit 1
+fi
+
+echo "🕵️  Checking for personal data..."
+PII_IBAN_ALLOW_SOURCE=$(git show :.githooks/pii-iban-allow 2>/dev/null || true)
+PII_IDCODE_ALLOW_SOURCE=$(git show :.githooks/pii-idcode-allow 2>/dev/null || true)
+export PII_IBAN_ALLOW_SOURCE PII_IDCODE_ALLOW_SOURCE
+if ! git diff --cached | "$HOOK_DIR/pii-scan"; then
+  exit 1
+fi
+echo "✅ No personal data found."
+
+if git diff --cached --name-only | grep -q '^backend/'; then
+  echo "✨ Checking backend formatting (advisory)..."
+  if ! (cd backend && ./gradlew spotlessCheck --quiet >/dev/null 2>&1); then
+    echo "⚠️  Spotless check failed — run 'cd backend && ./gradlew spotlessApply'. Not blocking."
+  fi
+fi
+
+exit 0

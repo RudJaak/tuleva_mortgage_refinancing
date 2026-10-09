@@ -1,0 +1,32 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: mortgage-pool
+  config:
+    import: optional:file:.env[.properties],optional:file:../.env[.properties]
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mortgage-pool
+    username: mortgage-pool
+    password: mortgage-pool
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,modulith
+
+app:
+  auth:
+    mode: ${AUTH_MODE:stub}
+  extraction:
+    mode: ${EXTRACTION_MODE:stub}
+  cors:
+    allowed-origins: http://localhost:5173

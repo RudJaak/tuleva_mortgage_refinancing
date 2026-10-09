@@ -1,0 +1,14 @@
+services:
+  database:
+    image: postgres:18-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=mortgage-pool
+      - POSTGRES_PASSWORD=mortgage-pool
+      - POSTGRES_DB=mortgage-pool
+    volumes:
+      - database:/var/lib/postgresql
+
+volumes:
+  database:

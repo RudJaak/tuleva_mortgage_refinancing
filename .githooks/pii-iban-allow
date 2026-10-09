@@ -1,0 +1,3 @@
+# IBANs approved to appear in this repository. Only accounts that are already
+# public or synthetic may be listed (e.g. bank sandbox accounts used in fixtures).
+# Never add a person's account. One IBAN per line; anything else is ignored.

@@ -1,3 +1,61 @@
 # tuleva_mortgage_refinancing
 
-Hackathon project.
+Tuleva hackathon (9–11 Oct 2026), idea **L6: Kodulaenude ühine refinantseerimisfond**.
+
+Estonian mortgage holders join a pool, upload their loan contract and account statements, and sign a conditional commitment. A joint tender then lets banks bid for the whole pool's refinancing.
+
+- **Context and decisions:** [`CLAUDE.md`](CLAUDE.md), [`PLAN.md`](PLAN.md)
+- **Backlog:** [`TASKS.md`](TASKS.md)
+- **Research:** [`docs/research/`](docs/research)
+
+## Repository layout
+
+```
+backend/    Spring Boot 4 / Java 25 API (Gradle). See backend/CLAUDE.md
+frontend/   React + TypeScript (Vite). Coming in T10
+docs/       Research notes (docs/inputs/ is private and gitignored)
+.githooks/  Personal-data scanner and hooks. This repo is PUBLIC
+```
+
+## First-time setup
+
+```bash
+git config core.hooksPath .githooks   # mandatory: blocks personal data from being committed
+cp .env.example .env                  # optional: defaults run everything on offline stubs
+```
+
+**Requirements:** JDK 25, Docker. Node 22+ is needed once the frontend exists.
+
+## Run locally
+
+```bash
+docker compose up -d                  # Postgres on :5432
+cd backend && ./gradlew bootRun       # API on :9000, health at /actuator/health
+```
+
+## Test
+
+```bash
+cd backend && ./gradlew test spotlessCheck   # tests use Testcontainers (Docker must be running)
+cd backend && ./gradlew spotlessApply        # format the code
+.githooks/pii-scan-test                      # self-test for the personal-data scanner
+```
+
+## Integration modes
+
+Every external integration has an offline stub. You switch between them in `.env`:
+
+| Variable | Values | Notes |
+|---|---|---|
+| `AUTH_MODE` | `stub` / `sk-demo` | `sk-demo` uses SK's public Smart-ID / Mobile-ID DEMO environment |
+| `EXTRACTION_MODE` | `stub` / `claude` | `claude` needs `ANTHROPIC_API_KEY` |
+
+## Attribution
+
+Parts of this project are adapted from Tuleva's open-source repositories, with Tuleva's permission:
+
+- [onboarding-service](https://github.com/TulevaEE/onboarding-service) (MIT)
+- [onboarding-client](https://github.com/TulevaEE/onboarding-client) (MIT)
+- [wordpress-theme](https://github.com/TulevaEE/wordpress-theme)
+
+See `.githooks/NOTICE` and per-file notes.

@@ -31,17 +31,19 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 
 ## Phase 2: Skeleton
 
-### T01 Repo scaffolding · A · 1h
+### T01 Repo scaffolding · A · 1h · ✅ done
 - Monorepo layout: `backend/`, `frontend/`, `docker-compose.yml` (Postgres 17), root `README.md` with run instructions.
 - `.githooks/pii-scan` pre-commit hook, adapted from Tuleva's onboarding-service: blocks isikukood-like numbers outside an allowlist of SK demo codes, emails, `.env`, and anything under `docs/inputs/`.
 - `.env.example` with `ANTHROPIC_API_KEY=`, `EXTRACTION_MODE=stub|claude`, `AUTH_MODE=stub|sk-demo`.
-- **Done when:** `docker compose up -d`, `./gradlew bootRun` and `npm run dev` all start, and the hook rejects a test commit containing a fake isikukood.
+- **Done when:** `docker compose up -d` and `./gradlew bootRun` start (`npm run dev` follows in T10), and the hook rejects a test commit containing a fake isikukood.
+- **Outcome:** the hooks were copied from Tuleva's `.githooks` (pii-scan with isikukood mod-11 / IBAN / email / name-roster detection), with our own allowlist of SK demo codes. `.env` is imported by Spring.
 
-### T02 Backend skeleton · A · 1.5h · after T01
+### T02 Backend skeleton · A · 1.5h · after T01 · ✅ done
 - Spring Boot 4.1 / Java 25 / Gradle KTS, following Tuleva's conventions: Spring Modulith packages, Flyway, Spotless, JUnit 5. Spock is optional.
 - Planned modules: `auth`, `signature`, `borrower`, `loan`, `document`, `statement`, `property`, `risk`, `pool`, `config`.
-- `GET /health`. A CORS setup for the Vite dev server.
+- `GET /actuator/health`. A CORS setup for the Vite dev server (`/v1/**`, origin from `app.cors.allowed-origins`).
 - **Done when:** the app boots against Postgres, Flyway runs `V1__init.sql`, and one slice test passes.
+- **Outcome:** `ee.tuleva.mortgage` on Boot 4.1.1 / Modulith 2.1.1, with Spotless (google-java-format). Tests: `HealthEndpointTests` (Testcontainers PG 18, Flyway + health UP) and `ModularityTests`. The module packages get created as their tasks land.
 
 ### T03 Data model · D · 1.5h · after T02
 - Flyway migrations. Use ESMA-style column comments (RREL*/RREC*) where they map.

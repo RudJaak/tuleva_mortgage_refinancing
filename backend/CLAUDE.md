@@ -1,0 +1,48 @@
+# backend/CLAUDE.md
+
+This is the Spring Boot API for the borrower flow. Project context and decisions are in `../CLAUDE.md`, `../PLAN.md` and `../TASKS.md`.
+
+## Stack
+
+- Java 25, Spring Boot 4.1.1, Gradle Kotlin DSL (use the wrapper `./gradlew`; there's no global Gradle).
+- **Spring Modulith 2.1.1.** Each top-level package under `ee.tuleva.mortgage` is a module, and sub-packages are internal to it. `ModularityTests` enforces this.
+- Planned modules: `auth`, `signature`, `borrower`, `loan`, `document`, `statement`, `property`, `risk`, `pool`, `config`.
+- PostgreSQL 18 (via `../docker-compose.yml`), Flyway migrations in `src/main/resources/db/migration`, JPA with `ddl-auto: validate`.
+- Runs on port **9000**. The Vite dev server is on 5173 and is allowed by CORS on `/v1/**`.
+
+## Conventions
+
+These are adapted from Tuleva's onboarding-service so the code can be ported later.
+
+- **Formatting:** Spotless with google-java-format. Run `./gradlew spotlessApply` before committing.
+- **Tests:**
+  - JUnit 5 + AssertJ.
+  - Prefer slice tests (`@WebMvcTest`, `@DataJpaTest`) over `@SpringBootTest`.
+  - Full-context tests import `TestcontainersConfiguration` (Postgres 18). Docker must be running.
+  - Write the test first where practical.
+- **Code style:** records for DTOs and config (`@ConfigurationProperties`), constructor injection, package-private by default. Inject `Clock` instead of calling `now()`. Avoid comments that restate the code.
+- **Flyway:** migrations are append-only, `V<n>__<snake_case>.sql`. Never edit an applied migration.
+- **API:** REST under `/v1/...`, JSON. The API sketch is in `../TASKS.md`.
+- **External integrations** (eID, Claude, In-ADS, EHR, Enable Banking):
+  - Each one sits behind an interface with a **stub** implementation, selected by `app.<area>.mode` (`AUTH_MODE`, `EXTRACTION_MODE` in `../.env`).
+  - Stub mode must work offline.
+- **Copied Tuleva code** (onboarding-service is MIT; reuse is authorised): keep package-level attribution in a `package-info.java` or a short header comment naming the source path.
+
+## Personal data (this repo is PUBLIC)
+
+- No real personal codes, names, emails or IBANs in code, tests or fixtures.
+  - Use SK demo identities, which are listed in `../.githooks/pii-idcode-allow`.
+  - Use synthetic data.
+- **Persist the minimum:**
+  - Statement transactions are reduced to a summary, and raw transactions are discarded.
+  - Uploaded originals are deleted after extraction.
+- **Never log** request bodies, extracted document text, or personal codes.
+
+## Commands
+
+```bash
+docker compose -f ../docker-compose.yml up -d
+./gradlew bootRun
+./gradlew test
+./gradlew spotlessApply
+```
