@@ -1,0 +1,87 @@
+// Calculator card and slider adapted from TulevaEE/wordpress-theme
+// (scss/_components.scss .calculator, scss/_custom-slider.scss), used with Tuleva's permission.
+
+.calculator {
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: var(--box-shadow-calculator);
+
+  input,
+  select {
+    font-weight: $font-weight-medium;
+  }
+
+  .calculator-unit {
+    min-width: 76px;
+    justify-content: center;
+  }
+}
+
+.margin-slider {
+  position: relative;
+  padding-top: 2rem;
+
+  .form-range {
+    display: block;
+
+    &::-webkit-slider-thumb {
+      background: $blue;
+    }
+
+    &::-moz-range-thumb {
+      background: $blue;
+    }
+
+    &::-webkit-slider-runnable-track {
+      border: $input-btn-border-width solid $input-border-color;
+      background: $white;
+      box-sizing: border-box;
+    }
+
+    &::-moz-range-track {
+      border: $input-btn-border-width solid $input-border-color;
+      background: $white;
+      box-sizing: border-box;
+    }
+
+    &:disabled::-webkit-slider-thumb {
+      background: $text-tertiary;
+    }
+
+    &:disabled::-moz-range-thumb {
+      background: $text-tertiary;
+    }
+  }
+
+  .margin-slider-value {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    padding: 0.125rem 0.5rem;
+    border-radius: $border-radius;
+    background: $white;
+    box-shadow: var(--box-shadow-dropdown);
+    color: $text-navy;
+    font-weight: $font-weight-medium;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.25;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .margin-slider-marker {
+    position: absolute;
+    top: calc(2rem + #{$form-range-thumb-height});
+    width: 1px;
+    height: 0.5rem;
+    background: $text-tertiary;
+    pointer-events: none;
+  }
+
+  .margin-slider-marker-label {
+    display: block;
+    margin-top: 0.5rem;
+    text-align: right;
+  }
+}

@@ -96,15 +96,16 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 
 ## Phase 3: Landing page and collection flow
 
-### T11 Annuity / savings library · B · 1.5h · after T10
+### T11 Annuity / savings library · B · 1.5h · after T10 · ✅ done
 - Pure TypeScript `calc/` module:
   - annuity payment;
   - remaining interest at current vs target margin;
   - monthly saving, lifetime saving, NPV (3%), break-even with a switching cost.
 - Unit tests, including the reference case from `02-teammate-market-analysis.md`: €125k, 20 years, 2.5% + 1.85% → €780.73/month.
 - **Done when:** the tests pass. This is the single source of the calculation maths; the backend doesn't duplicate it.
+- **Outcome:** `frontend/src/calc/savings.ts`: `annuityPayment`, `totalInterest`, `compareMargins`. The reference case reproduces exactly (780.73 / 747.63 / 33.09 / 7,942.69 / NPV 5,567.31 / break-even 12.1). NPV discounts monthly at the annual rate ÷ 12.
 
-### T12 Savings calculator component · B · 3h · after T11, T06
+### T12 Savings calculator component · B · 3h · after T11, T06 · ✅ done
 - A port of Tuleva's calculator card (wordpress-theme `front-hero/calculator.php`, `js/calculator.js`, `_custom-slider.scss`):
   - inputs: balance (€), remaining years, margin (slider with an "Eesti keskmine" marker, plus an "Ei tea" toggle);
   - rows: "Praegu maksad" vs "Ühispakkumisega" for worst, expected and best, with "Säästaksid X €" in green.
@@ -112,6 +113,11 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - `validated` mode: inputs are prefilled from the loan, with "✓ lepingust" badges; the only variable is the scenario.
 - Inputs persist to `sessionStorage` and carry into the flow.
 - **Done when:** it works anonymously on the landing page and in validated mode on the review step.
+- **Outcome:**
+  - `components/calculator/`: a port of Tuleva's card, segmented scenario buttons, and a margin slider with a value bubble and a "Uute laenude keskmine ~1,6%" marker. The "Ei tea" option falls back to 1.70%.
+  - Results show per month, until the end of the loan, NPV and break-even, with the compliance disclaimer. Inputs persist in `sessionStorage`. `validated` mode shows "✓ lepingust" badges.
+  - **Settings are static defaults for now** (`settings.ts` → `useCalculatorSettings`). T06 and T13 must feed them from `/v1/config/public` and `/v1/pool/stats`; the "expected" case = the next unreached ladder step.
+  - The review step (T34) still has to mount it in validated mode.
 
 ### T13 Pool tracker: API + component · D+B · 3h · after T03, T06, T10
 - **Backend:** `GET /v1/pool/stats` returns `{joinedCount, committedBalance, targetVolume, deadline, ladder[], currentStep, nextStep}`.
