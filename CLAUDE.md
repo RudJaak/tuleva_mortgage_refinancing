@@ -108,6 +108,7 @@ The full research is in `docs/research/`. Verify before quoting numbers external
 ```
 CLAUDE.md          – this file
 PLAN.md            – phased plan, open questions, current scope
+TASKS.md           – build backlog (T01…), lanes, milestones, cut line, API sketch
 docs/research/     – research notes (English), numbered
 docs/inputs/       – PRIVATE raw inputs + private digests (gitignored, never commit)
 ```

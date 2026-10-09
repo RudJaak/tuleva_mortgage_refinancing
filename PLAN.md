@@ -68,7 +68,7 @@ Open points:
 
 ## Landing page (D7, D8)
 
-**1. Savings calculator.** It copies Tuleva's calculator UX; the design research is running.
+**1. Savings calculator.** Port of Tuleva's calculator UX; see `docs/research/08-tuleva-design-and-code.md`.
 - **Inputs:** remaining balance, remaining term, current margin (or "I don't know", which defaults to ~1.7%). The current bank is optional.
 - **Outputs:** savings per month, over the remaining term and as NPV, under three scenarios:
   - **worst case**: a small cut, e.g. down to a 1.45% margin;
@@ -97,12 +97,9 @@ Open points:
 |---|---|---|
 | 0 | Context: research, CLAUDE.md, this plan | ✅ done |
 | 1 | Scope grooming: freeze the journey, fields and integrations | ✅ done |
-| 2 | Skeleton: Spring Boot + React/TS, Smart-ID/Mobile-ID demo login, DB schema, extraction interface (stub) | — |
-| 3 | Collection flow, stages 0–2, integrations in priority order | — |
-| 4 | Risk class (indicative, shown to the borrower) and the commitment signing step | — |
-| 5 | Persuasion content slot, demo polish, synthetic data and documents, pitch | — |
+| 2–5 | Build: broken into tasks in `TASKS.md` | ⏳ now |
 
-## Draft borrower journey (to groom)
+## Borrower journey
 
 Each stage asks only for what the next decision needs. Anything an upload can provide is pre-filled; the user only confirms it.
 
@@ -126,7 +123,7 @@ Result: the **indicative savings for *their* loan**, and their indicative risk c
 - Result: a verified risk class, with each field marked "declared" or "document-verified".
 
 **Stage 3: Commit.**
-- Choose threshold X, review a summary of all data plus the consents, then **sign with Smart-ID / Mobile-ID**.
+- Review a summary of all data, your personal saving at the pool's target margin M (D14), and the consents. Then **sign with Smart-ID / Mobile-ID**.
 - Confirmation screen: "You're in pool #N, with €M committed so far" (synthetic numbers) and what happens next.
 
 **Out of scope:** expert valuation, the ESIS, the bank's decision, the actual switch.
