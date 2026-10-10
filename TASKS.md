@@ -151,27 +151,25 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 
 ---
 
-## API sketch (for parallel frontend and backend work)
+## API (as built)
 
 ```
-GET  /v1/config/public
-GET  /v1/pool/stats
-POST /v1/auth/mobile-id            GET /v1/auth/mobile-id/status
-POST /v1/auth/smart-id             GET /v1/auth/smart-id/status
-GET  /v1/me                        (borrower + progress)
-POST /v1/documents                 GET /v1/documents/{id}        (status + extraction)
-PUT  /v1/me/loan                   PUT /v1/me/property
-GET  /v1/me/statements/summary
-GET  /v1/me/risk-class
-POST /v1/commitments               PUT /v1/commitments/{id}/signature/{method}
-GET  /v1/commitments/{id}/signature/{method}/status
-POST /v1/commitments/{id}/withdraw
+GET  /v1/config/public                 GET  /v1/pool/stats
+POST /v1/auth/{smart-id|mobile-id}     GET  /v1/auth/logins/{id}      DELETE /v1/auth/logins/{id}
+GET  /v1/me                            POST /v1/auth/logout
+POST /v1/documents?type=…              GET  /v1/documents?type=…
+GET  /v1/me/loan                       PUT  /v1/me/loan
+GET  /v1/me/statements
+GET  /v1/me/commitment                 POST /v1/me/commitment/signing
+GET  /v1/me/commitment/signing/{id}    DELETE /v1/me/commitment/signing/{id}
+POST /v1/demo/flow/reset               POST /v1/demo/reset
+GET  /v1/me/risk-class                 (T35, not built yet)
 ```
 
 ## Critical path
 
+Done: login (D29), contract → loan step (M2), statements (M3 minus the risk class), review and emulated signing (M4).
+
 ```
-T01 → T02 → T05 → T20 → T21 ─┐
-          ↘ T04 → T15 → T30 ─┴→ M2 → T22/T23 → T33 → T35 → T34 → T40/T42 → M4
-T10 → T11 → T12 ─→ T13 → T14 → M1
+T35 (risk class) → T36 (eligibility) → M5 (T14 landing content, T52, T53, T54)
 ```
