@@ -1,4 +1,4 @@
-package ee.tuleva.mortgage.statement;
+package ee.tuleva.mortgage.document;
 
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 

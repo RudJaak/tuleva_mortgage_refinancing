@@ -7,6 +7,7 @@ docs/inputs/
 /*.xlsx
 /*.csv
 /*.asice
+/*.bdoc
 
 .DS_Store
 .idea/

@@ -1,7 +1,7 @@
 package ee.tuleva.mortgage.statement;
 
-import static org.digidoc4j.Configuration.Mode.PROD;
-
+import ee.tuleva.mortgage.extraction.ClaudeDocumentReader;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,13 +10,15 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(StatementProperties.class)
 class StatementConfiguration {
 
-  // Adapted from TulevaEE/onboarding-service config/DigiDocConfiguration (MIT).
-  // Bank seals are real production certificates, so this always validates against the EE
-  // production trusted list, even when eID signing runs against the SK demo environment.
   @Bean
-  org.digidoc4j.Configuration statementDigiDocConfiguration() {
-    var configuration = new org.digidoc4j.Configuration(PROD);
-    configuration.setTrustedTerritories("EE");
-    return configuration;
+  @ConditionalOnProperty(name = "app.extraction.mode", havingValue = "claude")
+  StatementExtractor claudeStatementExtractor(ClaudeDocumentReader reader) {
+    return new ClaudeStatementExtractor(reader);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "app.extraction.mode", havingValue = "stub", matchIfMissing = true)
+  StatementExtractor stubStatementExtractor() {
+    return new StubStatementExtractor();
   }
 }
