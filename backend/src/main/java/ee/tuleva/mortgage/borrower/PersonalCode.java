@@ -23,6 +23,17 @@ public final class PersonalCode {
     return century != null && hasRealBirthDate(code, century) && hasValidChecksum(code);
   }
 
+  /** The birth date encoded in a valid personal code. */
+  public static LocalDate birthDate(String code) {
+    if (!isValid(code)) {
+      throw new IllegalArgumentException("Not a valid personal code");
+    }
+    return LocalDate.of(
+        CENTURY.get(code.charAt(0)) + Integer.parseInt(code.substring(1, 3)),
+        Integer.parseInt(code.substring(3, 5)),
+        Integer.parseInt(code.substring(5, 7)));
+  }
+
   private static boolean hasRealBirthDate(String code, int century) {
     try {
       LocalDate.of(

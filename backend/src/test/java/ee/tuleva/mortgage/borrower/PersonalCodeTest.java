@@ -2,6 +2,8 @@ package ee.tuleva.mortgage.borrower;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDate;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -31,5 +33,10 @@ class PersonalCodeTest {
   @ValueSource(strings = {"39913012236", "39902302231"})
   void rejectsImpossibleBirthDates(String code) {
     assertThat(PersonalCode.isValid(code)).isFalse();
+  }
+
+  @Test
+  void readsTheBirthDate() {
+    assertThat(PersonalCode.birthDate("60001017869")).isEqualTo(LocalDate.of(2000, 1, 1));
   }
 }

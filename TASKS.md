@@ -25,7 +25,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 | **M4 Commitment** | Review page → sign with Smart-ID/Mobile-ID → tracker goes up | Sun midday |
 | **M5 Demo-ready** | Polish, content placeholders filled, demo script rehearsed | Before pitch |
 
-**If behind schedule, drop in this order:** T27 (Enable Banking) → T25 (CSV) → T24 (camt.053) → T17 (EHR) → T42 (real ASiC-E signing; fall back to T41's auth-as-confirmation) → T23 (ASiC-E statement verification). **Never drop:** M2 (contract extraction) and the calculator/tracker. They carry the pitch.
+**If behind schedule, drop in this order:** T27 (Enable Banking) → T25 (CSV) → T24 (camt.053) → T17 (EHR) → T42 (real ASiC-E signing; fall back to T41's auth-as-confirmation). **Never drop:** M2 (contract extraction) and the calculator/tracker. They carry the pitch.
 
 ---
 
@@ -68,12 +68,6 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - `AUTH_MODE=stub` logs in as a fixed demo person.
 - **Done when:** demo Mobile-ID `+37268000769` / `60001017869` and Smart-ID `40504040001` log in, show the verification code in the UI, and return a session with name and birth date.
 
-### T05 Extraction interface + stub · C · 1h · after T02
-- `DocumentExtractor` with `extract(DocumentType, bytes, mime) → ExtractionResult<T>`, where each field carries `{value, confidence, sourcePage, snippet}`.
-- `StubExtractor` returns fixtures matching the synthetic documents (T50).
-- Switched by `EXTRACTION_MODE`.
-- **Done when:** a slice test gets typed results from the stub for `LOAN_CONTRACT` and `ACCOUNT_STATEMENT`.
-
 ## Phase 3: Landing page and collection flow
 
 ### T14 Landing page assembly · B · 2h · after T12, T13
@@ -81,39 +75,24 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - Content comes from one `content.et.json` so teammates can edit it without touching code.
 - **Done when:** the page is responsive and every content slot is fed from JSON.
 
-### T20 Upload pipeline · C · 3h · after T05, T03
-- `POST /v1/documents` (multipart).
-- **Format sniffing:**
-  - ASiC-E/BDOC zip mimetype → T23;
-  - XML with a camt namespace → T24;
-  - CSV → T25;
-  - PDF or image → LLM.
-- sha256 dedupe, size limit, async status (`GET /v1/documents/{id}`).
-- Original bytes are deleted after extraction unless kept by opt-in.
-- **Done when:** the stub extraction runs end to end and the original bytes are gone afterwards.
-
-### T21 Claude extractor: loan contract · C · 3h · after T20
+### T20 Upload pipeline · C · 3h · after T05, T03 · 🟡 core done
+- Done: `POST /v1/documents?type=…` (multipart, logged-in borrower) in the `document` module. PDF and ASiC-E/BDOC are sniffed, the container is opened and its seal checked, metadata is stored in `document`, and the files go to the `DocumentProcessor` registered for the type. The bytes are never stored.
+- Processing is asynchronous: the POST answers 202 after the seal check (~1 s), extraction runs on a virtual thread, and `GET /v1/documents?type=…` returns status and result. Results are held in memory only.
+- Remaining: sha256 dedupe, camt.053 and CSV sniffing (T24, T25).
+### T21 Claude extractor: loan contract · C · 3h · after T20 · 🟡 built, waiting for a real contract
+- Done: `loan` module. `POST /v1/documents?type=LOAN_CONTRACT` reads every field with page, quote and confidence (`ClaudeLoanContractExtractor` or the stub); `LoanAnalyzer` derives the current rate, remaining term, an estimated balance, age at maturity and screening flags; stored in `loan_contract` (V4). Signed contract containers are verified per signer, including whether the borrower signed.
+- Remaining: run against a real contract and tune the prompt; payoff statement and internet-bank screenshot inputs.
+- Original scope:
 - Claude API with a native PDF document block. Structured output via a tool or JSON schema.
 - Fields: lender, contract number, contract date, original amount, **balance** (if present), **margin**, **Euribor tenor**, rate type, fixed period, maturity, monthly payment, mortgage amount, early-repayment terms. Each field carries confidence, page and snippet.
 - Also handles a payoff statement or an internet-bank screenshot (image block), using the same schema with partial fields.
 - Model ID and parameters come from config. **Check the `claude-api` skill for the current model ID and PDF and structured-output usage before implementing.**
 - **Done when:** the synthetic contract (T50) extracts with every key field correct, and `EXTRACTION_MODE=stub` still works.
 
-### T22 Statement extraction (PDF) + summary · C · 4h · after T20
-- **LLM:** extract the opening and closing balance, period, and transactions.
-- **Code:** reconcile (opening + Σ = closing, ±€0.01), then derive the summary:
-  - **net income:** recurring credits, salary-like descriptors ("töötasu", employer name), monthly avg and min;
-  - **recurring loan and lease payments:** debits to banks or leasing companies, "laen", "liising";
-  - **arrears and overdraft signals:** negative balance, "viivis".
-- **Persist only the summary**; drop the transactions. Rules first, with the LLM as a fallback for categorisation.
-- **Done when:** the synthetic statement reconciles and the summary matches the expected fixture. A tampered PDF that breaks reconciliation is flagged.
-
-### T23 Sealed statement (ASiC-E/BDOC) · C · 2h · after T20, (T40 for digidoc4j setup)
-- Validate the container with digidoc4j: signature or seal valid, signer CN = a known bank, list of data files.
-- Route the inner file (PDF, XML or CSV) to the right parser.
-- Set `verification_level = SEALED` with the signer name.
-- **Done when:** a test container validates, and an altered one fails. The demo container is either a team member's own Swedbank or Coop export (kept private, in `docs/inputs/`, never committed) or a test-signed one.
-
+### T22 Statement extraction (PDF) + summary · C · 4h · after T20 · 🟡 works, more banks to try
+- Done (D26): `statement` module. `ClaudeStatementExtractor` (Claude reads the PDF and returns categorised relevant transactions) and `StubStatementExtractor`; `StatementAnalyzer` derives income, obligations, debt-service ratio, savings, holder-name match and flags; only the summary is stored in `statement_summary`.
+- Verified on a real LHV statement (~30 s, ~28k input tokens). Obligations use the median instalment and list outliers as one-off payments; credit-card repayments are reported as card usage, outside obligations and the debt-service ratio.
+- Remaining: try statements from other banks and tune the prompt.
 ### T24 camt.053 parser · C · 1.5h · after T22 · *Should*
 - Parse balances (OPBD/CLBD) and entries for 001.02 and 001.08, feeding the same summary logic as T22.
 - Reconciliation is exact.
@@ -152,7 +131,9 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - Fields: adults, dependants, co-borrower flag (D19), marital status, property regime (ühisvara / lahusvara / vara lahusus abieluvaraleping), employment type, other loans, leases and guarantees.
 - Pre-filled from the statement summary when available.
 
-### T33 Statements step `/valjavotted` · B · 2.5h · after T15, T22
+### T33 Statements step `/valjavotted` · B · 2.5h · after T15, T22 · 🟡 single upload done
+- Done: upload on `/valjavotted` with an instant seal badge, an estimated progress bar with stage messages while Claude reads (the borrower can move on), and a summary card per statement.
+- Remaining:
 - Multi-file upload for "all accounts, 6 months". Show a short how-to per bank: where to download, and **a recommendation to choose the digitally sealed (.asice) export**.
 - Show the summary per account plus a combined total, with reconciliation and seal badges.
 - If T27 is done, a "Ühenda pank" (connect bank) button.

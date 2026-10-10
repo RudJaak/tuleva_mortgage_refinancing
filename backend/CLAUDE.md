@@ -13,7 +13,11 @@ This is the Spring Boot API for the borrower flow. Project context and decisions
   - `config`: CORS, Clock;
   - `borrower`;
   - `pool`: commitments, stats, public config;
-  - `demo`: seeder and reset.
+  - `demo`: seeder, reset and simulated joiners;
+  - `document`: `POST /v1/documents`, container intake and bank-seal check (digidoc4j), the `DocumentProcessor` hook;
+  - `extraction`: shared Claude client (`ClaudeDocumentReader`: PDF in, structured output out);
+  - `statement`: account-statement extraction (stub or Claude), analysis and summary;
+  - `loan`: loan-contract extraction with per-field evidence, derived figures and screening flags.
 
   Cross-module references use IDs (UUID), not JPA relations.
 - Runs on port **9000**. The Vite dev server is on 5173 and is allowed by CORS on `/v1/**`.
@@ -37,7 +41,7 @@ These are adapted from Tuleva's onboarding-service so the code can be ported lat
   - **No hand-written getters or constructors.**
   - Package-private by default. Inject `Clock` instead of calling `now()`. Avoid comments that restate the code.
   - Column names come from the default snake_case naming strategy, so no `@Column(name=…)` is needed.
-- **Flyway:** migrations are append-only, `V<n>__<snake_case>.sql`. Never edit an applied migration.
+- **Flyway:** migrations are append-only, `V<n>__<snake_case>.sql`. Never edit an applied migration. While `bootRun` is running, devtools applies a new migration as soon as it compiles, so finish a migration before saving it or stop the app first.
 - **API:** REST under `/v1/...`, JSON. The API sketch is in `../TASKS.md`.
 - **External integrations** (eID, Claude, In-ADS, EHR, Enable Banking):
   - Each one sits behind an interface with a **stub** implementation, selected by `app.<area>.mode` (`AUTH_MODE`, `EXTRACTION_MODE` in `../.env`).

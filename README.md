@@ -51,6 +51,8 @@ Every external integration has an offline stub. You switch between them in `.env
 |---|---|---|
 | `AUTH_MODE` | `stub` / `sk-demo` | `sk-demo` uses SK's public Smart-ID / Mobile-ID DEMO environment |
 | `EXTRACTION_MODE` | `stub` / `claude` | `claude` needs `ANTHROPIC_API_KEY` |
+| `REQUIRE_BANK_SEAL` | `false` / `true` | `true` rejects uploads that aren't sealed by a known bank. With `false`, they're accepted at a lower verification level |
+| `STATEMENT_RECENCY_CHECKS` | `true` / `false` | `false` only for studying old statements: no staleness flag, and a long statement is analysed whole instead of over its last 6 months |
 | `DEMO_SEED` | `true` / `false` | Seeds a synthetic pool (~520 borrowers, ~€60M) on startup. `POST /v1/demo/reset` removes everything signed during a demo |
 
 ## Attribution
