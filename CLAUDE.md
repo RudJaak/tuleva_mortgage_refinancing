@@ -123,7 +123,6 @@ docs/inputs/       – PRIVATE raw inputs + private digests (gitignored, never c
 ## Working agreements
 
 - **`TASKS.md` lists open work only.** When a task is finished, delete its entry. Git history and the commit message record the outcome. Partly done tasks keep a short note on what remains.
-- **Other sessions and teammates edit this checkout at the same time.** Stage your own files by explicit path, never `git add -A`, and check `git status` for files you didn't touch before committing.
 - **Scope is frozen for the initial build** (PLAN.md, decisions D1–D21). Record any change of scope as a new decision in PLAN.md before implementing it.
 - Temporary input files are dropped in the repo root. Digest them into `docs/research/` in English, with a confidence or reliability note, so the originals can be deleted. **If the material is internal or confidential, write the digest to `docs/inputs/` instead.**
 - Prefer official sources: Eesti Pank, Finantsinspektsioon, Riigi Teataja, EUR-Lex, AKI, RIA.
