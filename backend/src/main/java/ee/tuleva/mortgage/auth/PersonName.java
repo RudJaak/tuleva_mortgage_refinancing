@@ -12,7 +12,7 @@ record PersonName(String firstName, String lastName) {
 
   /**
    * Reads a certificate CN of the form {@code SURNAME,GIVEN NAMES,PERSONALCODE}, e.g. {@code
-   * ÕUNAPUU,MARI LIIS,49001010000} gives "Mari Liis" and "Õunapuu".
+   * ÕUNAPUU,MARI LIIS,40404040009} gives "Mari Liis" and "Õunapuu".
    */
   static Optional<PersonName> fromCertificateCn(String cn) {
     String[] parts = cn.split(",");
