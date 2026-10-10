@@ -55,6 +55,64 @@ class DemoFlowResetIntegrationTests {
     assertEmpty(session);
   }
 
+  @Test
+  void signingTheCommitmentRaisesTheTrackerAndAResetLowersIt() throws Exception {
+    var session = new MockHttpSession();
+    logIn(session);
+    fillTheFlow(session);
+    int before = joined();
+
+    String signingId =
+        JsonPath.read(
+            mockMvc
+                .perform(
+                    post("/v1/me/commitment/signing")
+                        .session(session)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                            """
+                            {"method": "SMART_ID"}"""))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(),
+            "$.signingId");
+    String status = "PENDING";
+    for (int i = 0; i < 50 && !status.equals("COMPLETE"); i++) {
+      status =
+          JsonPath.read(
+              mockMvc
+                  .perform(get("/v1/me/commitment/signing/" + signingId).session(session))
+                  .andReturn()
+                  .getResponse()
+                  .getContentAsString(),
+              "$.status");
+    }
+
+    assertThat(status).isEqualTo("COMPLETE");
+    mockMvc
+        .perform(get("/v1/me/commitment").session(session))
+        .andExpect(jsonPath("$.committed").value(true))
+        .andExpect(jsonPath("$.committedBalance").value(150000));
+    assertThat(joined()).isEqualTo(before + 1);
+    mockMvc
+        .perform(
+            post("/v1/me/commitment/signing")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"method\": \"SMART_ID\"}"))
+        .andExpect(status().isConflict());
+
+    mockMvc.perform(post("/v1/demo/flow/reset").session(session)).andExpect(status().isNoContent());
+    assertThat(joined()).isEqualTo(before);
+  }
+
+  private int joined() throws Exception {
+    return JsonPath.read(
+        mockMvc.perform(get("/v1/pool/stats")).andReturn().getResponse().getContentAsString(),
+        "$.joinedCount");
+  }
+
   private void fillTheFlow(MockHttpSession session) throws Exception {
     upload(session, "LOAN_CONTRACT");
     upload(session, "ACCOUNT_STATEMENT");
@@ -66,7 +124,8 @@ class DemoFlowResetIntegrationTests {
                 .content(
                     """
                     {"lender": "SEB", "margin": 1.9, "rateType": "VARIABLE",
-                     "maturityDate": "2045-01-01", "repaymentType": "ANNUITY"}
+                     "maturityDate": "2045-01-01", "repaymentType": "ANNUITY",
+                     "balance": 150000}
                     """))
         .andExpect(status().isOk());
     mockMvc.perform(get("/v1/me/loan").session(session)).andExpect(status().isOk());

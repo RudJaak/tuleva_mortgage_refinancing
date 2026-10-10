@@ -2,6 +2,7 @@ import { FormattedMessage } from 'react-intl'
 import { Link } from 'react-router-dom'
 import { Placeholder } from '../layout/Placeholder'
 import { flowSteps, paths, type FlowStep } from '../paths'
+import { ReviewStep } from '../commitment/ReviewStep'
 import { LoanStep } from '../loan/LoanStep'
 import { StatementsStep } from '../statements/StatementsStep'
 
@@ -23,6 +24,8 @@ export function FlowStepPage({ section }: { section: FlowStep['section'] }) {
         <LoanStep />
       ) : section === 'statements' ? (
         <StatementsStep />
+      ) : section === 'review' ? (
+        <ReviewStep />
       ) : (
         <Placeholder>
           <FormattedMessage id="flow.placeholder" />
@@ -32,9 +35,11 @@ export function FlowStepPage({ section }: { section: FlowStep['section'] }) {
         <Link to={previous} className="btn btn-light">
           <FormattedMessage id="flow.back" />
         </Link>
-        <Link to={next} className="btn btn-primary">
-          <FormattedMessage id="flow.next" />
-        </Link>
+        {section !== 'review' && (
+          <Link to={next} className="btn btn-primary">
+            <FormattedMessage id="flow.next" />
+          </Link>
+        )}
       </div>
     </section>
   )

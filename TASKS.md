@@ -10,8 +10,8 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 
 | Lane | Focus | Tasks |
 |---|---|---|
-| **A: Platform** | repo, backend skeleton, auth, signing | T05, T40–T42 |
-| **B: Frontend** | landing page, calculator, tracker, flow screens | T10–T15, T30, T33, T34, T43 |
+| **A: Platform** | repo, backend skeleton, auth, signing | T05 |
+| **B: Frontend** | landing page, calculator, tracker, flow screens | T10–T15, T30, T33 |
 | **C: Documents** | upload pipeline, extraction, statements | T20–T27 |
 | **D: Domain** | property lookups, risk class, pool stats, synthetic data | T35–T38, T50–T51 |
 
@@ -25,7 +25,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 | **M4 Commitment** | Review page → sign with Smart-ID/Mobile-ID → tracker goes up | Sun midday |
 | **M5 Demo-ready** | Polish, content placeholders filled, demo script rehearsed | Before pitch |
 
-**If behind schedule, drop in this order:** T27 (Enable Banking) → T25 (CSV) → T24 (camt.053) → T42 (real ASiC-E signing; fall back to T41's auth-as-confirmation). **Never drop:** M2 (contract extraction) and the calculator/tracker. They carry the pitch.
+**If behind schedule, drop in this order:** T27 (Enable Banking) → T25 (CSV) → T24 (camt.053). **Never drop:** M2 (contract extraction) and the calculator/tracker. They carry the pitch.
 
 ---
 
@@ -114,37 +114,6 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 ### T36 Eligibility guard + personal saving · D · 1h · after T35, T11
 - The borrower can commit only if their validated margin is greater than M, the pool's current target (D14).
 - Expose the personal saving at M; the frontend computes it with T11, the backend re-checks it.
-
-### T34 Review & commit step `/kinnitus` · B · 3h · after T30–T33, T35
-- Summary of all data with source badges.
-- Risk class card.
-- Calculator in **validated mode** (T12).
-- **Commitment text** with M, the €Y cost cap, withdrawal rights and the operator "Tuleva või litsentseeritud partner (täpsustamisel)".
-- Granular consent checkboxes:
-  - pool participation;
-  - pseudonymised sharing with banks;
-  - identifiable data to the winning bank only;
-  - contact.
-- Sign button.
-
-### T40 Signing setup (digidoc4j) · A · 2h · after T04
-- Copy `signature/**` and `DigiDocConfiguration` (TEST mode) from onboarding-service.
-- Build an ASiC-E with the commitment PDF or text.
-- **Done when:** a container is created and its data-to-sign computed.
-
-### T41 Fallback: auth-as-confirmation · A · 1h · after T04
-- If T42 slips, "signing" becomes a fresh Mobile-ID or Smart-ID authentication over a hash of the commitment text. Store the hash, the auth certificate and a timestamp.
-- Label it honestly in the UI and pitch as "kinnitatud" (confirmed), not "allkirjastatud" (signed).
-
-### T42 Commitment signing with Smart-ID / Mobile-ID · A · 3h · after T40, T34
-- `PUT /v1/commitments/{id}/signature/{smart-id|mobile-id}` and `GET …/status`, following Tuleva's `SignatureController` / `MandateController`.
-- On success: store the container reference, update the pool aggregate, offer a downloadable .asice.
-- **Done when:** the demo account signs, the container validates in DigiDoc4j, and the tracker count goes up.
-
-### T43 Done page `/valmis` · B · 1h · after T42
-- "Oled ühispakkumises" (you're in the joint offer): pool step, people joined, committed volume, deadline countdown.
-- "Mis edasi" (what next): tender after 31.12.2026, then the offer, then your decision, then the valuation and notary.
-- Withdraw link: withdrawal is free before the deadline.
 
 ---
 

@@ -17,7 +17,8 @@ This is the Spring Boot API for the borrower flow. Project context and decisions
   - `document`: `POST /v1/documents`, container intake and bank-seal check (digidoc4j), the `DocumentProcessor` hook;
   - `extraction`: shared Claude client (`ClaudeDocumentReader`: PDF in, structured output out);
   - `statement`: account-statement extraction (stub or Claude), analysis and summary;
-  - `loan`: loan-contract extraction with per-field evidence, derived figures and screening flags.
+  - `loan`: loan-contract extraction with per-field evidence, derived figures and screening flags;
+  - `commitment`: the review step's emulated signing, which creates the pool commitment.
 
   Cross-module references use IDs (UUID), not JPA relations.
 - Runs on port **9000**. The Vite dev server is on 5173 and is allowed by CORS on `/v1/**`.
