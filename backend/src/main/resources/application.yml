@@ -34,9 +34,9 @@ management:
 
 app:
   auth:
-    # Emulated Smart-ID / Mobile-ID: the verification code is shown this long, then a short
-    # verifying step
-    stub-code-display: 10s
+    # Emulated Smart-ID / Mobile-ID (login and signing): the verification code is shown this
+    # long, then a short verifying step
+    stub-code-display: 5s
     stub-verifying: 2s
     # Real names from the public eID certificate directories (docs/research/10). Exact personal
     # codes only, never logged, rate-limited so the demo is not a name oracle
