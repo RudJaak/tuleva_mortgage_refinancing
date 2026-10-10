@@ -1,10 +1,8 @@
 package ee.tuleva.mortgage.loan;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.anthropic.models.messages.StructuredOutputConfig;
-import ee.tuleva.mortgage.extraction.ExtractionException;
 import ee.tuleva.mortgage.loan.ClaudeLoanContractExtractor.ClaudeEvidence;
 import ee.tuleva.mortgage.loan.ClaudeLoanContractExtractor.ClaudeLoanContract;
 import ee.tuleva.mortgage.loan.ExtractedLoanContract.Confidence;
@@ -45,7 +43,10 @@ class ClaudeLoanContractExtractorTest {
         "1.234,56 | 1234.56",
         "1,234.56 | 1234.56",
         "185 000 eurot | 185000",
-        "222 000 EUR | 222000"
+        "222 000 EUR | 222000",
+        "300 osamakset | 300",
+        "05. kuupäeval | 5",
+        "Euribor + 2,95% aastas | 2.95"
       })
   void readsPrintedAmounts(String printed, String expected) {
     assertThat(ClaudeLoanContractExtractor.amount(printed)).isEqualByComparingTo(expected);
@@ -91,10 +92,22 @@ class ClaudeLoanContractExtractorTest {
   }
 
   @Test
-  void anUnparseableValueFailsTheExtraction() {
-    assertThatThrownBy(
-            () -> ClaudeLoanContractExtractor.toExtracted(result("1,95", "14.06.2049", List.of())))
-        .isInstanceOf(ExtractionException.class);
+  void aValueThatCannotBeParsedLeavesOnlyThatFieldEmpty() {
+    var extracted =
+        ClaudeLoanContractExtractor.toExtracted(result("kokkuleppel", "05.03.2045", List.of()));
+
+    assertThat(extracted.margin()).isNull();
+    assertThat(extracted.maturityDate()).isEqualTo(LocalDate.of(2045, 3, 5));
+    assertThat(extracted.lender()).isEqualTo("Swedbank AS");
+    assertThat(extracted.principal()).isEqualByComparingTo("185000");
+  }
+
+  @Test
+  void readsIsoAndEstonianDates() {
+    assertThat(ClaudeLoanContractExtractor.date("2045-03-05")).isEqualTo(LocalDate.of(2045, 3, 5));
+    assertThat(ClaudeLoanContractExtractor.date("5.3.2045")).isEqualTo(LocalDate.of(2045, 3, 5));
+    assertThat(ClaudeLoanContractExtractor.date("2045-03-05T00:00"))
+        .isEqualTo(LocalDate.of(2045, 3, 5));
   }
 
   private static ClaudeLoanContract result(

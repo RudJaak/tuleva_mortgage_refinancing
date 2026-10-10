@@ -3,7 +3,6 @@ package ee.tuleva.mortgage.loan;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import ee.tuleva.mortgage.document.DocumentFile;
 import ee.tuleva.mortgage.extraction.ClaudeDocumentReader;
-import ee.tuleva.mortgage.extraction.ExtractionException;
 import ee.tuleva.mortgage.loan.ExtractedLoanContract.Confidence;
 import ee.tuleva.mortgage.loan.ExtractedLoanContract.Evidence;
 import ee.tuleva.mortgage.loan.ExtractedLoanContract.RateType;
@@ -11,14 +10,16 @@ import ee.tuleva.mortgage.loan.ExtractedLoanContract.RepaymentType;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -26,6 +27,7 @@ import org.jspecify.annotations.Nullable;
  * from. Values come back as text and are parsed here, so Estonian number formats ("185 000,00",
  * "1,95%") are handled in one tested place.
  */
+@Slf4j
 @RequiredArgsConstructor
 class ClaudeLoanContractExtractor implements LoanContractExtractor {
 
@@ -91,6 +93,10 @@ class ClaudeLoanContractExtractor implements LoanContractExtractor {
       @JsonPropertyDescription("Verbatim, at most 150 characters") String quote,
       Confidence confidence) {}
 
+  private static final Pattern FIRST_NUMBER = Pattern.compile("-?\\d[\\d\\s\\u00a0.,]*");
+  private static final Pattern ESTONIAN_DATE =
+      Pattern.compile("\\b(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})\\b");
+
   private final ClaudeDocumentReader reader;
   private final Clock clock;
 
@@ -141,42 +147,70 @@ class ClaudeLoanContractExtractor implements LoanContractExtractor {
                     e.field(),
                     new Evidence(
                         closestTitle(e.document(), titles), e.page(), e.quote(), e.confidence())));
+    return new ExtractedLoanContract(
+        text(result.lender()),
+        text(result.contractNumber()),
+        field(LoanField.CONTRACT_DATE, result.contractDate(), ClaudeLoanContractExtractor::date),
+        result.borrowers().stream().filter(b -> !b.isBlank()).map(String::strip).toList(),
+        field(LoanField.PRINCIPAL, result.principal(), ClaudeLoanContractExtractor::amount),
+        text(result.currency()),
+        text(result.baseRate()),
+        field(LoanField.MARGIN, result.margin(), ClaudeLoanContractExtractor::amount),
+        result.rateType(),
+        field(
+            LoanField.FIXED_RATE_UNTIL, result.fixedRateUntil(), ClaudeLoanContractExtractor::date),
+        field(
+            LoanField.STATED_INTEREST_RATE,
+            result.statedInterestRate(),
+            ClaudeLoanContractExtractor::amount),
+        field(LoanField.MATURITY_DATE, result.maturityDate(), ClaudeLoanContractExtractor::date),
+        field(LoanField.TERM_MONTHS, result.termMonths(), ClaudeLoanContractExtractor::integer),
+        field(
+            LoanField.MONTHLY_PAYMENT,
+            result.monthlyPayment(),
+            ClaudeLoanContractExtractor::amount),
+        field(LoanField.PAYMENT_DAY, result.paymentDay(), ClaudeLoanContractExtractor::integer),
+        result.repaymentType(),
+        field(
+            LoanField.MORTGAGE_AMOUNT,
+            result.mortgageAmount(),
+            ClaudeLoanContractExtractor::amount),
+        text(result.collateral()),
+        text(result.earlyRepaymentTerms()),
+        field(
+            LoanField.PROPERTY_VALUE, result.propertyValue(), ClaudeLoanContractExtractor::amount),
+        field(LoanField.BALANCE, result.balance(), ClaudeLoanContractExtractor::amount),
+        field(LoanField.BALANCE, result.balanceDate(), ClaudeLoanContractExtractor::date),
+        evidence);
+  }
+
+  /**
+   * One value the reader returned in an unexpected shape leaves that field empty for the borrower
+   * to fill in, instead of failing the whole contract. Only the field name is logged.
+   */
+  private static <T> @Nullable T field(
+      LoanField field, @Nullable String printed, Function<String, T> parse) {
     try {
-      return new ExtractedLoanContract(
-          text(result.lender()),
-          text(result.contractNumber()),
-          date(result.contractDate()),
-          result.borrowers().stream().filter(b -> !b.isBlank()).map(String::strip).toList(),
-          amount(result.principal()),
-          text(result.currency()),
-          text(result.baseRate()),
-          amount(result.margin()),
-          result.rateType(),
-          date(result.fixedRateUntil()),
-          amount(result.statedInterestRate()),
-          date(result.maturityDate()),
-          integer(result.termMonths()),
-          amount(result.monthlyPayment()),
-          integer(result.paymentDay()),
-          result.repaymentType(),
-          amount(result.mortgageAmount()),
-          text(result.collateral()),
-          text(result.earlyRepaymentTerms()),
-          amount(result.propertyValue()),
-          amount(result.balance()),
-          date(result.balanceDate()),
-          evidence);
-    } catch (DateTimeParseException | NumberFormatException | ArithmeticException e) {
-      throw new ExtractionException("The contract reader returned a value it could not parse", e);
+      return parse.apply(printed);
+    } catch (RuntimeException e) {
+      log.info("Contract field {} could not be parsed: {}", field, e.getClass().getSimpleName());
+      return null;
     }
   }
 
-  /** Parses Estonian and international number formats: "185 000,00", "1,95%", "920.00 €". */
+  /**
+   * The first number in a printed value, in Estonian or international format: "185 000,00",
+   * "1,95%", "920.00 €", "300 osamakset", "5. kuupäeval".
+   */
   static @Nullable BigDecimal amount(@Nullable String printed) {
     if (printed == null || printed.isBlank()) {
       return null;
     }
-    String digits = printed.replaceAll("[\\s\\u00a0€%]|EUR|eurot?", "");
+    var number = FIRST_NUMBER.matcher(printed);
+    if (!number.find()) {
+      throw new NumberFormatException("No number in the value");
+    }
+    String digits = number.group().replaceAll("[\\s\\u00a0]", "").replaceAll("[.,]$", "");
     if (digits.contains(",") && digits.contains(".")) {
       digits =
           digits.lastIndexOf(',') > digits.lastIndexOf('.')
@@ -188,13 +222,25 @@ class ClaudeLoanContractExtractor implements LoanContractExtractor {
     return new BigDecimal(digits);
   }
 
-  private static @Nullable Integer integer(@Nullable String printed) {
+  static @Nullable Integer integer(@Nullable String printed) {
     BigDecimal value = amount(printed);
     return value == null ? null : value.intValueExact();
   }
 
-  private static @Nullable LocalDate date(@Nullable String value) {
-    return value == null || value.isBlank() ? null : LocalDate.parse(value.strip());
+  /** ISO dates as asked for, and the Estonian "05.03.2045" in case the reader copied one. */
+  static @Nullable LocalDate date(@Nullable String value) {
+    if (value == null || value.isBlank()) {
+      return null;
+    }
+    String date = value.strip();
+    var estonian = ESTONIAN_DATE.matcher(date);
+    if (estonian.find()) {
+      return LocalDate.of(
+          Integer.parseInt(estonian.group(3)),
+          Integer.parseInt(estonian.group(2)),
+          Integer.parseInt(estonian.group(1)));
+    }
+    return LocalDate.parse(date.length() > 10 ? date.substring(0, 10) : date);
   }
 
   private static @Nullable String text(@Nullable String value) {
