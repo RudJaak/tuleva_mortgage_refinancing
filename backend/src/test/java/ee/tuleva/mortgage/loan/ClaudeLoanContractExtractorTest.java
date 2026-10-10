@@ -8,53 +8,47 @@ import ee.tuleva.mortgage.loan.ClaudeLoanContractExtractor.ClaudeLoanContract;
 import ee.tuleva.mortgage.loan.ExtractedLoanContract.Confidence;
 import ee.tuleva.mortgage.loan.ExtractedLoanContract.RateType;
 import ee.tuleva.mortgage.loan.ExtractedLoanContract.RepaymentType;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
 class ClaudeLoanContractExtractorTest {
 
   @Test
-  void theOutputSchemaIsAcceptedByTheSdk() {
-    var config =
+  void theOutputSchemaIsTypedSoTheApiGuaranteesNumbersAndDates() {
+    var schema =
         StructuredOutputConfig.<ClaudeLoanContract>builder()
             .format(ClaudeLoanContract.class)
-            .build();
+            .build()
+            .format()
+            .orElseThrow()
+            .schema()
+            .toString();
 
-    assertThat(config.format()).isPresent();
+    assertThat(schema)
+        .contains("margin={type=[number, null]")
+        .contains("termMonths={type=[integer, null]")
+        .contains("maturityDate={type=[string, null], format=date");
+    assertThat(unionFields(schema)).as("the API's limit").isLessThanOrEqualTo(16);
+  }
+
+  static long unionFields(String schema) {
+    return java.util.regex.Pattern.compile("type=\\[\\w+, null\\]")
+        .matcher(schema)
+        .results()
+        .count();
   }
 
   @Test
-  void thePromptNamesEveryField() {
+  void thePromptNamesEveryFieldAndTheNormalForms() {
     assertThat(ClaudeLoanContractExtractor.SYSTEM_PROMPT)
-        .contains(Arrays.stream(LoanField.values()).map(Enum::name).toList());
-  }
-
-  @ParameterizedTest
-  @CsvSource(
-      delimiter = '|',
-      value = {
-        "185 000,00 | 185000.00",
-        "1,95% | 1.95",
-        "920.00 € | 920.00",
-        "1.234,56 | 1234.56",
-        "1,234.56 | 1234.56",
-        "185 000 eurot | 185000",
-        "222 000 EUR | 222000",
-        "300 osamakset | 300",
-        "05. kuupäeval | 5",
-        "Euribor + 2,95% aastas | 2.95"
-      })
-  void readsPrintedAmounts(String printed, String expected) {
-    assertThat(ClaudeLoanContractExtractor.amount(printed)).isEqualByComparingTo(expected);
-  }
-
-  @Test
-  void anEmptyAmountIsUnknown() {
-    assertThat(ClaudeLoanContractExtractor.amount(" ")).isNull();
+        .contains(Arrays.stream(LoanField.values()).map(Enum::name).toList())
+        .contains("82990 for \"82 990 eurot\"")
+        .contains("2.95 for \"2,95% aastas\"")
+        .contains("Use null for a number or date");
   }
 
   @Test
@@ -62,23 +56,31 @@ class ClaudeLoanContractExtractorTest {
     var extracted =
         ClaudeLoanContractExtractor.toExtracted(
             result(
-                "1,95",
-                "2049-06-14",
+                "2.95",
                 List.of(
                     new ClaudeEvidence(
-                        LoanField.MARGIN, "leping.pdf", 2, "Marginaal 1,95%", Confidence.HIGH),
+                        LoanField.MARGIN, "leping.pdf", 2, "Marginaal 2,95%", Confidence.HIGH),
                     new ClaudeEvidence(
                         LoanField.MARGIN, "teabeleht.pdf", 7, "duplicate", Confidence.LOW))));
 
-    assertThat(extracted.margin()).isEqualByComparingTo("1.95");
-    assertThat(extracted.maturityDate()).isEqualTo(LocalDate.of(2049, 6, 14));
+    assertThat(extracted.margin()).isEqualByComparingTo("2.95");
+    assertThat(extracted.maturityDate()).isEqualTo(LocalDate.of(2045, 3, 5));
     assertThat(extracted.lender()).isEqualTo("Swedbank AS");
-    assertThat(extracted.contractNumber()).isNull();
+    assertThat(extracted.contractNumber()).as("not stated").isNull();
     assertThat(extracted.borrowers()).containsExactly("Mari Maasikas");
-    assertThat(extracted.termMonths()).isEqualTo(360);
+    assertThat(extracted.termMonths()).isEqualTo(300);
+    assertThat(extracted.propertyValue()).isEqualByComparingTo("162000");
     assertThat(extracted.evidence().get(LoanField.MARGIN).page()).isEqualTo(2);
     assertThat(extracted.evidence().get(LoanField.MARGIN).document()).isEqualTo("leping.pdf");
-    assertThat(extracted.propertyValue()).isEqualByComparingTo("162000");
+  }
+
+  @Test
+  void aMisreadNumberOutsideItsPlausibleRangeIsLeftEmpty() {
+    // "2,95%" read as 295
+    var extracted = ClaudeLoanContractExtractor.toExtracted(result("295", List.of()));
+
+    assertThat(extracted.margin()).isNull();
+    assertThat(extracted.principal()).isEqualByComparingTo("82990");
   }
 
   @Test
@@ -91,50 +93,30 @@ class ClaudeLoanContractExtractorTest {
         .isEqualTo("Standardinfo teabeleht.pdf");
   }
 
-  @Test
-  void aValueThatCannotBeParsedLeavesOnlyThatFieldEmpty() {
-    var extracted =
-        ClaudeLoanContractExtractor.toExtracted(result("kokkuleppel", "05.03.2045", List.of()));
-
-    assertThat(extracted.margin()).isNull();
-    assertThat(extracted.maturityDate()).isEqualTo(LocalDate.of(2045, 3, 5));
-    assertThat(extracted.lender()).isEqualTo("Swedbank AS");
-    assertThat(extracted.principal()).isEqualByComparingTo("185000");
-  }
-
-  @Test
-  void readsIsoAndEstonianDates() {
-    assertThat(ClaudeLoanContractExtractor.date("2045-03-05")).isEqualTo(LocalDate.of(2045, 3, 5));
-    assertThat(ClaudeLoanContractExtractor.date("5.3.2045")).isEqualTo(LocalDate.of(2045, 3, 5));
-    assertThat(ClaudeLoanContractExtractor.date("2045-03-05T00:00"))
-        .isEqualTo(LocalDate.of(2045, 3, 5));
-  }
-
-  private static ClaudeLoanContract result(
-      String margin, String maturity, List<ClaudeEvidence> evidence) {
+  private static ClaudeLoanContract result(String margin, List<ClaudeEvidence> evidence) {
     return new ClaudeLoanContract(
         "Swedbank AS",
-        "",
-        "2019-06-14",
+        " ",
+        Optional.of(LocalDate.of(2020, 3, 5)),
         List.of("Mari Maasikas", " "),
-        "185 000,00",
+        Optional.of(new BigDecimal("82990")),
         "EUR",
-        "6 kuu EURIBOR",
-        margin,
+        "6 kuu Euribor",
+        Optional.of(new BigDecimal(margin)),
         RateType.VARIABLE,
-        "",
-        "",
-        maturity,
-        "360",
-        "920,00",
-        "14",
+        Optional.empty(),
+        Optional.empty(),
+        Optional.of(LocalDate.of(2045, 3, 5)),
+        Optional.of(300),
+        Optional.of(new BigDecimal("393.14")),
+        Optional.of(5),
         RepaymentType.ANNUITY,
-        "222 000,00",
+        Optional.of(new BigDecimal("107887")),
         "Tallinn",
-        "3 kuu intress",
-        "162 000",
-        "",
-        "",
+        "Tasu ei rakendata",
+        Optional.of(new BigDecimal("162000")),
+        Optional.empty(),
+        Optional.empty(),
         evidence);
   }
 }

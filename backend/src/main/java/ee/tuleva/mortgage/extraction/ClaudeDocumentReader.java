@@ -3,6 +3,7 @@ package ee.tuleva.mortgage.extraction;
 import com.anthropic.client.AnthropicClient;
 import com.anthropic.core.JsonValue;
 import com.anthropic.errors.AnthropicException;
+import com.anthropic.errors.AnthropicServiceException;
 import com.anthropic.models.messages.Base64PdfSource;
 import com.anthropic.models.messages.ContentBlockParam;
 import com.anthropic.models.messages.DocumentBlockParam;
@@ -82,6 +83,12 @@ public class ClaudeDocumentReader {
           .map(text -> text.text())
           .findFirst()
           .orElseThrow(() -> new ExtractionException("Empty extraction result"));
+    } catch (AnthropicServiceException e) {
+      // The API's message says what was wrong with the request (e.g. the schema); no document
+      // content
+      log.warn("Document reader request failed: {} {}", e.statusCode(), e.getMessage());
+      throw new ExtractionException(
+          "The document reader is unavailable: " + e.getClass().getSimpleName(), e);
     } catch (AnthropicException e) {
       throw new ExtractionException(
           "The document reader is unavailable: " + e.getClass().getSimpleName(), e);

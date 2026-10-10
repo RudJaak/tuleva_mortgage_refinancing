@@ -1,7 +1,6 @@
 package ee.tuleva.mortgage.statement;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.anthropic.models.messages.StructuredOutputConfig;
 import ee.tuleva.mortgage.statement.ClaudeStatementExtractor.ClaudeStatement;
@@ -10,38 +9,56 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class ClaudeStatementExtractorTest {
 
   @Test
-  void theOutputSchemaIsAcceptedByTheSdk() {
-    var config =
-        StructuredOutputConfig.<ClaudeStatement>builder().format(ClaudeStatement.class).build();
+  void theOutputSchemaIsTypedSoTheApiGuaranteesNumbersAndDates() {
+    var schema =
+        StructuredOutputConfig.<ClaudeStatement>builder()
+            .format(ClaudeStatement.class)
+            .build()
+            .format()
+            .orElseThrow()
+            .schema()
+            .toString();
 
-    assertThat(config.format()).isPresent();
+    assertThat(schema)
+        .contains("lowestBalance={type=[number, null]")
+        .contains("periodStart={type=[string, null], format=date");
+    assertThat(
+            java.util.regex.Pattern.compile("type=\\[\\w+, null\\]")
+                .matcher(schema)
+                .results()
+                .count())
+        .as("the API allows at most 16 nullable fields")
+        .isLessThanOrEqualTo(16);
   }
 
   @Test
-  void thePromptNamesEveryCategory() {
+  void thePromptNamesEveryCategoryAndTheNormalForms() {
     assertThat(ClaudeStatementExtractor.SYSTEM_PROMPT)
-        .contains(Arrays.stream(TransactionCategory.values()).map(Enum::name).toList());
+        .contains(Arrays.stream(TransactionCategory.values()).map(Enum::name).toList())
+        .contains("-120.5 for \"-120,50\"")
+        .contains("never use 0 for an unknown");
   }
 
   @Test
-  void mapsTheResultAndTurnsBlanksIntoUnknowns() {
+  void mapsTheResultAndKeepsUnknownsAsUnknown() {
     var result =
         new ClaudeStatement(
-            " ",
-            "",
-            "2026-04-10",
-            "",
-            new BigDecimal("10.00"),
-            new BigDecimal("20.00"),
-            new BigDecimal("-5.00"),
+            Optional.of(" "),
+            Optional.empty(),
+            Optional.of(LocalDate.of(2026, 4, 10)),
+            Optional.empty(),
+            Optional.of(new BigDecimal("10.00")),
+            Optional.empty(),
+            Optional.of(new BigDecimal("-5.00")),
             List.of(
                 new ClaudeTransaction(
-                    "2026-04-30",
+                    LocalDate.of(2026, 4, 30),
                     "Firma OÜ",
                     "Töötasu",
                     new BigDecimal("2000.00"),
@@ -53,6 +70,7 @@ class ClaudeStatementExtractorTest {
     assertThat(extracted.iban()).isNull();
     assertThat(extracted.periodStart()).isEqualTo(LocalDate.of(2026, 4, 10));
     assertThat(extracted.periodEnd()).isNull();
+    assertThat(extracted.closingBalance()).as("unknown, not 0").isNull();
     assertThat(extracted.lowestBalance()).isEqualByComparingTo("-5.00");
     assertThat(extracted.transactions())
         .singleElement()
@@ -61,15 +79,5 @@ class ClaudeStatementExtractorTest {
               assertThat(t.date()).isEqualTo(LocalDate.of(2026, 4, 30));
               assertThat(t.category()).isEqualTo(TransactionCategory.SALARY);
             });
-  }
-
-  @Test
-  void anUnreadableDateFailsTheExtraction() {
-    var result =
-        new ClaudeStatement(
-            "", "", "10.04.2026", "", BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, List.of());
-
-    assertThatThrownBy(() -> ClaudeStatementExtractor.toExtracted(result))
-        .isInstanceOf(ee.tuleva.mortgage.extraction.ExtractionException.class);
   }
 }

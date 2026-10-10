@@ -14,18 +14,19 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Claude reads the contract and returns each field as printed, with the page and quote it came
- * from. Values come back as text and are parsed here, so Estonian number formats ("185 000,00",
- * "1,95%") are handled in one tested place.
+ * Claude reads the contract upload and returns each field normalised: amounts and percentages as
+ * numbers, dates as dates, null when not stated (texts: empty). The output schema is typed, so the
+ * API guarantees those shapes; the API allows at most 16 nullable fields, so texts are not
+ * nullable; the contract's own wording goes into each field's evidence quote. Values outside a
+ * plausible range (a misread "2,95%" as 295) are dropped and left for the borrower to fill in.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -44,8 +45,13 @@ class ClaudeLoanContractExtractor implements LoanContractExtractor {
       %s
 
       Rules:
-      - Copy values as printed. Dates as YYYY-MM-DD. Leave a field empty when the contract does \
-      not state it; never calculate or guess a value that is not written down.
+      - Give every value in its normal form, as each field's description says: amounts in \
+      euros and percentages as plain numbers with a dot as the decimal separator and no spaces, \
+      units or currency (82990 for "82 990 eurot", 2.95 for "2,95%% aastas"); dates as dates; \
+      whole numbers for counts and days.
+      - Use null for a number or date the documents do not state, and an empty string for such a \
+      text. Never calculate or guess a value that is not written down; converting a term in \
+      years to months is fine.
       - The contract may include amendments or annexes (muudatus, lisa). Return the terms in \
       force after the latest amendment, and quote the amendment as the evidence.
       - The contract wins when documents disagree. Use the information sheet or the schedule for \
@@ -53,8 +59,9 @@ class ClaudeLoanContractExtractor implements LoanContractExtractor {
       property value.
       - Read the loan's own terms, not the general conditions' definitions or price-list examples.
       - For every field you fill, add one evidence entry: the document's title, the 1-based page \
-      within that document, a short verbatim quote (at most 150 characters) and your confidence. \
-      Use LOW when the wording is ambiguous or the value is hard to read.\
+      within that document, a short verbatim quote of the original wording (at most 150 \
+      characters) and your confidence. Use LOW when the wording is ambiguous or the value is hard \
+      to read.\
       """
           .formatted(
               Arrays.stream(LoanField.values())
@@ -62,40 +69,69 @@ class ClaudeLoanContractExtractor implements LoanContractExtractor {
                   .collect(Collectors.joining("\n")));
 
   record ClaudeLoanContract(
-      String lender,
-      String contractNumber,
-      @JsonPropertyDescription("YYYY-MM-DD") String contractDate,
-      @JsonPropertyDescription("Full names of all borrowers") List<String> borrowers,
-      @JsonPropertyDescription("As printed, e.g. '185 000,00'") String principal,
-      String currency,
-      String baseRate,
-      @JsonPropertyDescription("Percent per year as printed, e.g. '1,95'") String margin,
+      @JsonPropertyDescription("The lending bank's name, e.g. 'AS LHV Pank'") String lender,
+      @JsonPropertyDescription("Contract number as printed") String contractNumber,
+      @JsonPropertyDescription("Date the contract was signed") Optional<LocalDate> contractDate,
+      @JsonPropertyDescription("Full names of all borrowers; empty if none are named")
+          List<String> borrowers,
+      @JsonPropertyDescription("Loan amount in euros, e.g. 82990 for '82 990 eurot'")
+          Optional<BigDecimal> principal,
+      @JsonPropertyDescription("ISO currency code, e.g. EUR") String currency,
+      @JsonPropertyDescription("Base rate with its tenor, e.g. '6 kuu Euribor'") String baseRate,
+      @JsonPropertyDescription("Margin in percent per year, e.g. 2.95 for '2,95% aastas'")
+          Optional<BigDecimal> margin,
       RateType rateType,
-      @JsonPropertyDescription("YYYY-MM-DD") String fixedRateUntil,
-      @JsonPropertyDescription("Percent per year as printed") String statedInterestRate,
-      @JsonPropertyDescription("YYYY-MM-DD") String maturityDate,
-      String termMonths,
-      @JsonPropertyDescription("As printed") String monthlyPayment,
-      String paymentDay,
+      @JsonPropertyDescription("End of a fixed-rate period") Optional<LocalDate> fixedRateUntil,
+      @JsonPropertyDescription(
+              "Total interest rate in percent per year, if the contract states one")
+          Optional<BigDecimal> statedInterestRate,
+      @JsonPropertyDescription("Final repayment date") Optional<LocalDate> maturityDate,
+      @JsonPropertyDescription(
+              "Loan term in months, e.g. 300 for '300 osamakset' or for '25 aastat'")
+          Optional<Integer> termMonths,
+      @JsonPropertyDescription("Monthly instalment in euros, e.g. 393.14")
+          Optional<BigDecimal> monthlyPayment,
+      @JsonPropertyDescription("Day of the month payments are due, 1 to 31")
+          Optional<Integer> paymentDay,
       RepaymentType repaymentType,
-      @JsonPropertyDescription("As printed") String mortgageAmount,
-      String collateral,
-      String earlyRepaymentTerms,
-      @JsonPropertyDescription("As printed") String propertyValue,
-      @JsonPropertyDescription("Outstanding principal as printed, if stated") String balance,
-      @JsonPropertyDescription("YYYY-MM-DD of the stated balance") String balanceDate,
+      @JsonPropertyDescription("Mortgage (hypothec) amount in euros")
+          Optional<BigDecimal> mortgageAmount,
+      @JsonPropertyDescription("The mortgaged property: address and land register number")
+          String collateral,
+      @JsonPropertyDescription("Early repayment fee or compensation, in a short sentence")
+          String earlyRepaymentTerms,
+      @JsonPropertyDescription("Value of the mortgaged property in euros")
+          Optional<BigDecimal> propertyValue,
+      @JsonPropertyDescription("Outstanding principal in euros, if stated")
+          Optional<BigDecimal> balance,
+      @JsonPropertyDescription("Date of the stated outstanding principal")
+          Optional<LocalDate> balanceDate,
       List<ClaudeEvidence> evidence) {}
 
   record ClaudeEvidence(
       LoanField field,
       @JsonPropertyDescription("Title of the document the value was read from") String document,
       @JsonPropertyDescription("1-based page within that document") int page,
-      @JsonPropertyDescription("Verbatim, at most 150 characters") String quote,
+      @JsonPropertyDescription("The original wording, verbatim, at most 150 characters")
+          String quote,
       Confidence confidence) {}
 
-  private static final Pattern FIRST_NUMBER = Pattern.compile("-?\\d[\\d\\s\\u00a0.,]*");
-  private static final Pattern ESTONIAN_DATE =
-      Pattern.compile("\\b(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})\\b");
+  /** A value outside these bounds is a misreading, not a loan term. */
+  private record Range(BigDecimal min, BigDecimal max) {
+
+    static Range of(String min, String max) {
+      return new Range(new BigDecimal(min), new BigDecimal(max));
+    }
+
+    boolean contains(BigDecimal value) {
+      return value.compareTo(min) >= 0 && value.compareTo(max) <= 0;
+    }
+  }
+
+  private static final Range PERCENT = Range.of("0", "15");
+  private static final Range EUROS = Range.of("1", "10000000");
+  private static final Range MONTHS = Range.of("1", "600");
+  private static final Range DAY_OF_MONTH = Range.of("1", "31");
 
   private final ClaudeDocumentReader reader;
   private final Clock clock;
@@ -111,6 +147,61 @@ class ClaudeLoanContractExtractor implements LoanContractExtractor {
             "Extract this home loan contract. Today is " + LocalDate.now(clock) + ".",
             ClaudeLoanContract.class);
     return toExtracted(result, pdfs.stream().map(DocumentFile::name).toList());
+  }
+
+  static ExtractedLoanContract toExtracted(ClaudeLoanContract result) {
+    return toExtracted(result, List.of());
+  }
+
+  static ExtractedLoanContract toExtracted(ClaudeLoanContract result, List<String> titles) {
+    var evidence = new EnumMap<LoanField, Evidence>(LoanField.class);
+    result
+        .evidence()
+        .forEach(
+            e ->
+                evidence.putIfAbsent(
+                    e.field(),
+                    new Evidence(
+                        closestTitle(e.document(), titles), e.page(), e.quote(), e.confidence())));
+    return new ExtractedLoanContract(
+        text(result.lender()),
+        text(result.contractNumber()),
+        result.contractDate().orElse(null),
+        result.borrowers().stream().filter(b -> !b.isBlank()).map(String::strip).toList(),
+        within(LoanField.PRINCIPAL, result.principal(), EUROS),
+        text(result.currency()),
+        text(result.baseRate()),
+        within(LoanField.MARGIN, result.margin(), PERCENT),
+        result.rateType(),
+        result.fixedRateUntil().orElse(null),
+        within(LoanField.STATED_INTEREST_RATE, result.statedInterestRate(), PERCENT),
+        result.maturityDate().orElse(null),
+        whole(LoanField.TERM_MONTHS, result.termMonths(), MONTHS),
+        within(LoanField.MONTHLY_PAYMENT, result.monthlyPayment(), EUROS),
+        whole(LoanField.PAYMENT_DAY, result.paymentDay(), DAY_OF_MONTH),
+        result.repaymentType(),
+        within(LoanField.MORTGAGE_AMOUNT, result.mortgageAmount(), EUROS),
+        text(result.collateral()),
+        text(result.earlyRepaymentTerms()),
+        within(LoanField.PROPERTY_VALUE, result.propertyValue(), EUROS),
+        within(LoanField.BALANCE, result.balance(), EUROS),
+        result.balanceDate().orElse(null),
+        evidence);
+  }
+
+  /** A number outside its plausible range is dropped; only the field name is logged. */
+  private static @Nullable BigDecimal within(
+      LoanField field, Optional<BigDecimal> value, Range range) {
+    if (value.isPresent() && !range.contains(value.get())) {
+      log.info("Contract field {} out of range, left for the borrower to fill in", field);
+      return null;
+    }
+    return value.orElse(null);
+  }
+
+  private static @Nullable Integer whole(LoanField field, Optional<Integer> value, Range range) {
+    BigDecimal checked = within(field, value.map(BigDecimal::valueOf), range);
+    return checked == null ? null : checked.intValue();
   }
 
   /**
@@ -131,116 +222,6 @@ class ClaudeLoanContractExtractor implements LoanContractExtractor {
     return Arrays.stream(text.toLowerCase().replace(".pdf", "").split("[^\\p{L}\\p{N}]+"))
         .filter(word -> word.length() >= 3)
         .collect(Collectors.toSet());
-  }
-
-  static ExtractedLoanContract toExtracted(ClaudeLoanContract result) {
-    return toExtracted(result, List.of());
-  }
-
-  static ExtractedLoanContract toExtracted(ClaudeLoanContract result, List<String> titles) {
-    var evidence = new EnumMap<LoanField, Evidence>(LoanField.class);
-    result
-        .evidence()
-        .forEach(
-            e ->
-                evidence.putIfAbsent(
-                    e.field(),
-                    new Evidence(
-                        closestTitle(e.document(), titles), e.page(), e.quote(), e.confidence())));
-    return new ExtractedLoanContract(
-        text(result.lender()),
-        text(result.contractNumber()),
-        field(LoanField.CONTRACT_DATE, result.contractDate(), ClaudeLoanContractExtractor::date),
-        result.borrowers().stream().filter(b -> !b.isBlank()).map(String::strip).toList(),
-        field(LoanField.PRINCIPAL, result.principal(), ClaudeLoanContractExtractor::amount),
-        text(result.currency()),
-        text(result.baseRate()),
-        field(LoanField.MARGIN, result.margin(), ClaudeLoanContractExtractor::amount),
-        result.rateType(),
-        field(
-            LoanField.FIXED_RATE_UNTIL, result.fixedRateUntil(), ClaudeLoanContractExtractor::date),
-        field(
-            LoanField.STATED_INTEREST_RATE,
-            result.statedInterestRate(),
-            ClaudeLoanContractExtractor::amount),
-        field(LoanField.MATURITY_DATE, result.maturityDate(), ClaudeLoanContractExtractor::date),
-        field(LoanField.TERM_MONTHS, result.termMonths(), ClaudeLoanContractExtractor::integer),
-        field(
-            LoanField.MONTHLY_PAYMENT,
-            result.monthlyPayment(),
-            ClaudeLoanContractExtractor::amount),
-        field(LoanField.PAYMENT_DAY, result.paymentDay(), ClaudeLoanContractExtractor::integer),
-        result.repaymentType(),
-        field(
-            LoanField.MORTGAGE_AMOUNT,
-            result.mortgageAmount(),
-            ClaudeLoanContractExtractor::amount),
-        text(result.collateral()),
-        text(result.earlyRepaymentTerms()),
-        field(
-            LoanField.PROPERTY_VALUE, result.propertyValue(), ClaudeLoanContractExtractor::amount),
-        field(LoanField.BALANCE, result.balance(), ClaudeLoanContractExtractor::amount),
-        field(LoanField.BALANCE, result.balanceDate(), ClaudeLoanContractExtractor::date),
-        evidence);
-  }
-
-  /**
-   * One value the reader returned in an unexpected shape leaves that field empty for the borrower
-   * to fill in, instead of failing the whole contract. Only the field name is logged.
-   */
-  private static <T> @Nullable T field(
-      LoanField field, @Nullable String printed, Function<String, T> parse) {
-    try {
-      return parse.apply(printed);
-    } catch (RuntimeException e) {
-      log.info("Contract field {} could not be parsed: {}", field, e.getClass().getSimpleName());
-      return null;
-    }
-  }
-
-  /**
-   * The first number in a printed value, in Estonian or international format: "185 000,00",
-   * "1,95%", "920.00 €", "300 osamakset", "5. kuupäeval".
-   */
-  static @Nullable BigDecimal amount(@Nullable String printed) {
-    if (printed == null || printed.isBlank()) {
-      return null;
-    }
-    var number = FIRST_NUMBER.matcher(printed);
-    if (!number.find()) {
-      throw new NumberFormatException("No number in the value");
-    }
-    String digits = number.group().replaceAll("[\\s\\u00a0]", "").replaceAll("[.,]$", "");
-    if (digits.contains(",") && digits.contains(".")) {
-      digits =
-          digits.lastIndexOf(',') > digits.lastIndexOf('.')
-              ? digits.replace(".", "").replace(',', '.')
-              : digits.replace(",", "");
-    } else {
-      digits = digits.replace(',', '.');
-    }
-    return new BigDecimal(digits);
-  }
-
-  static @Nullable Integer integer(@Nullable String printed) {
-    BigDecimal value = amount(printed);
-    return value == null ? null : value.intValueExact();
-  }
-
-  /** ISO dates as asked for, and the Estonian "05.03.2045" in case the reader copied one. */
-  static @Nullable LocalDate date(@Nullable String value) {
-    if (value == null || value.isBlank()) {
-      return null;
-    }
-    String date = value.strip();
-    var estonian = ESTONIAN_DATE.matcher(date);
-    if (estonian.find()) {
-      return LocalDate.of(
-          Integer.parseInt(estonian.group(3)),
-          Integer.parseInt(estonian.group(2)),
-          Integer.parseInt(estonian.group(1)));
-    }
-    return LocalDate.parse(date.length() > 10 ? date.substring(0, 10) : date);
   }
 
   private static @Nullable String text(@Nullable String value) {

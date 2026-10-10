@@ -3,19 +3,20 @@ package ee.tuleva.mortgage.statement;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import ee.tuleva.mortgage.document.DocumentFile;
 import ee.tuleva.mortgage.extraction.ClaudeDocumentReader;
-import ee.tuleva.mortgage.extraction.ExtractionException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
 /**
  * Claude reads the statement PDF and returns only the transactions that matter for screening,
- * already categorised. Totals and averages are left to {@link StatementAnalyzer}.
+ * already categorised. The output schema is typed (dates as dates, amounts as numbers, null when
+ * not shown), so the API guarantees those shapes. Totals and averages are left to {@link
+ * StatementAnalyzer}.
  */
 @RequiredArgsConstructor
 class ClaudeStatementExtractor implements StatementExtractor {
@@ -31,10 +32,11 @@ class ClaudeStatementExtractor implements StatementExtractor {
       %s
 
       Leave out everything else: card purchases, utilities, transfers between the holder's own \
-      accounts, refunds. Copy dates as YYYY-MM-DD and amounts exactly as printed, signed: \
-      credits positive, debits negative. Use the statement's own text for counterparty and \
-      description. If a field is not on the statement, return an empty string, or 0 for an \
-      amount. Never guess a category: when a transaction fits none, leave it out.\
+      accounts, refunds. Give amounts in euros as plain numbers with a dot as the decimal \
+      separator and no spaces or currency, signed: credits positive, debits negative (-120.5 for \
+      "-120,50"). Give dates as dates. Use the statement's own text for counterparty and \
+      description. Use null when the statement does not show a value; never use 0 for an unknown \
+      balance. Never guess a category: when a transaction fits none, leave it out.\
       """
           .formatted(
               Arrays.stream(TransactionCategory.values())
@@ -42,21 +44,24 @@ class ClaudeStatementExtractor implements StatementExtractor {
                   .collect(Collectors.joining("\n")));
 
   record ClaudeStatement(
-      @JsonPropertyDescription("Account holder's name as printed, or empty") String accountHolder,
-      @JsonPropertyDescription("Account IBAN, or empty") String iban,
-      @JsonPropertyDescription("First day of the statement period, YYYY-MM-DD") String periodStart,
-      @JsonPropertyDescription("Last day of the statement period, YYYY-MM-DD") String periodEnd,
-      @JsonPropertyDescription("Opening balance (algsaldo)") BigDecimal openingBalance,
-      @JsonPropertyDescription("Closing balance (lõppsaldo)") BigDecimal closingBalance,
-      @JsonPropertyDescription("Lowest running balance during the period") BigDecimal lowestBalance,
+      @JsonPropertyDescription("Account holder's name as printed") Optional<String> accountHolder,
+      @JsonPropertyDescription("Account IBAN") Optional<String> iban,
+      @JsonPropertyDescription("First day of the statement period") Optional<LocalDate> periodStart,
+      @JsonPropertyDescription("Last day of the statement period") Optional<LocalDate> periodEnd,
+      @JsonPropertyDescription("Opening balance (algsaldo) in euros")
+          Optional<BigDecimal> openingBalance,
+      @JsonPropertyDescription("Closing balance (lõppsaldo) in euros")
+          Optional<BigDecimal> closingBalance,
+      @JsonPropertyDescription("Lowest running balance during the period, in euros")
+          Optional<BigDecimal> lowestBalance,
       @JsonPropertyDescription("Only the transactions in one of the listed categories")
           List<ClaudeTransaction> transactions) {}
 
   record ClaudeTransaction(
-      @JsonPropertyDescription("Booking date, YYYY-MM-DD") String date,
+      @JsonPropertyDescription("Booking date") LocalDate date,
       @JsonPropertyDescription("Payer or payee as printed") String counterparty,
       @JsonPropertyDescription("Explanation or reference as printed") String description,
-      @JsonPropertyDescription("Signed amount: credits positive, debits negative")
+      @JsonPropertyDescription("Signed amount in euros: credits positive, debits negative")
           BigDecimal amount,
       TransactionCategory category) {}
 
@@ -73,35 +78,23 @@ class ClaudeStatementExtractor implements StatementExtractor {
   }
 
   static ExtractedStatement toExtracted(ClaudeStatement result) {
-    try {
-      return new ExtractedStatement(
-          blankToNull(result.accountHolder()),
-          blankToNull(result.iban()),
-          date(result.periodStart()),
-          date(result.periodEnd()),
-          result.openingBalance(),
-          result.closingBalance(),
-          result.lowestBalance(),
-          result.transactions().stream()
-              .map(
-                  t ->
-                      new ExtractedStatement.Transaction(
-                          LocalDate.parse(t.date()),
-                          t.counterparty(),
-                          t.description(),
-                          t.amount(),
-                          t.category()))
-              .toList());
-    } catch (DateTimeParseException e) {
-      throw new ExtractionException("The statement reader returned an invalid date", e);
-    }
+    return new ExtractedStatement(
+        text(result.accountHolder()),
+        text(result.iban()),
+        result.periodStart().orElse(null),
+        result.periodEnd().orElse(null),
+        result.openingBalance().orElse(null),
+        result.closingBalance().orElse(null),
+        result.lowestBalance().orElse(null),
+        result.transactions().stream()
+            .map(
+                t ->
+                    new ExtractedStatement.Transaction(
+                        t.date(), t.counterparty(), t.description(), t.amount(), t.category()))
+            .toList());
   }
 
-  private static @Nullable LocalDate date(@Nullable String value) {
-    return value == null || value.isBlank() ? null : LocalDate.parse(value);
-  }
-
-  private static @Nullable String blankToNull(@Nullable String value) {
-    return value == null || value.isBlank() ? null : value.strip();
+  private static @Nullable String text(Optional<String> value) {
+    return value.map(String::strip).filter(v -> !v.isEmpty()).orElse(null);
   }
 }
