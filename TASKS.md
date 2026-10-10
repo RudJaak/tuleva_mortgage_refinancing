@@ -46,7 +46,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
   - `V2__borrower_and_commitment.sql`. `borrower` has a nullable personal code and a `synthetic` flag. `commitment` stores the committed balance (RREL30), the current margin (RREL46) and a `SIGNED`/`WITHDRAWN` status, with one signed commitment per borrower.
   - **The other tables (loan, property, liability, statement_summary, document, field provenance) are added with the tasks that use them** (T20, T22, T30–T32), so we don't design them before they're needed.
 
-### T04 Auth: Mobile-ID + Smart-ID (SK demo) · A · 3h · after T02
+### T04 Auth: Mobile-ID + Smart-ID (SK demo) · A · 3h · after T02 · 🟡 stub done, SK integration deferred
 - **Research done** (`docs/research/09-eid-login-local.md`). Key points:
   - **Real phone against production** needs an SK contract (from €60/month) or Tuleva's credentials, which means legal and billing implications.
   - **Your real phone against SK DEMO works for free:** install the Smart-ID **demo app**, register with your ID card or Mobile-ID, and use the cross-device **QR flow**, which works from `http://localhost`. Set `smartid.callback-url` to any `https://localhost…` value; it's never called in the QR flow. Then either upload your demo certificate to demo.sk.ee/upload_cert or skip the OCSP check.
@@ -76,7 +76,15 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - Content comes from one `content.et.json` so teammates can edit it without touching code.
 - **Done when:** the page is responsive and every content slot is fed from JSON.
 
-### T15 Flow shell + login screen · B · 2h · after T04, T10
+### T15 Flow shell + login screen · B · 2h · after T04, T10 · ✅ done (stub auth)
+- **Outcome:**
+  - **UI ported from Tuleva's onboarding-client login:** Smart-ID / Mobiil-ID / ID-kaart tabs with keyboard navigation (ID-kaart hidden on mobile); the Mobile-ID form with isikukood and phone validation; the verification-code loader with "Katkestan"; the Smart-ID QR screen with scan frame; the ID-card spinner.
+  - A success screen "Tere, {nimi}!" leads to `/laen`. The header shows the logged-in name with "Logi välja".
+  - **Backend `auth` module:**
+    - `POST /v1/auth/{smart-id|mobile-id|id-card}`, `GET` and `DELETE /v1/auth/logins/{id}`, `GET /v1/me`, `POST /v1/auth/logout`.
+    - Each login is bound to the HTTP session. The session ID rotates on success, and the borrower is found or created.
+  - **`StubAuthProvider` (`AUTH_MODE=stub`)** confirms after `app.auth.stub-delay` (3 s). Mobile-ID uses the entered isikukood; Smart-ID and ID-card log in the stub person (40504040001, Mari Maasikas).
+  - **To make it real:** implement `AuthProvider` with SK DEMO for T04. The UI doesn't change.
 - Login with Mobile-ID (phone + personal code) and Smart-ID (personal code). Show the verification code and poll for status.
 - Stepper for the flow steps; save and resume (progress kept server-side).
 - **Done when:** the demo accounts log in and land on `/laen`.

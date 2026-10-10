@@ -1,0 +1,44 @@
+// Adapted from TulevaEE/onboarding-client src/components/common/loader/Loader.scss (MIT, (c) 2017 Tuleva).
+
+.loader {
+  width: 50px;
+
+  &.align-middle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .circular {
+    animation: loader-rotate 2s linear infinite;
+    transform-origin: center center;
+  }
+
+  .path {
+    stroke: $blue;
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+    animation: loader-dash 1.5s ease-in-out infinite;
+    stroke-linecap: round;
+  }
+}
+
+@keyframes loader-rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loader-dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -35px;
+  }
+  100% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -124px;
+  }
+}

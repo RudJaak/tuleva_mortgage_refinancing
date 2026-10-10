@@ -16,6 +16,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (!response.ok) {
     throw new ApiError(response.status, `${init?.method ?? 'GET'} ${path} failed`)
   }
+  if (response.status === 204) {
+    return undefined as T
+  }
   return (await response.json()) as T
 }
 
@@ -33,4 +36,5 @@ export const api = {
       body: JSON.stringify(body),
       headers: { 'Content-Type': 'application/json' },
     }),
+  delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 }

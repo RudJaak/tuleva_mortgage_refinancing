@@ -18,7 +18,7 @@ function renderAt(path: string) {
 describe('AppRoutes', () => {
   it.each([
     [paths.landing, 'Koos saame kodulaenule parema marginaali'],
-    [paths.login, 'Sisene'],
+    [paths.login, 'Tuvasta end'],
     [paths.loan, 'Sinu kodulaen'],
     [paths.property, 'Sinu kodu'],
     [paths.household, 'Leibkond ja kohustused'],
