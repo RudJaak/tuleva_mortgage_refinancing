@@ -1,9 +1,12 @@
 export class ApiError extends Error {
   readonly status: number
+  /** The `reason` of a 422 problem response, when the backend gives one. */
+  readonly reason?: string
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, reason?: string) {
     super(message)
     this.status = status
+    this.reason = reason
   }
 }
 
@@ -14,7 +17,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { Accept: 'application/json', ...init?.headers },
   })
   if (!response.ok) {
-    throw new ApiError(response.status, `${init?.method ?? 'GET'} ${path} failed`)
+    const problem = await response.json().catch(() => undefined)
+    throw new ApiError(response.status, `${init?.method ?? 'GET'} ${path} failed`, problem?.reason)
   }
   if (response.status === 204) {
     return undefined as T
@@ -37,4 +41,5 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
     }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
+  upload: <T>(path: string, form: FormData) => request<T>(path, { method: 'POST', body: form }),
 }

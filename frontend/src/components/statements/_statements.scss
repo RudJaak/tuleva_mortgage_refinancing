@@ -1,0 +1,31 @@
+.seal-badge {
+  display: inline-block;
+  border-radius: $border-radius-pill;
+  padding: 0.25rem 0.75rem;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &.seal-badge-verified {
+    color: $green;
+    background-color: rgba($green, 0.08);
+  }
+
+  &.seal-badge-unverified {
+    color: $gray-700;
+    background-color: $gray-bg-1;
+  }
+}
+
+.statement-progress {
+  height: 0.75rem;
+
+  .progress-bar {
+    transition: width 0.5s linear;
+  }
+}
+
+.statement-figure {
+  border: 1px solid var(--gray-border-2);
+  border-radius: $border-radius-lg;
+  padding: 0.75rem 1rem;
+}

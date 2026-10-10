@@ -2,6 +2,7 @@ import { FormattedMessage } from 'react-intl'
 import { Link } from 'react-router-dom'
 import { Placeholder } from '../layout/Placeholder'
 import { flowSteps, paths, type FlowStep } from '../paths'
+import { StatementsStep } from '../statements/StatementsStep'
 
 export function FlowStepPage({ section }: { section: FlowStep['section'] }) {
   const index = flowSteps.findIndex((step) => step.section === section)
@@ -17,9 +18,13 @@ export function FlowStepPage({ section }: { section: FlowStep['section'] }) {
           <FormattedMessage id={`flow.${section}.lead`} />
         </p>
       </div>
-      <Placeholder>
-        <FormattedMessage id="flow.placeholder" />
-      </Placeholder>
+      {section === 'statements' ? (
+        <StatementsStep />
+      ) : (
+        <Placeholder>
+          <FormattedMessage id="flow.placeholder" />
+        </Placeholder>
+      )}
       <div className="d-flex gap-2">
         <Link to={previous} className="btn btn-light">
           <FormattedMessage id="flow.back" />
