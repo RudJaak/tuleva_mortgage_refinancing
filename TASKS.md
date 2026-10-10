@@ -31,20 +31,6 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 
 ## Phase 2: Skeleton
 
-### T01 Repo scaffolding · A · 1h · ✅ done
-- Monorepo layout: `backend/`, `frontend/`, `docker-compose.yml` (Postgres 17), root `README.md` with run instructions.
-- `.githooks/pii-scan` pre-commit hook, adapted from Tuleva's onboarding-service: blocks isikukood-like numbers outside an allowlist of SK demo codes, emails, `.env`, and anything under `docs/inputs/`.
-- `.env.example` with `ANTHROPIC_API_KEY=`, `EXTRACTION_MODE=stub|claude`, `AUTH_MODE=stub|sk-demo`.
-- **Done when:** `docker compose up -d` and `./gradlew bootRun` start (`npm run dev` follows in T10), and the hook rejects a test commit containing a fake isikukood.
-- **Outcome:** the hooks were copied from Tuleva's `.githooks` (pii-scan with isikukood mod-11 / IBAN / email / name-roster detection), with our own allowlist of SK demo codes. `.env` is imported by Spring.
-
-### T02 Backend skeleton · A · 1.5h · after T01 · ✅ done
-- Spring Boot 4.1 / Java 25 / Gradle KTS, following Tuleva's conventions: Spring Modulith packages, Flyway, Spotless, JUnit 5. Spock is optional.
-- Planned modules: `auth`, `signature`, `borrower`, `loan`, `document`, `statement`, `property`, `risk`, `pool`, `config`.
-- `GET /actuator/health`. A CORS setup for the Vite dev server (`/v1/**`, origin from `app.cors.allowed-origins`).
-- **Done when:** the app boots against Postgres, Flyway runs `V1__init.sql`, and one slice test passes.
-- **Outcome:** `ee.tuleva.mortgage` on Boot 4.1.1 / Modulith 2.1.1, with Spotless (google-java-format). Tests: `HealthEndpointTests` (Testcontainers PG 18, Flyway + health UP) and `ModularityTests`. The module packages get created as their tasks land.
-
 ### T03 Data model · D · 1.5h · after T02 · 🟡 partly done
 - Flyway migrations. Use ESMA-style column comments (RREL*/RREC*) where they map.
 - `borrower`: id, personal code (encrypted at rest or hashed + last 4 shown), name, birth date, marital status, property regime, co-borrower flag, adults, dependants.
@@ -74,78 +60,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - Switched by `EXTRACTION_MODE`.
 - **Done when:** a slice test gets typed results from the stub for `LOAN_CONTRACT` and `ACCOUNT_STATEMENT`.
 
-### T06 Config: pool, ladder, scenarios · D · 0.5h · after T02 · ✅ done
-- `application.yml`:
-  - pool deadline `2026-12-31`, target volume, minimum €100M, ladder `[100M→1.20, 300M→1.00, 500M→0.80]` (D24);
-  - default margin 1.70%; 6M Euribor anchor 2.936%; NPV discount 3%; switching cost €400;
-  - risk-class thresholds.
-- `GET /v1/config/public` exposes what the frontend needs.
-- **Done when:** the frontend can read the config, and changing the YAML changes the UI.
-- **Outcome:**
-  - `app.pool.*` and `app.calculator.*` in `application.yml`, served at `GET /v1/config/public`.
-  - The calculator reads Euribor, the defaults and the tiers from this endpoint and falls back to built-in defaults while it loads or if it fails.
-
-### T10 Frontend skeleton · B · 2h · after T01 · ✅ done
-- Vite + React + TS + Bootstrap 5.3.
-- **Tuleva SCSS**: `_variables.scss` and fonts (Roboto, Merriweather) from onboarding-client; logo from wordpress-theme, with an attribution note.
-- react-intl with `et` only (all strings in `translations.et.json`), react-router, react-query, react-hook-form.
-- Feature folders: `src/components/<feature>/`.
-- Routes: `/` landing; `/sisene` login; `/laen`, `/vara`, `/leibkond`, `/valjavotted`, `/kinnitus` flow steps; `/valmis` done.
-- **Done when:** the routes render with Tuleva styling at 1280 and 390 px.
-- **Outcome:**
-  - Kept the current Vite template: Vite 8, **React 19**, TS 6, react-router 7, TanStack Query 5, Vitest + RTL, oxlint, Prettier.
-  - Tuleva SCSS, the Roboto font and the logo are copied (MIT). Merriweather comes from Google Fonts.
-  - The flow stepper collapses to "Samm n/5" on mobile.
-  - The dev proxy to :9000 is verified. 10 route tests pass. Screenshots were checked at 1280 and 390 px.
-
----
-
 ## Phase 3: Landing page and collection flow
-
-### T11 Annuity / savings library · B · 1.5h · after T10 · ✅ done
-- Pure TypeScript `calc/` module:
-  - annuity payment;
-  - remaining interest at current vs target margin;
-  - monthly saving, lifetime saving, NPV (3%), break-even with a switching cost.
-- Unit tests, including the reference case from `02-teammate-market-analysis.md`: €125k, 20 years, 2.5% + 1.85% → €780.73/month.
-- **Done when:** the tests pass. This is the single source of the calculation maths; the backend doesn't duplicate it.
-- **Outcome:** `frontend/src/calc/savings.ts`: `annuityPayment`, `totalInterest`, `compareMargins`. The reference case reproduces exactly (780.73 / 747.63 / 33.09 / 7,942.69 / NPV 5,567.31 / break-even 12.1). NPV discounts monthly at the annual rate ÷ 12.
-
-### T12 Savings calculator component · B · 3h · after T11, T06 · ✅ done
-- A port of Tuleva's calculator card (wordpress-theme `front-hero/calculator.php`, `js/calculator.js`, `_custom-slider.scss`):
-  - inputs: balance (€), remaining years, margin (slider with an "Eesti keskmine" marker, plus an "Ei tea" toggle);
-  - rows: "Praegu maksad" vs "Ühispakkumisega" for worst, expected and best, with "Säästaksid X €" in green.
-- The **expected** case follows the current ladder step from T13's API.
-- `validated` mode: inputs are prefilled from the loan, with "✓ lepingust" badges; the only variable is the scenario.
-- Inputs persist to `sessionStorage` and carry into the flow.
-- **Done when:** it works anonymously on the landing page and in validated mode on the review step.
-- **Outcome:**
-  - `components/calculator/`: a port of Tuleva's card, segmented scenario buttons, and a margin slider with a value bubble and a "Uute laenude keskmine ~1,6%" marker. The "Ei tea" option falls back to 1.70%.
-  - Results show per month, until the end of the loan, NPV and break-even, with the compliance disclaimer. Inputs persist in `sessionStorage`. `validated` mode shows "✓ lepingust" badges.
-  - **Settings are static defaults for now** (`settings.ts` → `useCalculatorSettings`). T06 must feed them from `/v1/config/public`. The scenarios are the three ladder tiers (D23).
-  - The review step (T34) still has to mount it in validated mode.
-
-### T13 Pool tracker: API + component · D+B · 3h · after T03, T06, T10 · ✅ done
-- **Backend:** `GET /v1/pool/stats` returns `{joinedCount, committedBalance, targetVolume, deadline, ladder[], currentStep, nextStep}`.
-  - Aggregates only. Clamp small counts to avoid re-identification: hide or round the balance when fewer than ~10 people have joined.
-- **Frontend:**
-  - a big Merriweather counter;
-  - a Bootstrap progress bar with ladder milestone markers;
-  - a "Eesmärk: marginaal X%" label;
-  - a flip-tile countdown to 31.12.2026, ported from wordpress-theme `countdown-timer.php` / `_counter.scss`;
-  - the compliance disclaimer (§ 29: goal, not offer).
-- Polls every 30 s.
-- **Done when:** the seeded data shows, and a new commitment (T42) moves the bar.
-- **Outcome:**
-  - `GET /v1/pool/stats` returns aggregates only: count and volume of SIGNED commitments, minimum reached, milestones with reached flags, and the current and next milestone. Count and volume are hidden while fewer than 10 people have joined.
-  - **Frontend:**
-    - big Merriweather figures;
-    - a progress bar towards the next milestone, with "Puudu X mln €";
-    - three milestone cards (€100M minimum, €300M, €500M);
-    - Tuleva flip-tile countdown to 31.12.2026;
-    - the § 29 disclaimer;
-    - polling every 30 s.
-  - "A new commitment moves the bar" will be checked once T42 exists.
 
 ### T14 Landing page assembly · B · 2h · after T12, T13
 - Hero with headline (Estonia ≈1.55 pp vs Finland ≈0.5 pp over Euribor; ECB MIR Aug 2026), calculator, tracker, "Kuidas see töötab" (how it works, 3 steps), placeholder blocks for teammates' facts, statistics and slogans (D17), FAQ placeholder, CTA "Liitu ühispakkumisega" (join the joint offer).
@@ -291,14 +206,6 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
   - a camt.053 XML;
   - an LHV-style CSV.
 - Keep them in `fixtures/` (committed, synthetic only) together with their expected-extraction JSON.
-
-### T51 Pool seed data · D · 1h · after T03 · ✅ done
-- A seeder that creates synthetic commitments, so the tracker shows a realistic pool (D25: ~520 borrowers, ~€60M, mid-way to the €100M minimum).
-- Includes a "reset demo" endpoint, active only in the dev profile.
-- **Outcome:**
-  - `demo` module. It seeds on startup when `app.demo.seed-enabled` (env `DEMO_SEED`, default true) and only if no synthetic borrowers exist yet.
-  - Balances are deterministic, log-normal around €110k, and add up to exactly €60M.
-  - `POST /v1/demo/reset` removes all non-synthetic borrowers and their commitments, so the live demo can be replayed.
 
 ### T52 Content integration · B · 1h · when teammates deliver
 - Drop the teammates' facts, statistics and slogans into `content.et.json`. Check the wording against § 29: goals, not offers.
