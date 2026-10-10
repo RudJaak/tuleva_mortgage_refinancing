@@ -1,6 +1,5 @@
 package ee.tuleva.mortgage.pool;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +27,12 @@ class PoolController {
         calculatorProperties,
         new PublicConfig.Pool(
             poolProperties.deadline(),
-            poolProperties.minimumVolume(),
+            poolProperties.minimumMembers(),
             poolProperties.milestones()));
   }
 
   record PublicConfig(CalculatorProperties calculator, Pool pool) {
     record Pool(
-        OffsetDateTime deadline,
-        BigDecimal minimumVolume,
-        List<PoolProperties.Milestone> milestones) {}
+        OffsetDateTime deadline, int minimumMembers, List<PoolProperties.Milestone> milestones) {}
   }
 }

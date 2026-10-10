@@ -38,4 +38,15 @@ describe('AppRoutes', () => {
       .find((item) => item.getAttribute('aria-current') === 'step')
     expect(current).toHaveTextContent('Väljavõtted')
   })
+
+  it.each([paths.loan, paths.statements, paths.review])(
+    'explains on %s why it asks and what happens to the data',
+    (path) => {
+      renderAt(path)
+
+      expect(screen.getByRole('heading', { name: 'Miks me seda küsime' })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Mis sinu andmetega juhtub' })).toBeInTheDocument()
+      expect(screen.getByTestId('why-we-ask')).toHaveTextContent(/meie|meie serveris|Pangad/)
+    },
+  )
 })

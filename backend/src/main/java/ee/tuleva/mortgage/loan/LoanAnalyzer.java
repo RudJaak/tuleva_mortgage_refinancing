@@ -222,7 +222,7 @@ class LoanAnalyzer {
 
   private BigDecimal firstTargetMargin() {
     return pool.milestones().stream()
-        .min(Comparator.comparing(PoolProperties.Milestone::volume))
+        .min(Comparator.comparingInt(PoolProperties.Milestone::members))
         .map(PoolProperties.Milestone::margin)
         .orElse(BigDecimal.ZERO);
   }

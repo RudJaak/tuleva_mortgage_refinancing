@@ -24,16 +24,15 @@ class PoolControllerTest {
 
   @Test
   void servesAggregatePoolStats() throws Exception {
-    var first =
-        new PoolStats.MilestoneStatus(new BigDecimal("100000000"), new BigDecimal("1.20"), false);
+    var first = new PoolStats.MilestoneStatus(1000, new BigDecimal("1.35"), false);
     given(poolStatsService.currentStats())
         .willReturn(
             new PoolStats(
                 520L,
                 new BigDecimal("60000000"),
-                new BigDecimal("100000000"),
+                1000,
                 false,
-                OffsetDateTime.parse("2026-12-31T23:59:59+02:00"),
+                OffsetDateTime.parse("2026-11-10T00:00:00+02:00"),
                 List.of(first),
                 null,
                 first));
@@ -44,7 +43,8 @@ class PoolControllerTest {
         .andExpect(jsonPath("$.joinedCount").value(520))
         .andExpect(jsonPath("$.committedVolume").value(60000000))
         .andExpect(jsonPath("$.minimumReached").value(false))
-        .andExpect(jsonPath("$.nextMilestone.margin").value(1.20))
+        .andExpect(jsonPath("$.nextMilestone.members").value(1000))
+        .andExpect(jsonPath("$.nextMilestone.margin").value(1.35))
         .andExpect(jsonPath("$.currentMilestone").isEmpty());
   }
 
@@ -55,8 +55,10 @@ class PoolControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.calculator.euribor6m").value(2.936))
         .andExpect(jsonPath("$.calculator.defaultMargin").value(1.70))
-        .andExpect(jsonPath("$.pool.minimumVolume").value(100000000))
+        .andExpect(jsonPath("$.pool.deadline").value("2026-11-10T00:00:00+02:00"))
+        .andExpect(jsonPath("$.pool.minimumMembers").value(1000))
         .andExpect(jsonPath("$.pool.milestones.length()").value(3))
-        .andExpect(jsonPath("$.pool.milestones[2].margin").value(0.80));
+        .andExpect(jsonPath("$.pool.milestones[0].margin").value(1.35))
+        .andExpect(jsonPath("$.pool.milestones[2].margin").value(1.20));
   }
 }

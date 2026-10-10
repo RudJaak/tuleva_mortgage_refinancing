@@ -24,13 +24,13 @@ public class PoolStatsService {
   PoolStats statsFor(PoolTotals totals) {
     List<MilestoneStatus> milestones =
         properties.milestones().stream()
-            .sorted(Comparator.comparing(PoolProperties.Milestone::volume))
+            .sorted(Comparator.comparingInt(PoolProperties.Milestone::members))
             .map(
                 milestone ->
                     new MilestoneStatus(
-                        milestone.volume(),
+                        milestone.members(),
                         milestone.margin(),
-                        totals.volume().compareTo(milestone.volume()) >= 0))
+                        totals.count() >= milestone.members()))
             .toList();
     MilestoneStatus current =
         milestones.stream().filter(MilestoneStatus::reached).reduce((_, b) -> b).orElse(null);
@@ -39,8 +39,8 @@ public class PoolStatsService {
     return new PoolStats(
         visible ? totals.count() : null,
         visible ? totals.volume() : null,
-        properties.minimumVolume(),
-        totals.volume().compareTo(properties.minimumVolume()) >= 0,
+        properties.minimumMembers(),
+        totals.count() >= properties.minimumMembers(),
         properties.deadline(),
         milestones,
         current,

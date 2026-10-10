@@ -130,8 +130,10 @@ describe('LoanStep', () => {
     expect(within(confirmed).getByText('sinu kinnitatud')).toBeInTheDocument()
     expect(within(confirmed).getByText('18 a 4 k')).toBeInTheDocument()
     expect(within(confirmed).getByText('41%')).toBeInTheDocument()
+    expect(within(confirmed).getByText(/Kõik allolevad tingimused on täidetud/)).toBeInTheDocument()
+    expect(within(confirmed).getAllByTestId('loan-check')[0]).toHaveTextContent(/Intress on ujuv/)
     expect(
-      within(confirmed).getByText('Esmasel kontrollil takistusi ei leitud'),
+      within(confirmed).getByText(/on kõrgem kui ühispakkumise esimene eesmärk 1,35%/),
     ).toBeInTheDocument()
 
     await userEvent.click(within(confirmed).getByRole('button', { name: 'Muuda andmeid' }))

@@ -5,18 +5,18 @@ import { defaultCalculatorSettings, scenarioMargins, toCalculatorSettings } from
 describe('scenarioMargins', () => {
   it('maps the three ladder tiers to the modest, goal and best scenarios', () => {
     expect(scenarioMargins(defaultCalculatorSettings)).toEqual({
-      worst: 1.2,
-      expected: 1.0,
-      best: 0.8,
+      worst: 1.35,
+      expected: 1.3,
+      best: 1.2,
     })
   })
 
-  it('orders tiers by pool volume regardless of input order', () => {
+  it('orders tiers by the number of people regardless of input order', () => {
     const [first, second, third] = defaultCalculatorSettings.ladder
 
     expect(
       scenarioMargins({ ...defaultCalculatorSettings, ladder: [third, first, second] }),
-    ).toEqual({ worst: 1.2, expected: 1.0, best: 0.8 })
+    ).toEqual({ worst: 1.35, expected: 1.3, best: 1.2 })
   })
 })
 
@@ -28,7 +28,7 @@ describe('toCalculatorSettings', () => {
     })
 
     expect(settings.euribor6m).toBe(3.1)
-    expect(scenarioMargins(settings)).toEqual({ worst: 1.2, expected: 1.0, best: 0.8 })
+    expect(scenarioMargins(settings)).toEqual({ worst: 1.35, expected: 1.3, best: 1.2 })
   })
 
   it('keeps the default ladder when the config has fewer than three milestones', () => {

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { SavingsCalculator } from '../calculator/SavingsCalculator'
 import type { LoanView } from './api'
+import { LoanChecks } from './LoanChecks'
 
 export function ConfirmedLoan({ view, onEdit }: { view: LoanView; onEdit: () => void }) {
   const intl = useIntl()
@@ -85,21 +86,7 @@ export function ConfirmedLoan({ view, onEdit }: { view: LoanView; onEdit: () => 
           )}
         </div>
 
-        <ul className="list-unstyled d-flex flex-column gap-1 mb-0">
-          {summary.flags.length === 0 ? (
-            <li className="text-success">
-              <span aria-hidden="true">✓ </span>
-              <FormattedMessage id="loan.flags.none" />
-            </li>
-          ) : (
-            summary.flags.map((flag) => (
-              <li key={flag} className="text-danger" data-testid="loan-flag">
-                <span aria-hidden="true">! </span>
-                <FormattedMessage id={`loan.flag.${flag}`} />
-              </li>
-            ))
-          )}
-        </ul>
+        <LoanChecks terms={terms} summary={summary} />
       </article>
 
       {canCalculate && (

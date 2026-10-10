@@ -1,6 +1,6 @@
 import { usePublicConfig, type PublicConfig } from '../pool/api'
 
-export type LadderStep = { volume: number; margin: number }
+export type LadderStep = { members: number; margin: number }
 
 export type CalculatorSettings = {
   euribor6m: number
@@ -20,9 +20,9 @@ export const defaultCalculatorSettings: CalculatorSettings = {
   switchingCost: 400,
   annualDiscountRate: 3,
   ladder: [
-    { volume: 100_000_000, margin: 1.2 },
-    { volume: 300_000_000, margin: 1.0 },
-    { volume: 500_000_000, margin: 0.8 },
+    { members: 1000, margin: 1.35 },
+    { members: 2500, margin: 1.3 },
+    { members: 5000, margin: 1.2 },
   ],
 }
 
@@ -32,7 +32,7 @@ export const scenarios: Scenario[] = ['worst', 'expected', 'best']
 
 export function scenarioMargins(settings: CalculatorSettings): Record<Scenario, number> {
   const [worst, expected, best] = [...settings.ladder]
-    .sort((a, b) => a.volume - b.volume)
+    .sort((a, b) => a.members - b.members)
     .map((step) => step.margin)
   return { worst, expected, best }
 }

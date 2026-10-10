@@ -60,16 +60,18 @@ app:
   cors:
     allowed-origins: http://localhost:5173
   pool:
-    deadline: 2026-12-31T23:59:59+02:00
-    minimum-volume: 100000000
+    # D31: a month-long campaign, counted in people. Placeholder thresholds and margins until
+    # teammates confirm them (D18)
+    deadline: 2026-11-10T00:00:00+02:00
+    minimum-members: 1000
     privacy-threshold: 10
     milestones:
-      - volume: 100000000
+      - members: 1000
+        margin: 1.35
+      - members: 2500
+        margin: 1.30
+      - members: 5000
         margin: 1.20
-      - volume: 300000000
-        margin: 1.00
-      - volume: 500000000
-        margin: 0.80
   calculator:
     euribor6m: 2.936
     euribor-date: 2026-10-08

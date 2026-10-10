@@ -115,7 +115,7 @@ describe('SavingsCalculator', () => {
     renderCalculator()
 
     expect(await screen.findByText(/6 kuu Euribor 3,25%/, { selector: 'p' })).toBeInTheDocument()
-    expect(screen.getByRole('radio', { name: /Eesmärk/ })).toHaveAccessibleName(/1,00%/)
+    expect(screen.getByRole('radio', { name: /Eesmärk/ })).toHaveAccessibleName(/1,30%/)
   })
 
   it('presents margins as goals with a disclaimer, not as an offer', () => {

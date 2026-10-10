@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../../api/client'
 
-export type Milestone = { volume: number; margin: number }
+/** The ladder is counted in people (D31): {@code members} joined sets {@code margin} as the target */
+export type Milestone = { members: number; margin: number }
 
 export type PublicConfig = {
   calculator: {
@@ -14,7 +15,7 @@ export type PublicConfig = {
   }
   pool: {
     deadline: string
-    minimumVolume: number
+    minimumMembers: number
     milestones: Milestone[]
   }
 }
@@ -24,7 +25,7 @@ export type MilestoneStatus = Milestone & { reached: boolean }
 export type PoolStats = {
   joinedCount: number | null
   committedVolume: number | null
-  minimumVolume: number
+  minimumMembers: number
   minimumReached: boolean
   deadline: string
   milestones: MilestoneStatus[]

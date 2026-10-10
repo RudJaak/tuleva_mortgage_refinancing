@@ -40,12 +40,11 @@ class LoanAnalyzerTest {
               new BigDecimal("400"),
               new BigDecimal("3")),
           new PoolProperties(
-              OffsetDateTime.parse("2026-12-31T23:59:59+02:00"),
-              new BigDecimal("100000000"),
+              OffsetDateTime.parse("2026-11-10T00:00:00+02:00"),
+              1000,
               List.of(
-                  new PoolProperties.Milestone(new BigDecimal("300000000"), new BigDecimal("1.00")),
-                  new PoolProperties.Milestone(
-                      new BigDecimal("100000000"), new BigDecimal("1.20"))),
+                  new PoolProperties.Milestone(2500, new BigDecimal("1.30")),
+                  new PoolProperties.Milestone(1000, new BigDecimal("1.35"))),
               10));
 
   @Test

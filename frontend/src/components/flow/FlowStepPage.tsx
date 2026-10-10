@@ -5,6 +5,7 @@ import { flowSteps, paths, type FlowStep } from '../paths'
 import { ReviewStep } from '../commitment/ReviewStep'
 import { LoanStep } from '../loan/LoanStep'
 import { StatementsStep } from '../statements/StatementsStep'
+import { WhyWeAsk } from './WhyWeAsk'
 
 export function FlowStepPage({ section }: { section: FlowStep['section'] }) {
   const index = flowSteps.findIndex((step) => step.section === section)
@@ -20,6 +21,7 @@ export function FlowStepPage({ section }: { section: FlowStep['section'] }) {
           <FormattedMessage id={`flow.${section}.lead`} />
         </p>
       </div>
+      <WhyWeAsk section={section} />
       {section === 'loan' ? (
         <LoanStep />
       ) : section === 'statements' ? (

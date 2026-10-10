@@ -22,26 +22,26 @@ export function PoolTracker() {
   )
 }
 
+/**
+ * The pool counted in people (D31), so every borrower feels welcome whatever their balance; the
+ * euro total stays out of the counter on purpose.
+ */
 function TrackerContent({ stats }: { stats: PoolStats }) {
   const intl = useIntl()
-  const millions = (volume: number) =>
-    intl.formatMessage(
-      { id: 'tracker.millions' },
-      { amount: intl.formatNumber(volume / 1_000_000, { maximumFractionDigits: 1 }) },
-    )
+  const people = (count: number) => intl.formatMessage({ id: 'tracker.people' }, { count })
   const percent = (margin: number) =>
     intl.formatNumber(margin / 100, { style: 'percent', minimumFractionDigits: 2 })
-  const visible = stats.joinedCount !== null && stats.committedVolume !== null
-  const joined = Math.round(useAnimatedNumber(stats.joinedCount ?? 0))
-  const volume = useAnimatedNumber(stats.committedVolume ?? 0)
+  const visible = stats.joinedCount !== null
+  const exactJoined = useAnimatedNumber(stats.joinedCount ?? 0)
+  const joined = Math.round(exactJoined)
   const next = stats.nextMilestone
-  const exactProgress = next ? Math.min(100, (volume / next.volume) * 100) : 100
+  const exactProgress = next ? Math.min(100, (exactJoined / next.members) * 100) : 100
   const progress = Math.floor(exactProgress)
 
   return (
     <div className="d-flex flex-column gap-4">
       <div className="row gy-4 align-items-end">
-        <div className="col-sm-4">
+        <div className="col-sm-6">
           <TrackerFigure testId="joined-count" value={stats.joinedCount}>
             {visible ? intl.formatNumber(joined) : '—'}
           </TrackerFigure>
@@ -49,21 +49,7 @@ function TrackerContent({ stats }: { stats: PoolStats }) {
             <FormattedMessage id="tracker.joined" />
           </div>
         </div>
-        <div className="col-sm-4">
-          <TrackerFigure testId="committed-volume" value={stats.committedVolume}>
-            {visible
-              ? intl.formatNumber(Math.round(volume), {
-                  style: 'currency',
-                  currency: 'EUR',
-                  maximumFractionDigits: 0,
-                })
-              : '—'}
-          </TrackerFigure>
-          <div className="text-body-secondary">
-            <FormattedMessage id="tracker.volume" />
-          </div>
-        </div>
-        <div className="col-sm-4">
+        <div className="col-sm-6">
           <Countdown deadline={stats.deadline} />
           <div className="text-body-secondary mt-1">
             <FormattedMessage id="tracker.untilDeadline" />
@@ -83,7 +69,7 @@ function TrackerContent({ stats }: { stats: PoolStats }) {
             <span className="text-navy fw-medium">
               <FormattedMessage
                 id={stats.minimumReached ? 'tracker.nextMilestone' : 'tracker.minimumMilestone'}
-                values={{ volume: millions(next.volume), margin: percent(next.margin) }}
+                values={{ people: people(next.members), margin: percent(next.margin) }}
               />
             </span>
             <span className="tracker-percent text-navy fw-bold">{progress}%</span>
@@ -101,7 +87,7 @@ function TrackerContent({ stats }: { stats: PoolStats }) {
           <p className="small text-body-secondary mt-2 mb-0">
             <FormattedMessage
               id="tracker.remaining"
-              values={{ amount: millions(Math.max(0, next.volume - volume)) }}
+              values={{ people: people(Math.max(0, next.members - joined)) }}
             />
           </p>
         </div>
@@ -109,12 +95,12 @@ function TrackerContent({ stats }: { stats: PoolStats }) {
 
       <ol className="row g-3 list-unstyled mb-0">
         {stats.milestones.map((milestone, index) => (
-          <li key={milestone.volume} className="col-sm-4">
+          <li key={milestone.members} className="col-sm-4">
             <MilestoneCard
               milestone={milestone}
               isMinimum={index === 0}
-              isNext={milestone.volume === next?.volume}
-              millions={millions}
+              isNext={milestone.members === next?.members}
+              people={people}
               percent={percent}
             />
           </li>
@@ -125,7 +111,7 @@ function TrackerContent({ stats }: { stats: PoolStats }) {
         <FormattedMessage
           id="tracker.disclaimer"
           values={{
-            minimum: millions(stats.minimumVolume),
+            minimum: people(stats.minimumMembers),
             date: intl.formatDate(stats.deadline, {
               dateStyle: 'short',
               timeZone: 'Europe/Tallinn',
@@ -162,20 +148,20 @@ function MilestoneCard({
   milestone,
   isMinimum,
   isNext,
-  millions,
+  people,
   percent,
 }: {
   milestone: MilestoneStatus
   isMinimum: boolean
   isNext: boolean
-  millions: (volume: number) => string
+  people: (count: number) => string
   percent: (margin: number) => string
 }) {
   const state = milestone.reached ? 'milestone-reached' : isNext ? 'milestone-next' : ''
   return (
     <div className={`milestone ${state}`} data-testid="milestone">
       <div className="d-flex justify-content-between align-items-baseline gap-2">
-        <span className="fw-bold text-navy">{millions(milestone.volume)}</span>
+        <span className="fw-bold text-navy">{people(milestone.members)}</span>
         {milestone.reached && (
           <span className="small text-success fw-medium">
             <FormattedMessage id="tracker.milestone.reached" />

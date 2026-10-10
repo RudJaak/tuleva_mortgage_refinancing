@@ -5,30 +5,31 @@ import { midwayStats } from './fixtures'
 import { PoolTracker } from './PoolTracker'
 
 describe('PoolTracker', () => {
-  it('shows how many have joined and their combined balance', async () => {
+  it('counts people, not money', async () => {
     mockApi({ '/v1/pool/stats': midwayStats })
     renderWithProviders(<PoolTracker />)
 
     expect(await screen.findByTestId('joined-count')).toHaveTextContent('520')
-    expect(screen.getByTestId('committed-volume')).toHaveTextContent(/^60\s000\s000\s€$/)
+    expect(screen.queryByText(/€/)).not.toBeInTheDocument()
+    expect(screen.getByText(/laenujäägi suurus ei ole oluline/)).toBeInTheDocument()
   })
 
-  it('tracks progress towards the 100 million minimum', async () => {
+  it('tracks progress towards the minimum number of people', async () => {
     mockApi({ '/v1/pool/stats': midwayStats })
     renderWithProviders(<PoolTracker />)
 
     expect(
-      await screen.findByText('Miinimum 100 mln €: eesmärk-marginaal 1,20%'),
+      await screen.findByText('Miinimum 1000 inimest: eesmärk-marginaal 1,35%'),
     ).toBeInTheDocument()
-    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '60')
-    expect(screen.getByText('Puudu 40 mln €')).toBeInTheDocument()
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '52')
+    expect(screen.getByText('Puudu 480 inimest')).toBeInTheDocument()
   })
 
   it('lists all three milestones and marks the reached ones', async () => {
     mockApi({
       '/v1/pool/stats': {
         ...midwayStats,
-        committedVolume: 120_000_000,
+        joinedCount: 1200,
         minimumReached: true,
         milestones: midwayStats.milestones.map((m, i) => ({ ...m, reached: i === 0 })),
         currentMilestone: { ...midwayStats.milestones[0], reached: true },
@@ -42,7 +43,7 @@ describe('PoolTracker', () => {
     expect(within(cards[0]).getByText('✓ Saavutatud')).toBeInTheDocument()
     expect(within(cards[1]).queryByText('✓ Saavutatud')).not.toBeInTheDocument()
     expect(
-      screen.getByText('Järgmine verstapost 300 mln €: eesmärk-marginaal 1,00%'),
+      screen.getByText('Järgmine verstapost 2500 inimest: eesmärk-marginaal 1,30%'),
     ).toBeInTheDocument()
   })
 

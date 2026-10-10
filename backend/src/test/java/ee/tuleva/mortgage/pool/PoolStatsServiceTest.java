@@ -13,12 +13,12 @@ class PoolStatsServiceTest {
 
   private final PoolProperties properties =
       new PoolProperties(
-          OffsetDateTime.parse("2026-12-31T23:59:59+02:00"),
-          new BigDecimal("100000000"),
+          OffsetDateTime.parse("2026-11-10T00:00:00+02:00"),
+          1000,
           List.of(
-              new PoolProperties.Milestone(new BigDecimal("300000000"), new BigDecimal("1.00")),
-              new PoolProperties.Milestone(new BigDecimal("100000000"), new BigDecimal("1.20")),
-              new PoolProperties.Milestone(new BigDecimal("500000000"), new BigDecimal("0.80"))),
+              new PoolProperties.Milestone(2500, new BigDecimal("1.30")),
+              new PoolProperties.Milestone(1000, new BigDecimal("1.35")),
+              new PoolProperties.Milestone(5000, new BigDecimal("1.20"))),
           10);
 
   private final PoolStatsService service =
@@ -29,21 +29,20 @@ class PoolStatsServiceTest {
     var stats = service.statsFor(new PoolTotals(520, new BigDecimal("60000000")));
 
     assertThat(stats.joinedCount()).isEqualTo(520);
-    assertThat(stats.committedVolume()).isEqualByComparingTo("60000000");
+    assertThat(stats.minimumMembers()).isEqualTo(1000);
     assertThat(stats.minimumReached()).isFalse();
     assertThat(stats.currentMilestone()).isNull();
-    assertThat(stats.nextMilestone().volume()).isEqualByComparingTo("100000000");
-    assertThat(stats.nextMilestone().margin()).isEqualByComparingTo("1.20");
+    assertThat(stats.nextMilestone().members()).isEqualTo(1000);
+    assertThat(stats.nextMilestone().margin()).isEqualByComparingTo("1.35");
   }
 
   @Test
-  void milestonesAreOrderedByVolume() {
+  void milestonesAreOrderedByPeople() {
     var stats = service.statsFor(new PoolTotals(520, new BigDecimal("60000000")));
 
     assertThat(stats.milestones())
-        .extracting(PoolStats.MilestoneStatus::volume)
-        .map(BigDecimal::intValue)
-        .containsExactly(100_000_000, 300_000_000, 500_000_000);
+        .extracting(PoolStats.MilestoneStatus::members)
+        .containsExactly(1000, 2500, 5000);
   }
 
   @Test
@@ -51,23 +50,24 @@ class PoolStatsServiceTest {
     var stats = service.statsFor(new PoolTotals(3000, new BigDecimal("320000000")));
 
     assertThat(stats.minimumReached()).isTrue();
-    assertThat(stats.currentMilestone().margin()).isEqualByComparingTo("1.00");
-    assertThat(stats.nextMilestone().margin()).isEqualByComparingTo("0.80");
+    assertThat(stats.currentMilestone().margin()).isEqualByComparingTo("1.30");
+    assertThat(stats.nextMilestone().margin()).isEqualByComparingTo("1.20");
   }
 
   @Test
-  void reachingExactlyTheVolumeCountsAsReached() {
-    var stats = service.statsFor(new PoolTotals(900, new BigDecimal("100000000")));
-
-    assertThat(stats.minimumReached()).isTrue();
-    assertThat(stats.currentMilestone().volume()).isEqualByComparingTo("100000000");
+  void peopleCountNotMoney() {
+    // a thousand small loans reach the minimum; a few large ones do not
+    assertThat(service.statsFor(new PoolTotals(1000, new BigDecimal("20000000"))).minimumReached())
+        .isTrue();
+    assertThat(service.statsFor(new PoolTotals(999, new BigDecimal("900000000"))).minimumReached())
+        .isFalse();
   }
 
   @Test
   void afterTheLastMilestoneThereIsNoNext() {
     var stats = service.statsFor(new PoolTotals(5000, new BigDecimal("510000000")));
 
-    assertThat(stats.currentMilestone().margin()).isEqualByComparingTo("0.80");
+    assertThat(stats.currentMilestone().margin()).isEqualByComparingTo("1.20");
     assertThat(stats.nextMilestone()).isNull();
   }
 
@@ -77,7 +77,7 @@ class PoolStatsServiceTest {
 
     assertThat(stats.joinedCount()).isNull();
     assertThat(stats.committedVolume()).isNull();
-    assertThat(stats.nextMilestone().volume()).isEqualByComparingTo("100000000");
+    assertThat(stats.nextMilestone().members()).isEqualTo(1000);
   }
 
   @Test

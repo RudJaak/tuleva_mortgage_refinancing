@@ -45,12 +45,11 @@ class CommitmentServiceTest {
           loans,
           commitments,
           new PoolProperties(
-              OffsetDateTime.parse("2026-12-31T23:59:59+02:00"),
-              new BigDecimal("100000000"),
+              OffsetDateTime.parse("2026-11-10T00:00:00+02:00"),
+              1000,
               List.of(
-                  new PoolProperties.Milestone(new BigDecimal("100000000"), new BigDecimal("1.20")),
-                  new PoolProperties.Milestone(
-                      new BigDecimal("500000000"), new BigDecimal("0.80"))),
+                  new PoolProperties.Milestone(1000, new BigDecimal("1.35")),
+                  new PoolProperties.Milestone(5000, new BigDecimal("1.20"))),
               10),
           Clock.fixed(NOW, ZoneOffset.UTC));
 

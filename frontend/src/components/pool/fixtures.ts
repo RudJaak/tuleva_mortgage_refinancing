@@ -1,9 +1,9 @@
 import type { PoolStats, PublicConfig } from './api'
 
 export const milestones = [
-  { volume: 100_000_000, margin: 1.2 },
-  { volume: 300_000_000, margin: 1.0 },
-  { volume: 500_000_000, margin: 0.8 },
+  { members: 1000, margin: 1.35 },
+  { members: 2500, margin: 1.3 },
+  { members: 5000, margin: 1.2 },
 ]
 
 export const publicConfig: PublicConfig = {
@@ -15,15 +15,15 @@ export const publicConfig: PublicConfig = {
     switchingCost: 400,
     annualDiscountRate: 3,
   },
-  pool: { deadline: '2026-12-31T23:59:59+02:00', minimumVolume: 100_000_000, milestones },
+  pool: { deadline: '2026-11-10T00:00:00+02:00', minimumMembers: 1000, milestones },
 }
 
 export const midwayStats: PoolStats = {
   joinedCount: 520,
   committedVolume: 60_000_000,
-  minimumVolume: 100_000_000,
+  minimumMembers: 1000,
   minimumReached: false,
-  deadline: '2026-12-31T23:59:59+02:00',
+  deadline: '2026-11-10T00:00:00+02:00',
   milestones: milestones.map((m) => ({ ...m, reached: false })),
   currentMilestone: null,
   nextMilestone: { ...milestones[0], reached: false },
