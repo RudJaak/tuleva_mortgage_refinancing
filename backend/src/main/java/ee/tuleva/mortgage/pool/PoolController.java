@@ -3,26 +3,19 @@ package ee.tuleva.mortgage.pool;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/v1")
+@RequiredArgsConstructor
 class PoolController {
 
   private final PoolStatsService poolStatsService;
   private final PoolProperties poolProperties;
   private final CalculatorProperties calculatorProperties;
-
-  PoolController(
-      PoolStatsService poolStatsService,
-      PoolProperties poolProperties,
-      CalculatorProperties calculatorProperties) {
-    this.poolStatsService = poolStatsService;
-    this.poolProperties = poolProperties;
-    this.calculatorProperties = calculatorProperties;
-  }
 
   @GetMapping("/pool/stats")
   PoolStats stats() {

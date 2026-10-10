@@ -1,6 +1,7 @@
 package ee.tuleva.mortgage.demo;
 
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,13 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/demo")
 @ConditionalOnBooleanProperty("app.demo.seed-enabled")
+@RequiredArgsConstructor
 class DemoController {
 
   private final JdbcClient jdbc;
-
-  DemoController(JdbcClient jdbc) {
-    this.jdbc = jdbc;
-  }
 
   @PostMapping("/reset")
   @Transactional

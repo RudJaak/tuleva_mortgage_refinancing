@@ -47,6 +47,15 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
   - **The other tables (loan, property, liability, statement_summary, document, field provenance) are added with the tasks that use them** (T20, T22, T30–T32), so we don't design them before they're needed.
 
 ### T04 Auth: Mobile-ID + Smart-ID (SK demo) · A · 3h · after T02
+- **Research done** (`docs/research/09-eid-login-local.md`). Key points:
+  - **Real phone against production** needs an SK contract (from €60/month) or Tuleva's credentials, which means legal and billing implications.
+  - **Your real phone against SK DEMO works for free:** install the Smart-ID **demo app**, register with your ID card or Mobile-ID, and use the cross-device **QR flow**, which works from `http://localhost`. Set `smartid.callback-url` to any `https://localhost…` value; it's never called in the QR flow. Then either upload your demo certificate to demo.sk.ee/upload_cert or skip the OCSP check.
+  - **No-phone fallback:**
+    - Smart-ID notification with `40504040001` auto-completes, but needs a dev-only endpoint by personal code;
+    - Mobile-ID `+37268000769` auto-completes.
+  - **A real Mobile-ID SIM can't be used on DEMO any more** (MIDCertsReg is gone).
+  - **A real ID card works through Web eID** with an https origin or the extension's `ALLOW_HTTP_LOCALHOST` option.
+  - **Reuse Tuleva's `truststore.jks`.** SK's pinned certificates rotate on 2026-10-11 and the truststore already covers the new ones.
 - Copy from `TulevaEE/onboarding-service` (MIT; reuse authorised): `auth/mobileid`, `auth/smartid`, `config/MobileIdConfiguration`, `SmartIdClientConfiguration`, `SmartIdTrustedCaCertificates`, the demo certificates, and the truststore.
 - Strip out EPIS, user, AML and other dependencies.
 - **Mobile-ID first:** pure REST, no callback, so it's the easiest locally. Then **Smart-ID via the notification flow by personal code**. The device-link callback needs https, so skip it unless we tunnel.

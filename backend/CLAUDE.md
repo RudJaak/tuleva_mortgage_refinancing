@@ -28,7 +28,15 @@ These are adapted from Tuleva's onboarding-service so the code can be ported lat
   - Prefer slice tests (`@WebMvcTest`, `@DataJpaTest`) over `@SpringBootTest`.
   - Full-context tests import `TestcontainersConfiguration` (Postgres 18). Docker must be running.
   - Write the test first where practical.
-- **Code style:** records for DTOs and config (`@ConfigurationProperties`), constructor injection, package-private by default. Inject `Clock` instead of calling `now()`. Avoid comments that restate the code.
+- **Code style:**
+  - **Records** for every DTO, response body, config class (`@ConfigurationProperties`) and value type.
+  - **Lombok** where records aren't possible:
+    - JPA entities: `@Getter`, `@NoArgsConstructor(access = PROTECTED)`, `@AllArgsConstructor(access = PRIVATE)` plus static factory methods;
+    - services and controllers: `@RequiredArgsConstructor`;
+    - logging: `@Slf4j`.
+  - **No hand-written getters or constructors.**
+  - Package-private by default. Inject `Clock` instead of calling `now()`. Avoid comments that restate the code.
+  - Column names come from the default snake_case naming strategy, so no `@Column(name=…)` is needed.
 - **Flyway:** migrations are append-only, `V<n>__<snake_case>.sql`. Never edit an applied migration.
 - **API:** REST under `/v1/...`, JSON. The API sketch is in `../TASKS.md`.
 - **External integrations** (eID, Claude, In-ADS, EHR, Enable Banking):

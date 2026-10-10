@@ -12,15 +12,16 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@RequiredArgsConstructor
+@Slf4j
 class DemoSeeder {
 
-  private static final Logger log = LoggerFactory.getLogger(DemoSeeder.class);
   private static final double TYPICAL_BALANCE = 110_000;
   private static final double BALANCE_SPREAD = 0.45;
   private static final double MIN_BALANCE = 20_000;
@@ -28,12 +29,6 @@ class DemoSeeder {
   private final BorrowerRepository borrowers;
   private final CommitmentRepository commitments;
   private final Clock clock;
-
-  DemoSeeder(BorrowerRepository borrowers, CommitmentRepository commitments, Clock clock) {
-    this.borrowers = borrowers;
-    this.commitments = commitments;
-    this.clock = clock;
-  }
 
   @Transactional
   boolean seedIfEmpty(int borrowerCount, BigDecimal totalVolume) {

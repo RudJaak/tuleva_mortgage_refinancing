@@ -3,6 +3,7 @@ plugins {
     id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.10.3"
+    id("io.freefair.lombok") version "9.8.0"
 }
 
 group = "ee.tuleva"
@@ -13,6 +14,10 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
     }
+}
+
+lombok {
+    version = "1.18.48"
 }
 
 repositories {

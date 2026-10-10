@@ -3,18 +3,15 @@ package ee.tuleva.mortgage.pool;
 import ee.tuleva.mortgage.pool.PoolStats.MilestoneStatus;
 import java.util.Comparator;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class PoolStatsService {
 
   private final CommitmentRepository commitments;
   private final PoolProperties properties;
-
-  PoolStatsService(CommitmentRepository commitments, PoolProperties properties) {
-    this.commitments = commitments;
-    this.properties = properties;
-  }
 
   public PoolStats currentStats() {
     return statsFor(commitments.signedTotals());
