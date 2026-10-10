@@ -7,9 +7,10 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 /**
- * What an extractor reads from a loan contract, as stated in it; nothing derived. If the contract
- * includes amendments, the terms in force are given. {@code evidence} says where each field was
- * read, so the borrower can check it.
+ * What an extractor reads from a loan contract upload, as stated in it; nothing derived. An upload
+ * can hold the contract with its standard information sheet (ESIS) or repayment schedule; the
+ * contract wins on conflicts and amendments override the original terms. {@code evidence} says
+ * where each field was read, so the borrower can check it.
  */
 record ExtractedLoanContract(
     @Nullable String lender,
@@ -31,6 +32,7 @@ record ExtractedLoanContract(
     @Nullable BigDecimal mortgageAmount,
     @Nullable String collateral,
     @Nullable String earlyRepaymentTerms,
+    @Nullable BigDecimal propertyValue,
     @Nullable BigDecimal balance,
     @Nullable LocalDate balanceDate,
     Map<LoanField, Evidence> evidence) {
@@ -54,6 +56,9 @@ record ExtractedLoanContract(
     LOW
   }
 
-  /** {@code page} is 1-based; {@code quote} is the contract's own wording. */
-  record Evidence(int page, String quote, Confidence confidence) {}
+  /**
+   * {@code document} is the file within the upload (the contract, the standard information sheet, a
+   * repayment schedule); {@code page} is 1-based; {@code quote} is the document's own wording.
+   */
+  record Evidence(String document, int page, String quote, Confidence confidence) {}
 }

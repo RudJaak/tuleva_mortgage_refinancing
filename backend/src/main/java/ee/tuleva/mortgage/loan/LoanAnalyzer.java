@@ -76,15 +76,22 @@ class LoanAnalyzer {
       balanceSource = BalanceSource.CONTRACT;
       balance = contract.balance();
     } else {
-      balance = estimateBalance(contract, rate, remainingMonths);
+      balance = estimateBalance(contract, maturity, today);
       balanceSource = balance == null ? BalanceSource.UNKNOWN : BalanceSource.ESTIMATED;
     }
+    BigDecimal loanToValue =
+        balance == null
+                || contract.propertyValue() == null
+                || contract.propertyValue().signum() <= 0
+            ? null
+            : balance.divide(contract.propertyValue(), 2, HALF_UP);
 
+    PersonNames.Match partyCheck = partyCheck(contract.borrowers(), firstName, lastName);
+    // The logged-in borrower's age says nothing about someone else's contract
     Integer ageAtMaturity =
-        birthDate == null || maturity == null
+        birthDate == null || maturity == null || partyCheck == PersonNames.Match.MISMATCH
             ? null
             : Period.between(birthDate, maturity).getYears();
-    PersonNames.Match partyCheck = partyCheck(contract.borrowers(), firstName, lastName);
     List<LoanField> missing = missingKeyFields(contract);
     List<LoanField> lowConfidence =
         contract.evidence().entrySet().stream()
@@ -128,6 +135,7 @@ class LoanAnalyzer {
         remainingMonths,
         balance,
         balanceSource,
+        loanToValue,
         ageAtMaturity,
         contract.borrowers().size(),
         partyCheck,
@@ -148,33 +156,68 @@ class LoanAnalyzer {
   }
 
   /**
-   * For an annuity the outstanding principal is the present value of the remaining instalments at
-   * the current rate; Euribor resets keep the instalment consistent with that. For equal principal
-   * repayments it falls linearly over the term. Approximate either way.
+   * The original principal amortised to today. Contracts and information sheets state the
+   * instalment as it was at signing, so the schedule is rebuilt at the rate that instalment
+   * implies; without an instalment the margin is used, as Euribor was floored at zero for most
+   * contracts signed before 2022. Equal principal repayments fall linearly. Approximate either way:
+   * the instalment is recalculated at every Euribor reset.
    */
   static @Nullable BigDecimal estimateBalance(
-      ExtractedLoanContract contract, @Nullable BigDecimal annualRate, @Nullable Integer months) {
-    if (months == null) {
+      ExtractedLoanContract contract, @Nullable LocalDate maturity, LocalDate today) {
+    BigDecimal principal = contract.principal();
+    LocalDate start = contract.contractDate();
+    Integer term = contract.termMonths();
+    if (term == null && start != null && maturity != null) {
+      term = (int) ChronoUnit.MONTHS.between(start, maturity);
+    }
+    if (principal == null || start == null || term == null || term <= 0) {
       return null;
     }
+    int elapsed = (int) Math.clamp(ChronoUnit.MONTHS.between(start, today), 0, term);
     if (contract.repaymentType() == RepaymentType.EQUAL_PRINCIPAL) {
-      if (contract.principal() == null
-          || contract.termMonths() == null
-          || contract.termMonths() == 0) {
-        return null;
-      }
-      return contract
-          .principal()
-          .multiply(BigDecimal.valueOf(Math.min(months, contract.termMonths())))
-          .divide(BigDecimal.valueOf(contract.termMonths()), 0, HALF_UP);
+      return principal
+          .multiply(BigDecimal.valueOf(term - elapsed))
+          .divide(BigDecimal.valueOf(term), 0, HALF_UP);
     }
-    if (contract.monthlyPayment() == null || annualRate == null) {
+    Double monthlyRate;
+    if (contract.monthlyPayment() != null) {
+      monthlyRate =
+          impliedMonthlyRate(
+              principal.doubleValue(), term, contract.monthlyPayment().doubleValue());
+    } else if (contract.statedInterestRate() != null) {
+      monthlyRate = contract.statedInterestRate().doubleValue() / 100 / 12;
+    } else if (contract.margin() != null) {
+      monthlyRate = contract.margin().doubleValue() / 100 / 12;
+    } else {
       return null;
     }
-    double r = annualRate.doubleValue() / 100 / 12;
-    double payment = contract.monthlyPayment().doubleValue();
-    double value = r == 0 ? payment * months : payment * (1 - Math.pow(1 + r, -months)) / r;
-    return BigDecimal.valueOf(value).setScale(0, HALF_UP);
+    double p = principal.doubleValue();
+    double remaining =
+        monthlyRate == 0
+            ? p * (term - elapsed) / term
+            : p
+                * (Math.pow(1 + monthlyRate, term) - Math.pow(1 + monthlyRate, elapsed))
+                / (Math.pow(1 + monthlyRate, term) - 1);
+    return BigDecimal.valueOf(remaining).setScale(0, HALF_UP);
+  }
+
+  /** The monthly rate at which {@code payment} repays {@code principal} in {@code months}. */
+  static double impliedMonthlyRate(double principal, int months, double payment) {
+    if (payment * months <= principal) {
+      return 0;
+    }
+    double low = 0;
+    double high = 0.05;
+    for (int i = 0; i < 100; i++) {
+      double mid = (low + high) / 2;
+      double annuity = principal * mid / (1 - Math.pow(1 + mid, -months));
+      if (annuity > payment) {
+        high = mid;
+      } else {
+        low = mid;
+      }
+    }
+    return (low + high) / 2;
   }
 
   private BigDecimal firstTargetMargin() {

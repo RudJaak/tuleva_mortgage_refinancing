@@ -82,7 +82,8 @@ app:
     # Off only to study old statements: no staleness flag, and the whole period is analysed
     recency-checks: ${STATEMENT_RECENCY_CHECKS:true}
   documents:
-    # Off for the demo: a missing or untrusted seal only lowers the verification level
+    # Statements only (contracts are signed by people). Off: a missing or untrusted seal only
+    # lowers the verification level
     require-bank-seal: ${REQUIRE_BANK_SEAL:false}
     # Banks whose digital seal we accept on a statement container, matched on the seal
     # certificate's organizationIdentifier (NTREE-<registry code>). Codes checked in e-Äriregister.

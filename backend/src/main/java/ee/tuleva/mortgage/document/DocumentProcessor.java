@@ -8,6 +8,14 @@ public interface DocumentProcessor {
 
   DocumentType type();
 
+  /**
+   * Whether {@code app.documents.require-bank-seal} applies to this type. A statement can come
+   * sealed by the bank; a contract is signed by people, so it never carries a bank seal.
+   */
+  default boolean bankSealCanBeRequired() {
+    return false;
+  }
+
   /** Returns the response body shown to the borrower for confirmation. */
   Object process(ReceivedDocument document);
 }

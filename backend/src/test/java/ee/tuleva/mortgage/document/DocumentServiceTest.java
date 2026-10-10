@@ -223,6 +223,11 @@ class DocumentServiceTest {
     }
 
     @Override
+    public boolean bankSealCanBeRequired() {
+      return true;
+    }
+
+    @Override
     public Object process(ReceivedDocument document) {
       received = document;
       if (failWith != null) {

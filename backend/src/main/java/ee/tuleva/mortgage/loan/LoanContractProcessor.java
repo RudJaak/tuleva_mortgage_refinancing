@@ -13,6 +13,7 @@ import ee.tuleva.mortgage.document.DocumentType;
 import ee.tuleva.mortgage.document.ReceivedDocument;
 import ee.tuleva.mortgage.extraction.ExtractionException;
 import java.time.Clock;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
@@ -41,15 +42,13 @@ class LoanContractProcessor implements DocumentProcessor {
 
   @Override
   public LoanContractResult process(ReceivedDocument document) {
-    DocumentFile pdf =
-        document.files().stream()
-            .filter(DocumentFile::isPdf)
-            .findFirst()
-            .orElseThrow(
-                () -> new DocumentRejectedException(NO_USABLE_FILE, "No PDF contract found"));
+    List<DocumentFile> pdfs = document.files().stream().filter(DocumentFile::isPdf).toList();
+    if (pdfs.isEmpty()) {
+      throw new DocumentRejectedException(NO_USABLE_FILE, "No PDF contract found");
+    }
     ExtractedLoanContract contract;
     try {
-      contract = extractor.extract(pdf);
+      contract = extractor.extract(pdfs);
     } catch (ExtractionException e) {
       throw new DocumentRejectedException(EXTRACTION_FAILED, e.getMessage(), e);
     }

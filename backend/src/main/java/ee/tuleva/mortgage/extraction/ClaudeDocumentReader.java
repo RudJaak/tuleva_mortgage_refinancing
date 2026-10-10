@@ -17,8 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Sends a PDF to Claude and returns its answer as {@code type}, using structured output so the
- * answer always parses. Nothing from the document is logged, only token counts.
+ * Sends one or more PDFs to Claude and returns its answer as {@code type}, using structured output
+ * so the answer always parses. Nothing from the document is logged, only token counts.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -30,7 +30,27 @@ public class ClaudeDocumentReader {
   private final AnthropicClient client;
   private final ExtractionProperties.Claude settings;
 
+  /** One PDF of an upload; the title is how Claude and its evidence refer to it. */
+  public record Pdf(String title, byte[] content) {}
+
   public <T> T read(byte[] pdf, String systemPrompt, String instruction, Class<T> type) {
+    return read(List.of(new Pdf("document.pdf", pdf)), systemPrompt, instruction, type);
+  }
+
+  public <T> T read(List<Pdf> pdfs, String systemPrompt, String instruction, Class<T> type) {
+    List<ContentBlockParam> content = new java.util.ArrayList<>();
+    for (Pdf pdf : pdfs) {
+      content.add(
+          ContentBlockParam.ofDocument(
+              DocumentBlockParam.builder()
+                  .source(
+                      Base64PdfSource.builder()
+                          .data(Base64.getEncoder().encodeToString(pdf.content()))
+                          .build())
+                  .title(pdf.title())
+                  .build()));
+    }
+    content.add(ContentBlockParam.ofText(TextBlockParam.builder().text(instruction).build()));
     var params =
         MessageCreateParams.builder()
             .model(settings.model())
@@ -41,16 +61,7 @@ public class ClaudeDocumentReader {
                     .format(type)
                     .effort(OutputConfig.Effort.of(settings.effort()))
                     .build())
-            .addUserMessageOfBlockParams(
-                List.of(
-                    ContentBlockParam.ofDocument(
-                        DocumentBlockParam.builder()
-                            .source(
-                                Base64PdfSource.builder()
-                                    .data(Base64.getEncoder().encodeToString(pdf))
-                                    .build())
-                            .build()),
-                    ContentBlockParam.ofText(TextBlockParam.builder().text(instruction).build())))
+            .addUserMessageOfBlockParams(content)
             .putAdditionalHeader("anthropic-beta", FALLBACK_BETA)
             .putAdditionalBodyProperty("fallbacks", JsonValue.from("default"))
             .build();

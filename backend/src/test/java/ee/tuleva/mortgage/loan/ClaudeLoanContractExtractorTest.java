@@ -64,8 +64,10 @@ class ClaudeLoanContractExtractorTest {
                 "1,95",
                 "2049-06-14",
                 List.of(
-                    new ClaudeEvidence(LoanField.MARGIN, 2, "Marginaal 1,95%", Confidence.HIGH),
-                    new ClaudeEvidence(LoanField.MARGIN, 7, "duplicate", Confidence.LOW))));
+                    new ClaudeEvidence(
+                        LoanField.MARGIN, "leping.pdf", 2, "Marginaal 1,95%", Confidence.HIGH),
+                    new ClaudeEvidence(
+                        LoanField.MARGIN, "teabeleht.pdf", 7, "duplicate", Confidence.LOW))));
 
     assertThat(extracted.margin()).isEqualByComparingTo("1.95");
     assertThat(extracted.maturityDate()).isEqualTo(LocalDate.of(2049, 6, 14));
@@ -74,6 +76,18 @@ class ClaudeLoanContractExtractorTest {
     assertThat(extracted.borrowers()).containsExactly("Mari Maasikas");
     assertThat(extracted.termMonths()).isEqualTo(360);
     assertThat(extracted.evidence().get(LoanField.MARGIN).page()).isEqualTo(2);
+    assertThat(extracted.evidence().get(LoanField.MARGIN).document()).isEqualTo("leping.pdf");
+    assertThat(extracted.propertyValue()).isEqualByComparingTo("162000");
+  }
+
+  @Test
+  void aDocumentCitedByItsHeadingIsMappedToItsFile() {
+    var titles = List.of("EAL-20200305XY Mari Maasikas.pdf", "Standardinfo teabeleht.pdf");
+
+    assertThat(ClaudeLoanContractExtractor.closestTitle("Laenuleping nr EAL-20200305XY", titles))
+        .isEqualTo("EAL-20200305XY Mari Maasikas.pdf");
+    assertThat(ClaudeLoanContractExtractor.closestTitle("Standardinfo teabeleht.pdf", titles))
+        .isEqualTo("Standardinfo teabeleht.pdf");
   }
 
   @Test
@@ -105,6 +119,7 @@ class ClaudeLoanContractExtractorTest {
         "222 000,00",
         "Tallinn",
         "3 kuu intress",
+        "162 000",
         "",
         "",
         evidence);

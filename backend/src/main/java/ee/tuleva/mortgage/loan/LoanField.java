@@ -21,7 +21,12 @@ enum LoanField {
   MORTGAGE_AMOUNT("Mortgage (hypothec) amount securing the loan ('hüpoteegi summa')"),
   COLLATERAL("The mortgaged property: address and land register number ('kinnistu nr')"),
   EARLY_REPAYMENT_TERMS("Fee or compensation for early repayment ('ennetähtaegne tagastamine')"),
-  BALANCE("Outstanding principal if a current balance is stated ('laenujääk'), with its date");
+  PROPERTY_VALUE(
+      "Value of the mortgaged property used for the loan ('kinnisvara eeldatav väärtus',"
+          + " 'turuväärtus' in a valuation)"),
+  BALANCE(
+      "Outstanding principal with its date: a stated balance ('laenujääk'), or from a repayment"
+          + " schedule the balance after the last payment due on or before today");
 
   private final String description;
 

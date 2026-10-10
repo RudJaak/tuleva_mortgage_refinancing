@@ -79,7 +79,9 @@ class DocumentService {
           verification.withSignedByBorrower(
               ownCode != null && contents.signerCodes().contains(ownCode));
     }
-    if (properties.requireBankSeal() && verification.level() != VerificationLevel.BANK_SEALED) {
+    if (properties.requireBankSeal()
+        && processor.bankSealCanBeRequired()
+        && verification.level() != VerificationLevel.BANK_SEALED) {
       throw new DocumentRejectedException(SEAL_REQUIRED, "A bank-sealed container is required");
     }
     if (contents.files().isEmpty()) {

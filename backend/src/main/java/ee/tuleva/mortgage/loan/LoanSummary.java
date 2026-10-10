@@ -16,6 +16,7 @@ record LoanSummary(
     @Nullable Integer remainingMonths,
     @Nullable BigDecimal balance,
     BalanceSource balanceSource,
+    @Nullable BigDecimal loanToValue,
     @Nullable Integer ageAtMaturity,
     int borrowerCount,
     PersonNames.Match partyCheck,
@@ -34,7 +35,10 @@ record LoanSummary(
   enum BalanceSource {
     /** Stated in the uploaded document. */
     CONTRACT,
-    /** Present value of the remaining instalments at today's rate: approximate. */
+    /**
+     * The original principal amortised to today at the rate implied by the original instalment:
+     * approximate, since the instalment is recalculated whenever Euribor resets.
+     */
     ESTIMATED,
     UNKNOWN
   }

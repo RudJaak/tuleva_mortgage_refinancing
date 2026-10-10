@@ -16,8 +16,10 @@ import java.util.Map;
  */
 class StubLoanContractExtractor implements LoanContractExtractor {
 
+  private static final String CONTRACT = "laenuleping.pdf";
+
   @Override
-  public ExtractedLoanContract extract(DocumentFile contract) {
+  public ExtractedLoanContract extract(List<DocumentFile> pdfs) {
     return new ExtractedLoanContract(
         "Swedbank AS",
         "KL-2019-000123",
@@ -38,16 +40,22 @@ class StubLoanContractExtractor implements LoanContractExtractor {
         new BigDecimal("222000.00"),
         "Tallinn, Näidise tn 1-12",
         "Hüvitis kuni 3 kuu intressi ulatuses",
+        new BigDecimal("231000.00"),
         null,
         null,
         Map.of(
-            LoanField.LENDER, new Evidence(1, "Laenuandja: Swedbank AS", HIGH),
-            LoanField.PRINCIPAL, new Evidence(2, "Laenusumma 185 000,00 eurot", HIGH),
-            LoanField.MARGIN, new Evidence(2, "Marginaal 1,95% aastas", HIGH),
-            LoanField.BASE_RATE, new Evidence(2, "Baasintress 6 kuu EURIBOR", HIGH),
-            LoanField.MATURITY_DATE, new Evidence(2, "Tagastamise tähtpäev 14.06.2049", HIGH),
-            LoanField.MONTHLY_PAYMENT, new Evidence(3, "Annuiteetmakse 920,00 eurot", MEDIUM),
+            LoanField.LENDER, new Evidence(CONTRACT, 1, "Laenuandja: Swedbank AS", HIGH),
+            LoanField.PRINCIPAL, new Evidence(CONTRACT, 2, "Laenusumma 185 000,00 eurot", HIGH),
+            LoanField.MARGIN, new Evidence(CONTRACT, 2, "Marginaal 1,95% aastas", HIGH),
+            LoanField.BASE_RATE, new Evidence(CONTRACT, 2, "Baasintress 6 kuu EURIBOR", HIGH),
+            LoanField.MATURITY_DATE,
+                new Evidence(CONTRACT, 2, "Tagastamise tähtpäev 14.06.2049", HIGH),
+            LoanField.MONTHLY_PAYMENT,
+                new Evidence(CONTRACT, 3, "Annuiteetmakse 920,00 eurot", MEDIUM),
             LoanField.EARLY_REPAYMENT_TERMS,
-                new Evidence(5, "hüvitist kuni 3 kuu intressi ulatuses", HIGH)));
+                new Evidence(CONTRACT, 5, "hüvitist kuni 3 kuu intressi ulatuses", HIGH),
+            LoanField.PROPERTY_VALUE,
+                new Evidence(
+                    "teabeleht.pdf", 2, "kinnisvara eeldatav väärtus: 231 000 eurot", HIGH)));
   }
 }

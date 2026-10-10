@@ -51,6 +51,11 @@ class StatementProcessor implements DocumentProcessor {
   }
 
   @Override
+  public boolean bankSealCanBeRequired() {
+    return true;
+  }
+
+  @Override
   public StatementResult process(ReceivedDocument document) {
     DocumentFile pdf =
         document.files().stream()
