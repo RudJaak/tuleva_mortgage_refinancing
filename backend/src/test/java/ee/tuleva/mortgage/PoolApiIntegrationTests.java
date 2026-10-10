@@ -13,7 +13,7 @@ import tools.jackson.databind.JsonNode;
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = "app.demo.seed-enabled=true")
+    properties = {"app.demo.seed-enabled=true", "app.demo.simulated-joiners.enabled=false"})
 @AutoConfigureTestRestTemplate
 class PoolApiIntegrationTests {
 

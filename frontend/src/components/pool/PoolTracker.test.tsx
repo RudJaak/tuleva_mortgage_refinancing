@@ -10,7 +10,7 @@ describe('PoolTracker', () => {
     renderWithProviders(<PoolTracker />)
 
     expect(await screen.findByTestId('joined-count')).toHaveTextContent('520')
-    expect(screen.getByTestId('committed-volume')).toHaveTextContent('60 mln €')
+    expect(screen.getByTestId('committed-volume')).toHaveTextContent(/^60\s000\s000\s€$/)
   })
 
   it('tracks progress towards the 100 million minimum', async () => {

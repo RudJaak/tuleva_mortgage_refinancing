@@ -12,9 +12,13 @@ public class PoolStatsService {
 
   private final CommitmentRepository commitments;
   private final PoolProperties properties;
+  private final List<PoolTotalsAdjustment> adjustments;
 
   public PoolStats currentStats() {
-    return statsFor(commitments.signedTotals());
+    return statsFor(
+        adjustments.stream()
+            .map(PoolTotalsAdjustment::totals)
+            .reduce(commitments.signedTotals(), PoolTotals::plus));
   }
 
   PoolStats statsFor(PoolTotals totals) {
@@ -29,7 +33,7 @@ public class PoolStatsService {
                         totals.volume().compareTo(milestone.volume()) >= 0))
             .toList();
     MilestoneStatus current =
-        milestones.stream().filter(MilestoneStatus::reached).reduce((a, b) -> b).orElse(null);
+        milestones.stream().filter(MilestoneStatus::reached).reduce((_, b) -> b).orElse(null);
     MilestoneStatus next = milestones.stream().filter(m -> !m.reached()).findFirst().orElse(null);
     boolean visible = totals.count() >= properties.privacyThreshold();
     return new PoolStats(

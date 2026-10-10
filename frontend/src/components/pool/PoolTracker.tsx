@@ -1,4 +1,6 @@
+import { useState, type ReactNode } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
+import { useAnimatedNumber } from '../common/useAnimatedNumber'
 import { usePoolStats, type MilestoneStatus, type PoolStats } from './api'
 import { Countdown } from './Countdown'
 
@@ -30,25 +32,33 @@ function TrackerContent({ stats }: { stats: PoolStats }) {
   const percent = (margin: number) =>
     intl.formatNumber(margin / 100, { style: 'percent', minimumFractionDigits: 2 })
   const visible = stats.joinedCount !== null && stats.committedVolume !== null
-  const volume = stats.committedVolume ?? 0
+  const joined = Math.round(useAnimatedNumber(stats.joinedCount ?? 0))
+  const volume = useAnimatedNumber(stats.committedVolume ?? 0)
   const next = stats.nextMilestone
-  const progress = next ? Math.min(100, Math.floor((volume / next.volume) * 100)) : 100
+  const exactProgress = next ? Math.min(100, (volume / next.volume) * 100) : 100
+  const progress = Math.floor(exactProgress)
 
   return (
     <div className="d-flex flex-column gap-4">
       <div className="row gy-4 align-items-end">
         <div className="col-sm-4">
-          <div className="tracker-figure" data-testid="joined-count">
-            {visible ? intl.formatNumber(stats.joinedCount!) : '—'}
-          </div>
+          <TrackerFigure testId="joined-count" value={stats.joinedCount}>
+            {visible ? intl.formatNumber(joined) : '—'}
+          </TrackerFigure>
           <div className="text-body-secondary">
             <FormattedMessage id="tracker.joined" />
           </div>
         </div>
         <div className="col-sm-4">
-          <div className="tracker-figure" data-testid="committed-volume">
-            {visible ? millions(volume) : '—'}
-          </div>
+          <TrackerFigure testId="committed-volume" value={stats.committedVolume}>
+            {visible
+              ? intl.formatNumber(Math.round(volume), {
+                  style: 'currency',
+                  currency: 'EUR',
+                  maximumFractionDigits: 0,
+                })
+              : '—'}
+          </TrackerFigure>
           <div className="text-body-secondary">
             <FormattedMessage id="tracker.volume" />
           </div>
@@ -76,7 +86,7 @@ function TrackerContent({ stats }: { stats: PoolStats }) {
                 values={{ volume: millions(next.volume), margin: percent(next.margin) }}
               />
             </span>
-            <span className="text-navy fw-bold">{progress}%</span>
+            <span className="tracker-percent text-navy fw-bold">{progress}%</span>
           </div>
           <div
             className="progress"
@@ -86,7 +96,7 @@ function TrackerContent({ stats }: { stats: PoolStats }) {
             aria-valuemax={100}
             aria-label={intl.formatMessage({ id: 'tracker.progressLabel' })}
           >
-            <div className="progress-bar" style={{ width: `${progress}%` }} />
+            <div className="progress-bar" style={{ width: `${exactProgress}%` }} />
           </div>
           <p className="small text-body-secondary mt-2 mb-0">
             <FormattedMessage
@@ -123,6 +133,27 @@ function TrackerContent({ stats }: { stats: PoolStats }) {
           }}
         />
       </p>
+    </div>
+  )
+}
+
+/** Pulses its content when `value` changes after the first render. */
+function TrackerFigure({
+  testId,
+  value,
+  children,
+}: {
+  testId: string
+  value: number | null
+  children: ReactNode
+}) {
+  const [initial] = useState(value)
+  const changed = value !== initial
+  return (
+    <div className="tracker-figure" data-testid={testId}>
+      <span key={changed ? value : 'initial'} className={changed ? 'tracker-pulse' : undefined}>
+        {children}
+      </span>
     </div>
   )
 }

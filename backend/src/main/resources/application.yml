@@ -66,6 +66,13 @@ app:
     seed-enabled: ${DEMO_SEED:true}
     seed-borrowers: 520
     seed-volume: 60000000
+    # Adds an in-memory "joiner" to the tracker at random intervals; resets on restart
+    simulated-joiners:
+      enabled: ${DEMO_LIVE:true}
+      min-interval: 15s
+      max-interval: 45s
+      min-balance: 100000
+      max-balance: 350000
   statement:
     # Banks whose digital seal we accept on a statement container, matched on the seal
     # certificate's organizationIdentifier (NTREE-<registry code>). Codes checked in e-Äriregister.

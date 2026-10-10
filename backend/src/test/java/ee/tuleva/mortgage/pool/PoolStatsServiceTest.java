@@ -1,6 +1,7 @@
 package ee.tuleva.mortgage.pool;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
@@ -21,7 +22,7 @@ class PoolStatsServiceTest {
           10);
 
   private final PoolStatsService service =
-      new PoolStatsService(mock(CommitmentRepository.class), properties);
+      new PoolStatsService(mock(CommitmentRepository.class), properties, List.of());
 
   @Test
   void beforeTheMinimumNoMilestoneIsReachedAndTheFirstIsNext() {
@@ -77,5 +78,18 @@ class PoolStatsServiceTest {
     assertThat(stats.joinedCount()).isNull();
     assertThat(stats.committedVolume()).isNull();
     assertThat(stats.nextMilestone().volume()).isEqualByComparingTo("100000000");
+  }
+
+  @Test
+  void adjustmentsAreAddedOnTopOfTheSignedCommitments() {
+    var commitments = mock(CommitmentRepository.class);
+    given(commitments.signedTotals()).willReturn(new PoolTotals(520, new BigDecimal("60000000")));
+    PoolTotalsAdjustment twoMore = () -> new PoolTotals(2, new BigDecimal("400000"));
+    var adjusted = new PoolStatsService(commitments, properties, List.of(twoMore));
+
+    var stats = adjusted.currentStats();
+
+    assertThat(stats.joinedCount()).isEqualTo(522);
+    assertThat(stats.committedVolume()).isEqualByComparingTo("60400000");
   }
 }

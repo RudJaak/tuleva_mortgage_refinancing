@@ -8,7 +8,7 @@ React app for the borrower flow. Project context and decisions live in `../CLAUD
 - Bootstrap 5.3 with react-bootstrap.
 - react-intl, react-router 7, TanStack Query 5, react-hook-form.
 - Tests: Vitest + Testing Library (jsdom). Lint: oxlint. Format: Prettier (no semicolons, single quotes, width 100).
-- Dev server on **:5173**. It proxies `/v1` and `/actuator` to the backend on :9000, so the app always calls relative URLs through `src/api/client.ts`.
+- Dev server on **:5173**, also reachable from the local network (`host: true`, for demoing on phones). It proxies `/v1` and `/actuator` to the backend on :9000, so the app always calls relative URLs through `src/api/client.ts`.
 
 ## Design: Tuleva look and feel (reuse authorised, D12)
 

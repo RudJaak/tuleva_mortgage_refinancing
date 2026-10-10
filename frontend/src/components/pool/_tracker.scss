@@ -1,16 +1,41 @@
 .pool-tracker {
+  .tracker-percent {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tracker-pulse {
+    display: inline-block;
+    transform-origin: left center;
+    animation: tracker-pulse 1.2s ease-out;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+
   .tracker-figure {
     font-family: $font-family-serif;
     font-size: 2.5rem;
     line-height: 1.1;
+    white-space: nowrap;
+
+    // Three figures share a row from sm up; the full-euro total must still fit its third
+    @include media-breakpoint-up(sm) {
+      font-size: clamp(1.25rem, 3.2vw, 2.5rem);
+    }
     font-weight: $font-weight-bold;
     color: $navy-blue;
-    font-variant-numeric: lining-nums;
+    font-variant-numeric: lining-nums tabular-nums;
   }
 
   .progress {
     height: 1rem;
     background-color: var(--blue-bg-2);
+  }
+
+  // Width follows the animated volume frame by frame, so Bootstrap's own transition would lag it
+  .progress-bar {
+    transition: none;
   }
 
   .milestone {
@@ -28,5 +53,17 @@
       border-color: $blue;
       background-color: var(--blue-bg-1);
     }
+  }
+}
+
+@keyframes tracker-pulse {
+  0% {
+    color: $green;
+    transform: scale(1.04);
+  }
+
+  100% {
+    color: $navy-blue;
+    transform: none;
   }
 }

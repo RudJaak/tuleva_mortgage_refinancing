@@ -7,6 +7,7 @@ const backend = 'http://localhost:9000'
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: true,
     port: 5173,
     proxy: {
       '/v1': backend,
