@@ -17,11 +17,15 @@ describe('estimatedProgress', () => {
 })
 
 describe('stageFor', () => {
+  const stages = [
+    { fromSeconds: 0, id: 'first' },
+    { fromSeconds: 6, id: 'second' },
+    { fromSeconds: 45, id: 'slow' },
+  ]
+
   it('moves through the stages as time passes', () => {
-    expect(stageFor(0)).toBe('statements.progress.reading')
-    expect(stageFor(7_000)).toBe('statements.progress.income')
-    expect(stageFor(14_000)).toBe('statements.progress.obligations')
-    expect(stageFor(25_000)).toBe('statements.progress.calculating')
-    expect(stageFor(60_000)).toBe('statements.progress.slow')
+    expect(stageFor(0, stages)).toBe('first')
+    expect(stageFor(7_000, stages)).toBe('second')
+    expect(stageFor(60_000, stages)).toBe('slow')
   })
 })

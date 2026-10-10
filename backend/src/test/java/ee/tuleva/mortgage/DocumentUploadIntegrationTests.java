@@ -3,6 +3,7 @@ package ee.tuleva.mortgage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
@@ -138,6 +140,42 @@ class DocumentUploadIntegrationTests {
         .andExpect(jsonPath("$[0].result.contract.evidence.MARGIN.page").value(2))
         .andExpect(jsonPath("$[0].result.summary.balanceSource").value("ESTIMATED"));
 
+    String documentId =
+        JsonPath.read(
+            mockMvc
+                .perform(get("/v1/documents").param("type", "LOAN_CONTRACT").session(session))
+                .andReturn()
+                .getResponse()
+                .getContentAsString(),
+            "$[0].documentId");
+    mockMvc
+        .perform(
+            put("/v1/me/loan")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"documentId": "%s", "lender": "Swedbank AS", "contractNumber": "KL-2019-000123",
+                     "contractDate": "2019-06-14", "principal": 185000, "margin": 1.75,
+                     "baseRate": "6 kuu EURIBOR", "rateType": "VARIABLE", "maturityDate": "2049-06-14",
+                     "monthlyPayment": 920, "repaymentType": "ANNUITY", "balance": 151000,
+                     "propertyValue": 231000}
+                    """
+                        .formatted(documentId)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.provenance.LENDER").value("DOCUMENT"))
+        .andExpect(jsonPath("$.provenance.MARGIN").value("DECLARED"))
+        .andExpect(jsonPath("$.provenance.BALANCE").value("DECLARED"))
+        .andExpect(jsonPath("$.summary.balanceSource").value("STATED"))
+        .andExpect(jsonPath("$.evidence.MARGIN.page").value(2));
+
+    mockMvc
+        .perform(get("/v1/me/loan").session(session))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.terms.margin").value(1.75))
+        .andExpect(jsonPath("$.provenance.MARGIN").value("DECLARED"))
+        .andExpect(jsonPath("$.summary.loanToValue").value(0.65));
+
     var stored =
         jdbc.sql(
                 "select lender, margin, balance_estimated from loan_contract where borrower_id = ?")
@@ -146,5 +184,10 @@ class DocumentUploadIntegrationTests {
                 (rs, row) -> rs.getString(1) + "/" + rs.getBigDecimal(2) + "/" + rs.getBoolean(3))
             .single();
     assertThat(stored).isEqualTo("Swedbank AS/1.950/true");
+  }
+
+  @Test
+  void theLoanBelongsToALoggedInBorrower() throws Exception {
+    mockMvc.perform(get("/v1/me/loan")).andExpect(status().isUnauthorized());
   }
 }

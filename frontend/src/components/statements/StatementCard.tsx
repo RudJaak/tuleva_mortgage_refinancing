@@ -1,8 +1,9 @@
 import { FormattedMessage, useIntl } from 'react-intl'
-import { failureMessageId } from './failure'
+import { failureMessageId } from '../documents/failure'
+import { ProcessingProgress } from '../documents/ProcessingProgress'
+import { SealBadge } from '../documents/SealBadge'
 import type { StatementDocument } from './api'
-import { ProcessingProgress } from './ProcessingProgress'
-import { SealBadge } from './SealBadge'
+import { statementStages } from './stages'
 import { StatementSummaryView } from './StatementSummaryView'
 
 export function StatementCard({ document }: { document: StatementDocument }) {
@@ -29,7 +30,13 @@ export function StatementCard({ document }: { document: StatementDocument }) {
         <SealBadge verification={document.verification} />
       </div>
 
-      {document.status === 'RECEIVED' && <ProcessingProgress createdAt={document.createdAt} />}
+      {document.status === 'RECEIVED' && (
+        <ProcessingProgress
+          createdAt={document.createdAt}
+          stages={statementStages}
+          labelId="statements.progress.label"
+        />
+      )}
       {document.status === 'PROCESSED' && summary && <StatementSummaryView summary={summary} />}
       {document.status === 'PROCESSED' && !summary && (
         <p className="mb-0 text-body-secondary">

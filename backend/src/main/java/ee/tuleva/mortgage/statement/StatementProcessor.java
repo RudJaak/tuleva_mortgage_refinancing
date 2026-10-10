@@ -15,6 +15,8 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -53,6 +55,19 @@ class StatementProcessor implements DocumentProcessor {
   @Override
   public boolean bankSealCanBeRequired() {
     return true;
+  }
+
+  /** The summary only: the counted transactions are never stored. */
+  @Override
+  public Optional<Object> storedResult(UUID documentId) {
+    return summaries
+        .findByDocumentId(documentId)
+        .map(
+            stored ->
+                new StatementResult(
+                    null,
+                    jsonMapper.readValue(stored.getSummary(), StatementSummary.class),
+                    List.of()));
   }
 
   @Override

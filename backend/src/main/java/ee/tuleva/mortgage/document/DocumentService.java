@@ -142,13 +142,22 @@ class DocumentService {
       status = DocumentStatus.FAILED;
       failure = new Failure(INTERRUPTED, "Processing was interrupted, please upload again");
     }
+    Object result = outcome != null ? outcome.result() : null;
+    if (result == null && status == DocumentStatus.PROCESSED) {
+      result =
+          processors.stream()
+              .filter(p -> p.type() == document.getType())
+              .findFirst()
+              .flatMap(p -> p.storedResult(document.getId()))
+              .orElse(null);
+    }
     return new DocumentView(
         document.getId(),
         document.getType(),
         status,
         verification,
         document.getCreatedAt(),
-        outcome != null ? outcome.result() : null,
+        result,
         failure);
   }
 

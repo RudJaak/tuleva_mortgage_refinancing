@@ -113,7 +113,7 @@ class LoanAnalyzerTest {
     var summary = analyzer.analyze(withBalance, null, null, null, null);
 
     assertThat(summary.balance()).isEqualByComparingTo("142000.00");
-    assertThat(summary.balanceSource()).isEqualTo(BalanceSource.CONTRACT);
+    assertThat(summary.balanceSource()).isEqualTo(BalanceSource.STATED);
   }
 
   @Test

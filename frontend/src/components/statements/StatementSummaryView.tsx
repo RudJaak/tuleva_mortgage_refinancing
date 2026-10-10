@@ -127,7 +127,7 @@ function Figure({
 }) {
   return (
     <div className="col-sm-6 col-lg-3">
-      <div className="statement-figure h-100">
+      <div className="figure-tile h-100">
         <div className="small text-body-secondary">
           <FormattedMessage id={label} />
         </div>

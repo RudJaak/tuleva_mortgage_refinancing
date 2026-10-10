@@ -1,11 +1,14 @@
+import type { Verification } from '../documents/api'
 import type { StatementDocument } from './api'
 
-export const sealed = {
+export const sealed: Verification = {
   level: 'BANK_SEALED',
   bankName: 'LHV',
   sealedBy: 'AS LHV Pank: Digital Stamping of Document V2',
   sealedAt: '2026-10-10T06:23:55Z',
-} as const
+  signers: [{ name: 'AS LHV Pank', kind: 'ORGANISATION' }],
+  signedByBorrower: null,
+}
 
 export const inProgress: StatementDocument = {
   documentId: 'd1',

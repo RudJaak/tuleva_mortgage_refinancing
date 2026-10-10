@@ -91,6 +91,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 
 ### T22 Statement extraction (PDF) + summary · C · 4h · after T20 · 🟡 works, more banks to try
 - Done (D26): `statement` module. `ClaudeStatementExtractor` (Claude reads the PDF and returns categorised relevant transactions) and `StubStatementExtractor`; `StatementAnalyzer` derives income, obligations, debt-service ratio, savings, holder-name match and flags; only the summary is stored in `statement_summary`.
+- Processed documents reload their stored result after a restart.
 - Verified on a real LHV statement (~30 s, ~28k input tokens). Obligations use the median instalment and list outliers as one-off payments; credit-card repayments are reported as card usage, outside obligations and the debt-service ratio.
 - Remaining: try statements from other banks and tune the prompt.
 ### T24 camt.053 parser · C · 1.5h · after T22 · *Should*
@@ -105,7 +106,9 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - Warn that the bank may ask for a second confirmation for history older than 90 days.
 - **Blocked on:** a sandbox account and the user's evaluation of the approach.
 
-### T30 Loan step UI `/laen` · B · 3h · after T15, T20
+### T30 Loan step UI `/laen` · B · 3h · after T15, T20 · 🟡 done except payoff statement and screenshot inputs
+- Done: `/laen` uploads the contract (signer badge, progress), pre-fills a confirm form with the document, page and quote behind every field (low-confidence fields marked), saves through `PUT /v1/me/loan` with per-field provenance (DOCUMENT or DECLARED, V5 `loan` table), then shows the current rate, balance, remaining term, LTV and flags with the savings calculator on the confirmed numbers. Manual entry works without a contract.
+- Remaining:
 - Upload first, with a drag-and-drop zone showing accepted formats ("Laenuleping, väljavõte laenujäägist või ekraanipilt"), then a progress state.
 - Confirm form: each field is pre-filled with a source badge (lepingust / sisestatud) and a low-confidence highlight; the user edits or confirms.
 - Manual-entry fallback.

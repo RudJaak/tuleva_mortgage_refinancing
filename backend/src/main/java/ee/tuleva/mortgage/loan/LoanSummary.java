@@ -33,8 +33,8 @@ record LoanSummary(
   }
 
   enum BalanceSource {
-    /** Stated in the uploaded document. */
-    CONTRACT,
+    /** Stated in a document or by the borrower, e.g. from their internet bank. */
+    STATED,
     /**
      * The original principal amortised to today at the rate implied by the original instalment:
      * approximate, since the instalment is recalculated whenever Euribor resets.

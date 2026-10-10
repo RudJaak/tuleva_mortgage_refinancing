@@ -10,6 +10,6 @@ const knownReasons = [
 /** Translation id for a backend rejection reason; anything unexpected gets the generic message. */
 export function failureMessageId(reason: string | undefined) {
   return knownReasons.includes(reason as (typeof knownReasons)[number])
-    ? `statements.failure.${reason}`
-    : 'statements.failure.PROCESSING_FAILED'
+    ? `documents.failure.${reason}`
+    : 'documents.failure.PROCESSING_FAILED'
 }

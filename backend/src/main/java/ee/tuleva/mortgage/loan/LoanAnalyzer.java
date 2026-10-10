@@ -73,7 +73,7 @@ class LoanAnalyzer {
     BalanceSource balanceSource;
     BigDecimal balance;
     if (contract.balance() != null) {
-      balanceSource = BalanceSource.CONTRACT;
+      balanceSource = BalanceSource.STATED;
       balance = contract.balance();
     } else {
       balance = estimateBalance(contract, maturity, today);

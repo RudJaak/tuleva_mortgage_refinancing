@@ -3,11 +3,15 @@ import { FormattedMessage } from 'react-intl'
 import { ApiError } from '../../api/client'
 import { failureMessageId } from './failure'
 
-export function StatementUpload({
+export function DocumentUpload({
+  hintId,
+  chooseId,
   onSelect,
   pending,
   error,
 }: {
+  hintId: string
+  chooseId: string
   onSelect: (file: File) => void
   pending: boolean
   error: Error | null
@@ -17,23 +21,23 @@ export function StatementUpload({
     error === null
       ? undefined
       : error instanceof ApiError && error.status === 401
-        ? 'statements.failure.UNAUTHORIZED'
+        ? 'documents.failure.UNAUTHORIZED'
         : failureMessageId(error instanceof ApiError ? error.reason : undefined)
 
   return (
-    <div className="card rounded-4 p-4 d-flex flex-column gap-3 statement-upload">
+    <div className="card rounded-4 p-4 d-flex flex-column gap-3">
       <p className="mb-0">
-        <FormattedMessage id="statements.upload.hint" />
+        <FormattedMessage id={hintId} />
       </p>
       <div className="d-flex flex-wrap align-items-center gap-3">
         <label className={`btn btn-primary mb-0 ${pending ? 'disabled' : ''}`}>
           {pending ? (
             <>
               <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
-              <FormattedMessage id="statements.upload.checking" />
+              <FormattedMessage id="documents.upload.checking" />
             </>
           ) : (
-            <FormattedMessage id="statements.upload.choose" />
+            <FormattedMessage id={chooseId} />
           )}
           <input
             ref={input}
@@ -53,7 +57,7 @@ export function StatementUpload({
           />
         </label>
         <span className="small text-body-secondary">
-          <FormattedMessage id="statements.upload.formats" />
+          <FormattedMessage id="documents.upload.formats" />
         </span>
       </div>
       {messageId && (

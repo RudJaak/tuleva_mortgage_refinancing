@@ -3,9 +3,6 @@ package ee.tuleva.mortgage.loan;
 import static ee.tuleva.mortgage.document.DocumentRejectedException.Reason.EXTRACTION_FAILED;
 import static ee.tuleva.mortgage.document.DocumentRejectedException.Reason.NO_USABLE_FILE;
 
-import ee.tuleva.mortgage.borrower.Borrower;
-import ee.tuleva.mortgage.borrower.BorrowerService;
-import ee.tuleva.mortgage.borrower.PersonalCode;
 import ee.tuleva.mortgage.document.DocumentFile;
 import ee.tuleva.mortgage.document.DocumentProcessor;
 import ee.tuleva.mortgage.document.DocumentRejectedException;
@@ -14,6 +11,8 @@ import ee.tuleva.mortgage.document.ReceivedDocument;
 import ee.tuleva.mortgage.extraction.ExtractionException;
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
@@ -29,15 +28,25 @@ class LoanContractProcessor implements DocumentProcessor {
   record LoanContractResult(ExtractedLoanContract contract, LoanSummary summary) {}
 
   private final LoanContractExtractor extractor;
-  private final LoanAnalyzer analyzer;
+  private final LoanService loanService;
   private final StoredLoanContractRepository contracts;
-  private final BorrowerService borrowers;
   private final JsonMapper jsonMapper;
   private final Clock clock;
 
   @Override
   public DocumentType type() {
     return DocumentType.LOAN_CONTRACT;
+  }
+
+  @Override
+  public Optional<Object> storedResult(UUID documentId) {
+    return contracts
+        .findByDocumentId(documentId)
+        .map(
+            stored ->
+                new LoanContractResult(
+                    jsonMapper.readValue(stored.getContract(), ExtractedLoanContract.class),
+                    jsonMapper.readValue(stored.getSummary(), LoanSummary.class)));
   }
 
   @Override
@@ -53,17 +62,9 @@ class LoanContractProcessor implements DocumentProcessor {
       throw new DocumentRejectedException(EXTRACTION_FAILED, e.getMessage(), e);
     }
 
-    var borrower = borrowers.find(document.borrowerId());
-    var personalCode = borrower.map(Borrower::getPersonalCode).orElse(null);
     LoanSummary summary =
-        analyzer.analyze(
-            contract,
-            borrower.map(Borrower::getFirstName).orElse(null),
-            borrower.map(Borrower::getLastName).orElse(null),
-            personalCode != null && PersonalCode.isValid(personalCode)
-                ? PersonalCode.birthDate(personalCode)
-                : null,
-            document.verification().signedByBorrower());
+        loanService.analyze(
+            contract, document.borrowerId(), document.verification().signedByBorrower());
     contracts.save(
         StoredLoanContract.of(
             document.id(),

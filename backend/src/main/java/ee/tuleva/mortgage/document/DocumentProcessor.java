@@ -18,4 +18,10 @@ public interface DocumentProcessor {
 
   /** Returns the response body shown to the borrower for confirmation. */
   Object process(ReceivedDocument document);
+
+  /**
+   * The stored result of a document processed earlier, e.g. before a restart cleared the in-memory
+   * one. Anything not stored (such as statement transactions) is left out.
+   */
+  java.util.Optional<Object> storedResult(java.util.UUID documentId);
 }

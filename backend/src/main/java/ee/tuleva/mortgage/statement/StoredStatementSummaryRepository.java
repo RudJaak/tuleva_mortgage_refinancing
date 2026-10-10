@@ -1,6 +1,10 @@
 package ee.tuleva.mortgage.statement;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-interface StoredStatementSummaryRepository extends JpaRepository<StoredStatementSummary, UUID> {}
+interface StoredStatementSummaryRepository extends JpaRepository<StoredStatementSummary, UUID> {
+
+  Optional<StoredStatementSummary> findByDocumentId(UUID documentId);
+}

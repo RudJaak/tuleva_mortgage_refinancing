@@ -2,6 +2,7 @@ import { FormattedMessage } from 'react-intl'
 import { Link } from 'react-router-dom'
 import { Placeholder } from '../layout/Placeholder'
 import { flowSteps, paths, type FlowStep } from '../paths'
+import { LoanStep } from '../loan/LoanStep'
 import { StatementsStep } from '../statements/StatementsStep'
 
 export function FlowStepPage({ section }: { section: FlowStep['section'] }) {
@@ -18,7 +19,9 @@ export function FlowStepPage({ section }: { section: FlowStep['section'] }) {
           <FormattedMessage id={`flow.${section}.lead`} />
         </p>
       </div>
-      {section === 'statements' ? (
+      {section === 'loan' ? (
+        <LoanStep />
+      ) : section === 'statements' ? (
         <StatementsStep />
       ) : (
         <Placeholder>

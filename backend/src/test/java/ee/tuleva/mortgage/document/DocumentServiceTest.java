@@ -213,6 +213,24 @@ class DocumentServiceTest {
             });
   }
 
+  @Test
+  void aDocumentProcessedBeforeARestartShowsItsStoredResult() {
+    var earlier =
+        Document.received(
+            BORROWER, DocumentType.ACCOUNT_STATEMENT, "0".repeat(64), SEALED, clock.instant());
+    earlier.processed();
+    var service = service(false, Runnable::run);
+    saved.add(earlier);
+
+    assertThat(service.list(BORROWER, DocumentType.ACCOUNT_STATEMENT))
+        .singleElement()
+        .satisfies(
+            view -> {
+              assertThat(view.status()).isEqualTo(DocumentStatus.PROCESSED);
+              assertThat(view.result()).isEqualTo("stored");
+            });
+  }
+
   private static class RecordingProcessor implements DocumentProcessor {
     ReceivedDocument received;
     RuntimeException failWith;
@@ -225,6 +243,11 @@ class DocumentServiceTest {
     @Override
     public boolean bankSealCanBeRequired() {
       return true;
+    }
+
+    @Override
+    public java.util.Optional<Object> storedResult(UUID documentId) {
+      return java.util.Optional.of("stored");
     }
 
     @Override

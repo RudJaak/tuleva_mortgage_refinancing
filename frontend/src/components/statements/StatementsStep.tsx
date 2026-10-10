@@ -1,10 +1,10 @@
 import { FormattedMessage } from 'react-intl'
 import { Link } from 'react-router-dom'
 import { ApiError } from '../../api/client'
+import { DocumentUpload } from '../documents/DocumentUpload'
 import { paths } from '../paths'
 import { useStatementDocuments, useUploadStatement } from './api'
 import { StatementCard } from './StatementCard'
-import { StatementUpload } from './StatementUpload'
 
 export function StatementsStep() {
   const documents = useStatementDocuments()
@@ -14,7 +14,7 @@ export function StatementsStep() {
     return (
       <p className="alert alert-info mb-0">
         <FormattedMessage
-          id="statements.loginRequired"
+          id="documents.loginRequired"
           values={{ link: (text) => <Link to={paths.login}>{text}</Link> }}
         />
       </p>
@@ -23,7 +23,9 @@ export function StatementsStep() {
 
   return (
     <div className="d-flex flex-column gap-4">
-      <StatementUpload
+      <DocumentUpload
+        hintId="statements.upload.hint"
+        chooseId="statements.upload.choose"
         onSelect={(file) => upload.mutate(file)}
         pending={upload.isPending}
         error={upload.error}
