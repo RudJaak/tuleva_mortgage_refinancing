@@ -3,7 +3,6 @@ export const paths = {
   login: '/sisene',
   loan: '/laen',
   property: '/vara',
-  household: '/leibkond',
   statements: '/valjavotted',
   review: '/kinnitus',
   done: '/valmis',
@@ -12,7 +11,6 @@ export const paths = {
 export const flowSteps = [
   { path: paths.loan, labelId: 'flow.step.loan', section: 'loan' },
   { path: paths.property, labelId: 'flow.step.property', section: 'property' },
-  { path: paths.household, labelId: 'flow.step.household', section: 'household' },
   { path: paths.statements, labelId: 'flow.step.statements', section: 'statements' },
   { path: paths.review, labelId: 'flow.step.review', section: 'review' },
 ] as const

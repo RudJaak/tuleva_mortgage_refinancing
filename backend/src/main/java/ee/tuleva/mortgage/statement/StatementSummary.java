@@ -24,6 +24,15 @@ record StatementSummary(
     HolderCheck holderCheck,
     List<Flag> flags) {
 
+  /** Summaries stored before a field existed come back without it; read those as empty. */
+  StatementSummary {
+    monthsAnalysed = monthsAnalysed == null ? monthsCovered : monthsAnalysed;
+    obligations = obligations == null ? List.of() : obligations;
+    oneOffPayments = oneOffPayments == null ? List.of() : oneOffPayments;
+    monthlyCardRepayments = monthlyCardRepayments == null ? BigDecimal.ZERO : monthlyCardRepayments;
+    flags = flags == null ? List.of() : flags;
+  }
+
   record Income(
       BigDecimal averageMonthlySalary,
       BigDecimal lowestMonthlySalary,
@@ -31,7 +40,12 @@ record StatementSummary(
       int employers,
       BigDecimal averageMonthlyOtherIncome,
       BigDecimal averageMonthlyTotal,
-      List<OneOffIncome> oneOffIncome) {}
+      List<OneOffIncome> oneOffIncome) {
+
+    Income {
+      oneOffIncome = oneOffIncome == null ? List.of() : oneOffIncome;
+    }
+  }
 
   /** Other income that does not recur, e.g. a single benefit payment; not in the averages. */
   record OneOffIncome(String payer, LocalDate date, BigDecimal amount) {}

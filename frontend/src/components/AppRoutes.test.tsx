@@ -21,7 +21,6 @@ describe('AppRoutes', () => {
     [paths.login, 'Tuvasta end'],
     [paths.loan, 'Sinu kodulaen'],
     [paths.property, 'Sinu kodu'],
-    [paths.household, 'Leibkond ja kohustused'],
     [paths.statements, 'Kontoväljavõtted'],
     [paths.review, 'Kontrolli ja kinnita'],
     [paths.done, 'Oled ühispakkumises'],
@@ -33,11 +32,11 @@ describe('AppRoutes', () => {
   })
 
   it('marks the current flow step', () => {
-    renderAt(paths.household)
+    renderAt(paths.property)
 
     const current = screen
       .getAllByRole('listitem')
       .find((item) => item.getAttribute('aria-current') === 'step')
-    expect(current).toHaveTextContent('Leibkond')
+    expect(current).toHaveTextContent('Kodu')
   })
 })

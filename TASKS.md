@@ -11,7 +11,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 | Lane | Focus | Tasks |
 |---|---|---|
 | **A: Platform** | repo, backend skeleton, auth, signing | T01–T06, T40–T42 |
-| **B: Frontend** | landing page, calculator, tracker, flow screens | T10–T15, T30–T34, T43 |
+| **B: Frontend** | landing page, calculator, tracker, flow screens | T10–T15, T30, T31, T33, T34, T43 |
 | **C: Documents** | upload pipeline, extraction, statements | T20–T27 |
 | **D: Domain** | property lookups, risk class, pool stats, synthetic data | T16–T17, T35–T38, T50–T51 |
 
@@ -44,7 +44,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - **Done when:** the migrations apply cleanly and repository slice tests pass.
 - **Outcome (part 1):**
   - `V2__borrower_and_commitment.sql`. `borrower` has a nullable personal code and a `synthetic` flag. `commitment` stores the committed balance (RREL30), the current margin (RREL46) and a `SIGNED`/`WITHDRAWN` status, with one signed commitment per borrower.
-  - **The other tables (loan, property, liability, statement_summary, document, field provenance) are added with the tasks that use them** (T20, T22, T30–T32), so we don't design them before they're needed.
+  - **The other tables (loan, property, liability, statement_summary, document, field provenance) are added with the tasks that use them** (T20, T22, T30, T31), so we don't design them before they're needed.
 
 ### T04 Auth: Mobile-ID + Smart-ID (SK demo) · A · 3h · after T02 · 🟡 stub done, SK integration deferred
 - **Already in place (T15):**
@@ -129,10 +129,6 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - Ehitisregister public API: from ADS / EHR code to building type, area, year built, **energy class** (from the energy certificate).
 - Stub fallback.
 - **Verify the endpoint first.**
-
-### T32 Household & liabilities step `/leibkond` · B · 2h · after T15
-- Fields: adults, dependants, co-borrower flag (D19), marital status, property regime (ühisvara / lahusvara / vara lahusus abieluvaraleping), employment type, other loans, leases and guarantees.
-- Pre-filled from the statement summary when available.
 
 ### T33 Statements step `/valjavotted` · B · 2.5h · after T15, T22 · 🟡 single upload done
 - Done: upload on `/valjavotted` with an instant seal badge, an estimated progress bar with stage messages while Claude reads (the borrower can move on), and a summary card per statement.
@@ -233,7 +229,7 @@ POST /v1/auth/mobile-id            GET /v1/auth/mobile-id/status
 POST /v1/auth/smart-id             GET /v1/auth/smart-id/status
 GET  /v1/me                        (borrower + progress)
 POST /v1/documents                 GET /v1/documents/{id}        (status + extraction)
-PUT  /v1/me/loan                   PUT /v1/me/property           PUT /v1/me/household
+PUT  /v1/me/loan                   PUT /v1/me/property
 GET  /v1/me/statements/summary
 GET  /v1/address/search?q=         GET /v1/buildings/{adsId}
 GET  /v1/me/risk-class
