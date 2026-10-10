@@ -25,6 +25,10 @@ ldapsearch -H ldaps://esteid.ldap.sk.ee/ -x -b "c=EE" "(serialNumber=PNOEE-<code
 ldapsearch -H ldaps://ldap.eidpki.ee/ -x -b "dc=ldap,dc=eidpki,dc=ee" "(serialNumber=PNOEE-<code>)" cn
 ```
 
+## Connecting from Java
+
+SK's directory only negotiates TLS 1.2 with RSA key exchange (`AES256-GCM-SHA384`). Java 24 and later disable that family by default (`TLS_RSA_*` in `jdk.tls.disabledAlgorithms`), and the list cannot be relaxed per connection, so the handshake fails. The backend removes only that entry at startup (`EidDirectoryTls`). Zetes' directory works with the defaults.
+
 ## Considerations
 
 - **Purpose.** The directories exist so that anyone can encrypt a document for a person. Using them to greet a demo user by name is a different purpose. The data is public, but this is still processing of personal data.
