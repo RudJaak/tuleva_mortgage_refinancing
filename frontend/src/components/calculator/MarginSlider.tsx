@@ -16,7 +16,6 @@ function thumbCentre(value: number): CSSProperties {
 export function MarginSlider({
   id,
   value,
-  disabled,
   marker,
   markerLabel,
   format,
@@ -24,7 +23,6 @@ export function MarginSlider({
 }: {
   id: string
   value: number
-  disabled: boolean
   marker: number
   markerLabel: string
   format: (value: number) => string
@@ -43,7 +41,6 @@ export function MarginSlider({
         max={max}
         step={step}
         value={value}
-        disabled={disabled}
         aria-valuetext={format(value)}
         onChange={(event) => onChange(Number(event.target.value))}
       />

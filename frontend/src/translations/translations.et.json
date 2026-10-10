@@ -26,8 +26,6 @@
   "calculator.balance": "Laenujääk",
   "calculator.years": "Laenu lõpuni",
   "calculator.margin": "Sinu praegune marginaal",
-  "calculator.marginUnknown": "Ei tea oma marginaali",
-  "calculator.marginUnknownHint": "Kasutame tüüpilist marginaali {margin}. Täpse numbri leiad laenulepingust.",
   "calculator.marketAverage": "Uute laenude keskmine ~{margin}",
   "calculator.scenario": "Ühispakkumise tulemus",
   "calculator.scenario.worst": "Tagasihoidlik",

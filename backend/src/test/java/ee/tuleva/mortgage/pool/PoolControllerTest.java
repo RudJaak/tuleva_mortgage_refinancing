@@ -54,7 +54,7 @@ class PoolControllerTest {
         .perform(get("/v1/config/public"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.calculator.euribor6m").value(2.936))
-        .andExpect(jsonPath("$.calculator.defaultMargin").value(1.70))
+        .andExpect(jsonPath("$.calculator.defaultMargin").value(1.80))
         .andExpect(jsonPath("$.pool.deadline").value("2026-11-10T00:00:00+02:00"))
         .andExpect(jsonPath("$.pool.minimumMembers").value(1000))
         .andExpect(jsonPath("$.pool.milestones.length()").value(3))

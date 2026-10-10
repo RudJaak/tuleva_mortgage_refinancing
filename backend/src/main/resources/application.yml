@@ -75,7 +75,7 @@ app:
   calculator:
     euribor6m: 2.936
     euribor-date: 2026-10-08
-    default-margin: 1.70
+    default-margin: 1.80
     market-average-margin: 1.60
     switching-cost: 400
     annual-discount-rate: 3

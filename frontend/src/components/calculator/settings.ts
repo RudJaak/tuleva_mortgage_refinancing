@@ -16,7 +16,7 @@ export type CalculatorSettings = {
 export const defaultCalculatorSettings: CalculatorSettings = {
   euribor6m: 2.936,
   euriborDate: '2026-10-08',
-  defaultMargin: 1.7,
+  defaultMargin: 1.8,
   marketAverageMargin: 1.6,
   switchingCost: 400,
   annualDiscountRate: 3,

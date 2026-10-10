@@ -16,19 +16,18 @@ type CalculatorInputs = {
   balance: string
   years: string
   months: string
-  margin: number
-  marginUnknown: boolean
+  // null until the borrower moves the slider: the configured default margin applies
+  margin: number | null
   scenario: Scenario
 }
 
-export const calculatorStorageKey = 'mortgage-pool.calculator'
+export const calculatorStorageKey = 'mortgage-pool.calculator.v2'
 
 const initialInputs: CalculatorInputs = {
-  balance: '125000',
+  balance: '180000',
   years: '20',
-  months: '0',
-  margin: 1.85,
-  marginUnknown: false,
+  months: '6',
+  margin: null,
   scenario: 'expected',
 }
 
@@ -51,8 +50,7 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
   const remainingMonths =
     validated?.remainingMonths ??
     Math.round(toNumber(inputs.years) * 12) + Math.min(Math.round(toNumber(inputs.months)), 11)
-  const currentMargin =
-    validated?.margin ?? (inputs.marginUnknown ? settings.defaultMargin : inputs.margin)
+  const currentMargin = validated?.margin ?? inputs.margin ?? settings.defaultMargin
   const targetMargin = margins[inputs.scenario]
 
   const result = compareMargins({
@@ -112,7 +110,7 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
                       min={0}
                       max={2_000_000}
                       step={1000}
-                      placeholder="125000"
+                      placeholder="180000"
                       value={inputs.balance}
                       onChange={(event) => update({ balance: event.target.value })}
                     />
@@ -170,7 +168,6 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
                   <MarginSlider
                     id={`${id}-margin`}
                     value={currentMargin}
-                    disabled={inputs.marginUnknown}
                     marker={settings.marketAverageMargin}
                     markerLabel={intl.formatMessage(
                       { id: 'calculator.marketAverage' },
@@ -184,26 +181,6 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
                     format={percent}
                     onChange={(margin) => update({ margin })}
                   />
-                  <div className="form-check mt-2">
-                    <input
-                      id={`${id}-unknown`}
-                      type="checkbox"
-                      className="form-check-input"
-                      checked={inputs.marginUnknown}
-                      onChange={(event) => update({ marginUnknown: event.target.checked })}
-                    />
-                    <label htmlFor={`${id}-unknown`} className="form-check-label small">
-                      <FormattedMessage id="calculator.marginUnknown" />
-                    </label>
-                  </div>
-                  {inputs.marginUnknown && (
-                    <p className="small text-body-secondary mt-1 mb-0">
-                      <FormattedMessage
-                        id="calculator.marginUnknownHint"
-                        values={{ margin: percent(settings.defaultMargin) }}
-                      />
-                    </p>
-                  )}
                 </div>
               </div>
             </>

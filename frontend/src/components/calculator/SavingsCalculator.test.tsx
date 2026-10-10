@@ -38,7 +38,7 @@ describe('SavingsCalculator', () => {
     renderCalculator()
     const before = Number(lifetimeSaving()!.replace(/\D/g, ''))
 
-    await userEvent.type(screen.getByLabelText('Laenu lõpuni, lisaks kuud'), '{backspace}6')
+    await userEvent.type(screen.getByLabelText('Laenu lõpuni, lisaks kuud'), '{backspace}9')
 
     expect(Number(lifetimeSaving()!.replace(/\D/g, ''))).toBeGreaterThan(before)
   })
@@ -66,13 +66,12 @@ describe('SavingsCalculator', () => {
     expect(best).toBeGreaterThan(modest)
   })
 
-  it('falls back to a typical margin when the borrower does not know theirs', async () => {
+  it('starts from a typical loan with the configured default margin', () => {
     renderCalculator()
 
-    await userEvent.click(screen.getByLabelText('Ei tea oma marginaali'))
-
-    expect(screen.getByLabelText('Sinu praegune marginaal')).toBeDisabled()
-    expect(screen.getByText(/Kasutame tüüpilist marginaali 1,70%/)).toBeInTheDocument()
+    expect(screen.getByLabelText('Laenujääk')).toHaveValue(180000)
+    expect(screen.getByLabelText('Laenu lõpuni, lisaks kuud')).toHaveValue(6)
+    expect(screen.getByLabelText('Sinu praegune marginaal')).toHaveValue('1.8')
   })
 
   it('explains when the scenario would not save anything', async () => {
@@ -86,12 +85,12 @@ describe('SavingsCalculator', () => {
     const { unmount } = renderCalculator()
     const balance = screen.getByLabelText('Laenujääk')
     await userEvent.clear(balance)
-    await userEvent.type(balance, '180000')
+    await userEvent.type(balance, '250000')
     unmount()
 
     renderCalculator()
 
-    expect(screen.getByLabelText('Laenujääk')).toHaveValue(180000)
+    expect(screen.getByLabelText('Laenujääk')).toHaveValue(250000)
   })
 
   it('shows validated loan figures without editable inputs', () => {
