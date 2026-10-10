@@ -1,0 +1,4 @@
+// Programmatic focus for screen readers only: the paragraph can't be tabbed to, so no ring
+.focused-paragraph:focus {
+  outline: none;
+}
