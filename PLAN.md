@@ -45,6 +45,7 @@ Build a **borrower-facing** app that:
 | D31 | **Demo feedback round 1.** The pool is counted in **people, not euros**, so any balance feels welcome: minimum 1 000 people → 1.35%, 2 500 → 1.30%, 5 000 → 1.20% (worst / expected / best scenario in the calculator; placeholders, D18). **Deadline 10.11.2026 00:00 Tallinn time.** Landing order: tracker, calculator, join button. Every flow step explains why it asks and what happens to the data (describing a model running on our own server). The loan screening lists what was checked and found | 2026-10-10 |
 | D32 | **Tuleva membership is required to join the pool** (supersedes D10): the €150 fee is a cost of joining in the savings calculation, shown struck through for members. After login an emulated check confirms membership (every demo login is a member). **A payment-default check comes after the documents** (it is a paid query): emulated Creditinfo query on Kinnitus, run only with consent, required before signing; only the result is stored (docs/research/11) | 2026-10-10 |
 | D33 | **The teammates' facts, statistics and slogans go in the presentation, not on the landing page** (supersedes D17): the landing page is heading, pool tracker, calculator and CTA | 2026-10-10 |
+| D34 | **Margin ladder** (updates D31): 1 000 people → 1.30%, 2 500 → 1.25%, 5 000 → 1.20% (worst / expected / best scenario; placeholders, D18) | 2026-10-10 |
 
 ## Non-goals for the hackathon
 

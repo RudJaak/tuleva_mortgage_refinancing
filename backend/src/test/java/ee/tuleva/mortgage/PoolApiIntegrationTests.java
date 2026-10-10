@@ -27,7 +27,7 @@ class PoolApiIntegrationTests {
     assertThat(stats.get("committedVolume").decimalValue()).isEqualByComparingTo("60000000");
     assertThat(stats.get("minimumReached").asBoolean()).isFalse();
     assertThat(stats.get("nextMilestone").get("margin").decimalValue())
-        .isEqualByComparingTo("1.35");
+        .isEqualByComparingTo("1.30");
   }
 
   @Test

@@ -67,9 +67,9 @@ app:
     privacy-threshold: 10
     milestones:
       - members: 1000
-        margin: 1.35
-      - members: 2500
         margin: 1.30
+      - members: 2500
+        margin: 1.25
       - members: 5000
         margin: 1.20
   calculator:

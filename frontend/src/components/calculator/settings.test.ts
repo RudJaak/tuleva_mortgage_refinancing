@@ -5,8 +5,8 @@ import { defaultCalculatorSettings, scenarioMargins, toCalculatorSettings } from
 describe('scenarioMargins', () => {
   it('maps the three ladder tiers to the modest, goal and best scenarios', () => {
     expect(scenarioMargins(defaultCalculatorSettings)).toEqual({
-      worst: 1.35,
-      expected: 1.3,
+      worst: 1.3,
+      expected: 1.25,
       best: 1.2,
     })
   })
@@ -16,7 +16,7 @@ describe('scenarioMargins', () => {
 
     expect(
       scenarioMargins({ ...defaultCalculatorSettings, ladder: [third, first, second] }),
-    ).toEqual({ worst: 1.35, expected: 1.3, best: 1.2 })
+    ).toEqual({ worst: 1.3, expected: 1.25, best: 1.2 })
   })
 })
 
@@ -28,7 +28,7 @@ describe('toCalculatorSettings', () => {
     })
 
     expect(settings.euribor6m).toBe(3.1)
-    expect(scenarioMargins(settings)).toEqual({ worst: 1.35, expected: 1.3, best: 1.2 })
+    expect(scenarioMargins(settings)).toEqual({ worst: 1.3, expected: 1.25, best: 1.2 })
   })
 
   it('keeps the default ladder when the config has fewer than three milestones', () => {

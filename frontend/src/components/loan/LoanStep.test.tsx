@@ -133,7 +133,7 @@ describe('LoanStep', () => {
     expect(within(confirmed).getByText(/Kõik allolevad tingimused on täidetud/)).toBeInTheDocument()
     expect(within(confirmed).getAllByTestId('loan-check')[0]).toHaveTextContent(/Intress on ujuv/)
     expect(
-      within(confirmed).getByText(/on kõrgem kui ühispakkumise esimene eesmärk 1,35%/),
+      within(confirmed).getByText(/on kõrgem kui ühispakkumise esimene eesmärk 1,30%/),
     ).toBeInTheDocument()
 
     await userEvent.click(within(confirmed).getByRole('button', { name: 'Muuda andmeid' }))
@@ -145,8 +145,8 @@ describe('LoanStep', () => {
     renderStep()
 
     await screen.findByTestId('confirmed-loan')
-    expect(screen.getByRole('radio', { name: /Tagasihoidlik/ })).toHaveAccessibleName(/1,35%/)
-    expect(screen.getByRole('radio', { name: /Eesmärk/ })).toHaveAccessibleName(/1,30%/)
+    expect(screen.getByRole('radio', { name: /Tagasihoidlik/ })).toHaveAccessibleName(/1,30%/)
+    expect(screen.getByRole('radio', { name: /Eesmärk/ })).toHaveAccessibleName(/1,25%/)
     expect(screen.getByRole('radio', { name: /Parim/ })).toHaveAccessibleName(/1,20%/)
   })
 

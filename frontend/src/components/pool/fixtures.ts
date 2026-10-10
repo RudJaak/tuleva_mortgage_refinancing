@@ -1,8 +1,8 @@
 import type { PoolStats, PublicConfig } from './api'
 
 export const milestones = [
-  { members: 1000, margin: 1.35 },
-  { members: 2500, margin: 1.3 },
+  { members: 1000, margin: 1.3 },
+  { members: 2500, margin: 1.25 },
   { members: 5000, margin: 1.2 },
 ]
 

@@ -58,7 +58,7 @@ class PoolControllerTest {
         .andExpect(jsonPath("$.pool.deadline").value("2026-11-10T00:00:00+02:00"))
         .andExpect(jsonPath("$.pool.minimumMembers").value(1000))
         .andExpect(jsonPath("$.pool.milestones.length()").value(3))
-        .andExpect(jsonPath("$.pool.milestones[0].margin").value(1.35))
+        .andExpect(jsonPath("$.pool.milestones[0].margin").value(1.30))
         .andExpect(jsonPath("$.pool.milestones[2].margin").value(1.20));
   }
 }

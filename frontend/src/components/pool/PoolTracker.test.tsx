@@ -19,7 +19,7 @@ describe('PoolTracker', () => {
     renderWithProviders(<PoolTracker />)
 
     expect(
-      await screen.findByText('Miinimum 1000 inimest: eesmärk-marginaal 1,35%'),
+      await screen.findByText('Miinimum 1000 inimest: eesmärk-marginaal 1,30%'),
     ).toBeInTheDocument()
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '52')
     expect(screen.getByText('Puudu 480 inimest')).toBeInTheDocument()
@@ -43,7 +43,7 @@ describe('PoolTracker', () => {
     expect(within(cards[0]).getByText('✓ Saavutatud')).toBeInTheDocument()
     expect(within(cards[1]).queryByText('✓ Saavutatud')).not.toBeInTheDocument()
     expect(
-      screen.getByText('Järgmine verstapost 2500 inimest: eesmärk-marginaal 1,30%'),
+      screen.getByText('Järgmine verstapost 2500 inimest: eesmärk-marginaal 1,25%'),
     ).toBeInTheDocument()
   })
 
