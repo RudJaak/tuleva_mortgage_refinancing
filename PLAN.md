@@ -46,6 +46,7 @@ Build a **borrower-facing** app that:
 | D32 | **Tuleva membership is required to join the pool** (supersedes D10): the €150 fee is a cost of joining in the savings calculation, shown struck through for members. After login an emulated check confirms membership (every demo login is a member). **A payment-default check comes after the documents** (it is a paid query): emulated Creditinfo query on Kinnitus, run only with consent, required before signing; only the result is stored (docs/research/11) | 2026-10-10 |
 | D33 | **The teammates' facts, statistics and slogans go in the presentation, not on the landing page** (supersedes D17): the landing page is heading, pool tracker, calculator and CTA | 2026-10-10 |
 | D34 | **Margin ladder** (updates D31): 1 000 people → 1.30%, 2 500 → 1.25%, 5 000 → 1.20% (worst / expected / best scenario; placeholders, D18) | 2026-10-10 |
+| D35 | **The signature is presented as a non-binding statement of intent** (softens D1): the UI calls it an *osalemissoov*, says it is not a contract or a loan application, and that the borrower decides only after seeing the offer and can withdraw at any time. The signature and documents show banks the interest is real. The mechanics of the commitment model are unchanged | 2026-10-10 |
 
 ## Non-goals for the hackathon
 
@@ -68,7 +69,7 @@ Why commit at all? Incumbent banks can match any outside offer, and about 40% of
 - **What gets signed:** the intent to switch, plus a consent package:
   - share pseudonymised data in the tender;
   - release identifiable data only to the winning bank.
-- **Not legally a loan contract.** It's a signed declaration of intent, or mandate. It is weakly enforceable by design. Its value is signalling to banks and adding friction to backing out.
+- **Not legally a loan contract.** It's a signed declaration of intent, or mandate, and the UI says so plainly (D35). It is weakly enforceable by design. Its value is signalling to banks and adding friction to backing out.
 - **Legal flag:** collecting signed switching mandates is even more clearly **mortgage credit intermediation** (KAVS § 4). The demo should label the operator "Tuleva or a licensed partner (TBD)".
 - **Stretch goal (D15):** authorise the 90-day early-repayment notice to the current bank as part of signing.
 
