@@ -126,7 +126,7 @@ describe('SavingsCalculator', () => {
     renderCalculator({ balance: 150000, remainingMonths: 240, margin: 1.9 })
 
     expect(await screen.findByTestId('membership-fee')).toHaveTextContent(
-      /^Tuleva liikmeks astumine 150\s€$/,
+      /^Tuleva liikmeks astumine 150\s€, ühispakkumisega liitumiseks vajalik$/,
     )
   })
 
@@ -134,7 +134,7 @@ describe('SavingsCalculator', () => {
     mockApi({ '/v1/me/membership': { member: true } })
     renderCalculator({ balance: 150000, remainingMonths: 240, margin: 1.9 })
 
-    const fee = await screen.findByText(/oled juba liige/)
+    const fee = await screen.findByText(/sinul juba tehtud/)
     expect(fee.querySelector('s')).toHaveTextContent(/150\s€/)
   })
 })

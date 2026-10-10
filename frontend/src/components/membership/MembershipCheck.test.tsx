@@ -24,7 +24,7 @@ describe('MembershipCheck', () => {
     expect(await screen.findByTestId('membership-member')).toHaveTextContent(
       'Suurepärane, oled juba Tuleva liige!',
     )
-    expect(screen.getByTestId('membership-member')).toHaveTextContent(/150\s€/)
+    expect(screen.getByTestId('membership-member')).not.toHaveTextContent(/150\s€/)
   })
 
   it('explains the fee to someone who is not a member', async () => {

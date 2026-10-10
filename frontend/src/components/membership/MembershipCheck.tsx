@@ -39,9 +39,6 @@ export function MembershipCheck() {
           <div className="fw-bold text-success">
             <FormattedMessage id="membership.member" />
           </div>
-          <div className="small text-body-secondary">
-            <FormattedMessage id="membership.memberDetail" values={{ fee }} />
-          </div>
         </div>
       </div>
     )
