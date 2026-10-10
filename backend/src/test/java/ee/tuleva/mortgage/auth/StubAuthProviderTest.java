@@ -33,18 +33,23 @@ class StubAuthProviderTest {
       new StubAuthProvider(
           new AuthProperties(
               "stub",
-              Duration.ofSeconds(3),
+              Duration.ofSeconds(2),
+              Duration.ofSeconds(10),
               new AuthProperties.StubPerson("40504040001", "Mari", "Maasikas")),
           clock);
 
   @Test
-  void confirmsTheLoginAfterTheConfiguredDelay() {
+  void mobileIdShowsTheCodeThenVerifiesThenLogsIn() {
     var challenge = provider.start(AuthMethod.MOBILE_ID, "60001017869", "+37268000769");
 
-    now = now.plusSeconds(2);
+    now = now.plusSeconds(9);
     assertThat(provider.poll(challenge.loginId()).status()).isEqualTo(AuthProvider.Status.PENDING);
 
     now = now.plusSeconds(1);
+    assertThat(provider.poll(challenge.loginId()).status())
+        .isEqualTo(AuthProvider.Status.VERIFYING);
+
+    now = now.plusSeconds(2);
     var outcome = provider.poll(challenge.loginId());
     assertThat(outcome.status()).isEqualTo(AuthProvider.Status.COMPLETE);
     assertThat(outcome.person().personalCode()).isEqualTo("60001017869");
@@ -62,7 +67,7 @@ class StubAuthProviderTest {
   @Test
   void logsInTheStubPersonWhenNoPersonalCodeIsGiven() {
     var challenge = provider.start(AuthMethod.ID_CARD, null, null);
-    now = now.plusSeconds(3);
+    now = now.plusSeconds(2);
 
     assertThat(provider.poll(challenge.loginId()).person().personalCode()).isEqualTo("40504040001");
   }
@@ -74,7 +79,7 @@ class StubAuthProviderTest {
     assertThat(provider.poll(cancelled.loginId()).status()).isEqualTo(AuthProvider.Status.FAILED);
 
     var completed = provider.start(AuthMethod.SMART_ID, null, null);
-    now = now.plusSeconds(3);
+    now = now.plusSeconds(2);
     provider.poll(completed.loginId());
     assertThat(provider.poll(completed.loginId()).status()).isEqualTo(AuthProvider.Status.FAILED);
   }

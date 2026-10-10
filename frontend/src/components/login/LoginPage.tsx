@@ -35,6 +35,7 @@ export function LoginPage() {
             ) : (
               <VerificationCodeLoader
                 verificationCode={pending.verificationCode}
+                verifying={pending.verifying}
                 onCancel={cancel}
               />
             )}

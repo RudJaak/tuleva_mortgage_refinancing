@@ -217,5 +217,6 @@
   "statements.totals": "sissetulek {income}/kuus, laenumaksed {obligations}/kuus, koormus {ratio}",
   "statements.processing.heading": "Töötlemisel",
   "statements.household.heading": "Leibkond kokku",
-  "statements.unknownHolder": "Konto omanik tuvastamata"
+  "statements.unknownHolder": "Konto omanik tuvastamata",
+  "login.verifying": "Kinnitus saadud, logime sisse…"
 }

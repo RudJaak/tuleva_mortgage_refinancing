@@ -13,6 +13,8 @@ export type LoginState =
       loginId: string
       verificationCode: string | null
       deviceLink: string | null
+      /** Confirmed on the phone; the code is no longer needed while the login completes */
+      verifying?: boolean
     }
   | { phase: 'success'; firstName: string | null }
 
@@ -48,6 +50,14 @@ export function useLogin() {
       try {
         const result = await pollLogin(loginId)
         if (stopped || result.status === 'PENDING') {
+          return
+        }
+        if (result.status === 'VERIFYING') {
+          setState((current) =>
+            current.phase === 'pending'
+              ? { ...current, verificationCode: null, verifying: true }
+              : current,
+          )
           return
         }
         window.clearInterval(timer)

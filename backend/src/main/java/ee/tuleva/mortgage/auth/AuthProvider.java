@@ -20,6 +20,10 @@ public interface AuthProvider {
       return new Outcome(Status.PENDING, null);
     }
 
+    static Outcome verifying() {
+      return new Outcome(Status.VERIFYING, null);
+    }
+
     static Outcome complete(Person person) {
       return new Outcome(Status.COMPLETE, person);
     }
@@ -31,6 +35,8 @@ public interface AuthProvider {
 
   enum Status {
     PENDING,
+    /** Confirmed on the device, the login is being completed (the stub emulates this step). */
+    VERIFYING,
     COMPLETE,
     FAILED
   }

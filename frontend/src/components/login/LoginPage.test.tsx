@@ -9,6 +9,7 @@ type Call = { method: string; path: string; body: unknown }
 
 let calls: Call[]
 let pollsUntilComplete: number
+let verifyingPolls: number
 
 function json(body: unknown, status = 200) {
   return Promise.resolve(new Response(JSON.stringify(body), { status }))
@@ -17,6 +18,7 @@ function json(body: unknown, status = 200) {
 beforeEach(() => {
   calls = []
   pollsUntilComplete = 1
+  verifyingPolls = 0
   vi.mocked(fetch).mockImplementation((input, init) => {
     const path = String(input)
     const method = init?.method ?? 'GET'
@@ -36,11 +38,14 @@ beforeEach(() => {
     }
     if (method === 'GET' && path === '/v1/auth/logins/login-1') {
       pollsUntilComplete -= 1
-      return json(
-        pollsUntilComplete < 0
-          ? { status: 'COMPLETE', firstName: 'Mari' }
-          : { status: 'PENDING', firstName: null },
-      )
+      if (pollsUntilComplete >= 0) {
+        return json({ status: 'PENDING', firstName: null })
+      }
+      if (verifyingPolls > 0) {
+        verifyingPolls -= 1
+        return json({ status: 'VERIFYING', firstName: null })
+      }
+      return json({ status: 'COMPLETE', firstName: 'Mari' })
     }
     if (method === 'DELETE') {
       return Promise.resolve(new Response(null, { status: 204 }))
@@ -67,6 +72,23 @@ describe('LoginPage', () => {
     expect(screen.getByRole('tab', { name: 'Smart-ID' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByRole('tab', { name: 'Mobiil-ID' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'ID-kaart' })).toBeInTheDocument()
+  })
+
+  it('hides the Mobile-ID code once it is confirmed on the phone, then logs in', async () => {
+    pollsUntilComplete = 0
+    verifyingPolls = 1
+    renderLogin()
+    await userEvent.click(screen.getByRole('tab', { name: 'Mobiil-ID' }))
+    await userEvent.type(screen.getByLabelText('Isikukood'), '60001017869')
+    await userEvent.type(screen.getByLabelText('Telefoninumber'), '68000769')
+    await userEvent.click(screen.getByRole('button', { name: 'Sisenen' }))
+
+    expect(await screen.findByTestId('verification-code')).toHaveTextContent('1234')
+    expect(
+      await screen.findByText('Kinnitus saadud, logime sisse…', {}, success),
+    ).toBeInTheDocument()
+    expect(screen.queryByTestId('verification-code')).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText(/Mari/)).toBeInTheDocument(), success)
   })
 
   it('logs in with Mobile-ID after showing the verification code', async () => {

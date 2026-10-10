@@ -35,7 +35,8 @@ management:
 app:
   auth:
     mode: ${AUTH_MODE:stub}
-    stub-delay: 3s
+    stub-delay: 2s
+    stub-mobile-id-code: 10s
     stub-person:
       personal-code: "40504040001"
       first-name: Rudolf

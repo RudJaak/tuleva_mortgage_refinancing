@@ -27,7 +27,7 @@ class StubAuthProvider implements AuthProvider {
             personalCode != null ? personalCode : stubPerson.personalCode(),
             stubPerson.firstName(),
             stubPerson.lastName());
-    logins.put(loginId, new PendingLogin(person, clock.instant()));
+    logins.put(loginId, new PendingLogin(method, person, clock.instant()));
     return switch (method) {
       case MOBILE_ID -> new Challenge(loginId, verificationCode(), null);
       case SMART_ID -> new Challenge(loginId, null, "https://smart-id.com/demo?login=" + loginId);
@@ -41,9 +41,18 @@ class StubAuthProvider implements AuthProvider {
     if (login == null) {
       return Outcome.failed();
     }
-    Instant confirmedAt = login.startedAt().plus(properties.stubDelay());
-    if (clock.instant().isBefore(confirmedAt)) {
+    // Mobile-ID: the code stays on screen while the person confirms on their phone, then a short
+    // verifying step; other methods only take the delay
+    Instant confirmedOnDevice =
+        login.method() == AuthMethod.MOBILE_ID
+            ? login.startedAt().plus(properties.stubMobileIdCode())
+            : login.startedAt();
+    Instant now = clock.instant();
+    if (now.isBefore(confirmedOnDevice)) {
       return Outcome.pending();
+    }
+    if (now.isBefore(confirmedOnDevice.plus(properties.stubDelay()))) {
+      return login.method() == AuthMethod.MOBILE_ID ? Outcome.verifying() : Outcome.pending();
     }
     logins.remove(loginId);
     return Outcome.complete(login.person());
@@ -58,5 +67,5 @@ class StubAuthProvider implements AuthProvider {
     return String.format("%04d", random.nextInt(10_000));
   }
 
-  private record PendingLogin(Person person, Instant startedAt) {}
+  private record PendingLogin(AuthMethod method, Person person, Instant startedAt) {}
 }

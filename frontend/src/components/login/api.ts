@@ -10,7 +10,7 @@ export type LoginStart = {
 }
 
 export type LoginPoll = {
-  status: 'PENDING' | 'COMPLETE' | 'FAILED'
+  status: 'PENDING' | 'VERIFYING' | 'COMPLETE' | 'FAILED'
   firstName: string | null
 }
 
