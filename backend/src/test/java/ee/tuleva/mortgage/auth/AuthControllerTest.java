@@ -111,6 +111,7 @@ class AuthControllerTest {
         .perform(get("/v1/me").session(session))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.firstName").value("Mari"))
+        .andExpect(jsonPath("$.loginMethod").value("SMART_ID"))
         .andExpect(jsonPath("$.personalCode").doesNotExist());
   }
 

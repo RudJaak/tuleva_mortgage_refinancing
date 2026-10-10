@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { ApiError } from '../../api/client'
-import { cancelSigning, pollSigning, startSigning, type SigningMethod } from './api'
+import { cancelSigning, pollSigning, startSigning } from './api'
 
 export const signingPollIntervalMs = 1000
 
@@ -15,10 +15,10 @@ export function useSigning() {
   const queryClient = useQueryClient()
   const [state, setState] = useState<SigningState>({ phase: 'idle' })
 
-  const sign = useCallback(async (method: SigningMethod, phoneNumber?: string) => {
+  const sign = useCallback(async () => {
     setState({ phase: 'pending', signingId: '', verificationCode: null, verifying: false })
     try {
-      const start = await startSigning(method, phoneNumber)
+      const start = await startSigning()
       setState({
         phase: 'pending',
         signingId: start.signingId,

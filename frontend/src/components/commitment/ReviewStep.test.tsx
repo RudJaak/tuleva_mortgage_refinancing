@@ -15,10 +15,12 @@ const notCommitted: CommitmentView = {
 }
 
 function mockBackend({
+  loginMethod = 'SMART_ID',
   loan = confirmedLoan as unknown,
   commitment = notCommitted,
   signing = { status: 200, body: { signingId: 's1', verificationCode: '4321', firstName: 'Mari' } },
 }: {
+  loginMethod?: 'SMART_ID' | 'MOBILE_ID'
   loan?: unknown
   commitment?: CommitmentView
   signing?: { status: number; body: unknown }
@@ -28,6 +30,9 @@ function mockBackend({
     const path = String(input)
     const reply = (body: unknown, status = 200) =>
       Promise.resolve(new Response(body === null ? null : JSON.stringify(body), { status }))
+    if (path === '/v1/me') {
+      return reply({ firstName: 'Mari', lastName: 'Tamm', loginMethod })
+    }
     if (path === '/v1/me/loan') {
       return loan ? reply(loan) : reply(null, 404)
     }
@@ -74,28 +79,27 @@ describe('ReviewStep', () => {
       'madalam kui minu praegune marginaal 2,95%',
     )
     expect(screen.getByText(/Väljavõtteid pole lisatud/)).toBeInTheDocument()
-    const submit = screen.getByRole('button', { name: 'Allkirjastan ja liitun' })
+    const submit = screen.getByRole('button', { name: 'Allkirjastan Smart-ID-ga' })
     expect(submit).toBeDisabled()
 
     await userEvent.click(screen.getByRole('checkbox'))
     await userEvent.click(submit)
 
     expect(await screen.findByTestId('verification-code')).toHaveTextContent('4321')
-    expect(posts).toEqual([{ method: 'SMART_ID' }])
+    expect(posts).toEqual([{}])
     expect(await screen.findByText('Valmis-leht', {}, { timeout: 3000 })).toBeInTheDocument()
   })
 
-  it('signs with Mobile-ID using the phone number', async () => {
-    const posts = mockBackend()
+  it('signs with Mobile-ID when that is how the borrower logged in', async () => {
+    const posts = mockBackend({ loginMethod: 'MOBILE_ID' })
     renderStep()
 
     await userEvent.click(await screen.findByRole('checkbox'))
-    await userEvent.click(screen.getByLabelText('Mobiil-ID'))
-    await userEvent.type(screen.getByLabelText('Telefoninumber'), '55512345')
-    await userEvent.click(screen.getByRole('button', { name: 'Allkirjastan ja liitun' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Allkirjastan Mobiil-ID-ga' }))
 
-    await screen.findByTestId('verification-code')
-    expect(posts).toEqual([{ method: 'MOBILE_ID', phoneNumber: '+37255512345' }])
+    expect(await screen.findByTestId('verification-code')).toHaveTextContent('4321')
+    expect(posts).toEqual([{}])
+    expect(screen.queryByLabelText('Telefoninumber')).not.toBeInTheDocument()
   })
 
   it('asks for the loan before anyone can sign', async () => {
@@ -104,7 +108,7 @@ describe('ReviewStep', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Kinnita enne oma laenu andmed')
     await userEvent.click(screen.getByRole('checkbox'))
-    expect(screen.getByRole('button', { name: 'Allkirjastan ja liitun' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Allkirjastan Smart-ID-ga' })).toBeDisabled()
   })
 
   it('explains why a signature was refused', async () => {
@@ -112,7 +116,7 @@ describe('ReviewStep', () => {
     renderStep()
 
     await userEvent.click(await screen.findByRole('checkbox'))
-    await userEvent.click(screen.getByRole('button', { name: 'Allkirjastan ja liitun' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Allkirjastan Smart-ID-ga' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('parimast eesmärgist madalam')
   })
@@ -129,6 +133,6 @@ describe('ReviewStep', () => {
     renderStep()
 
     expect(await screen.findByTestId('already-committed')).toHaveTextContent('marginaaliga 1,85%')
-    expect(screen.queryByRole('button', { name: 'Allkirjastan ja liitun' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Allkirjastan/ })).not.toBeInTheDocument()
   })
 })

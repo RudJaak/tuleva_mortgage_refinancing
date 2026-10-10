@@ -61,6 +61,9 @@ class DemoFlowResetIntegrationTests {
     logIn(session);
     fillTheFlow(session);
     int before = joined();
+    mockMvc
+        .perform(get("/v1/me").session(session))
+        .andExpect(jsonPath("$.loginMethod").value("SMART_ID"));
 
     String signingId =
         JsonPath.read(
@@ -69,9 +72,7 @@ class DemoFlowResetIntegrationTests {
                     post("/v1/me/commitment/signing")
                         .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(
-                            """
-                            {"method": "SMART_ID"}"""))
+                        .content("{}"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()

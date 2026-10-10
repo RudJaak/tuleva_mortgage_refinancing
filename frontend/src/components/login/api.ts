@@ -15,7 +15,12 @@ export type LoginPoll = {
   firstName: string | null
 }
 
-export type Me = { firstName: string | null; lastName: string | null }
+export type Me = {
+  firstName: string | null
+  lastName: string | null
+  /** How they logged in; signing the commitment reuses it */
+  loginMethod: 'SMART_ID' | 'MOBILE_ID' | null
+}
 
 export const meQueryKey = ['me']
 

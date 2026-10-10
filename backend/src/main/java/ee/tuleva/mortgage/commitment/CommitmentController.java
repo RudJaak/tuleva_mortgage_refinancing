@@ -37,14 +37,26 @@ class CommitmentController {
     return commitments.current(borrowerId(session));
   }
 
+  /**
+   * Signs with the method of the login by default (and its Mobile-ID phone), so the borrower just
+   * presses the button; a request can name another method.
+   */
   @PostMapping("/signing")
-  CommitmentService.SigningStart sign(@RequestBody SignRequest request, HttpSession session) {
-    if (request.method() == AuthMethod.MOBILE_ID
-        && (request.phoneNumber() == null
-            || !ESTONIAN_MOBILE.matcher(request.phoneNumber()).matches())) {
+  CommitmentService.SigningStart sign(
+      @RequestBody(required = false) @Nullable SignRequest request, HttpSession session) {
+    AuthMethod method =
+        request != null && request.method() != null
+            ? request.method()
+            : CurrentBorrower.loginMethod(session).orElse(AuthMethod.SMART_ID);
+    String phoneNumber =
+        request != null && request.phoneNumber() != null
+            ? request.phoneNumber()
+            : CurrentBorrower.loginPhoneNumber(session).orElse(null);
+    if (method == AuthMethod.MOBILE_ID
+        && (phoneNumber == null || !ESTONIAN_MOBILE.matcher(phoneNumber).matches())) {
       throw new CommitmentRejectedException(PHONE_NUMBER_INVALID, "Phone number invalid");
     }
-    return commitments.startSigning(borrowerId(session), request.method(), request.phoneNumber());
+    return commitments.startSigning(borrowerId(session), method, phoneNumber);
   }
 
   @GetMapping("/signing/{signingId}")
@@ -74,7 +86,7 @@ class CommitmentController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
   }
 
-  record SignRequest(AuthMethod method, @Nullable String phoneNumber) {}
+  record SignRequest(@Nullable AuthMethod method, @Nullable String phoneNumber) {}
 
   record SigningStatus(AuthProvider.Status status) {}
 }

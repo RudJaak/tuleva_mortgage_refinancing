@@ -231,10 +231,6 @@
   "review.commitment.text": "Kinnitan, et viin oma kodulaenu üle pakkumise teinud panka, kui ühispakkumises saavutatud marginaal on madalam kui minu praegune marginaal {margin}.",
   "review.commitment.conditions": "Kohustus on tingimuslik. Kui ühispakkumine ei saavuta miinimummahtu või pakutud marginaal pole sinu omast madalam, ei pea sa midagi tegema. Liitumise saad tagasi võtta kuni ühispakkumise tähtajani. Ühispakkumise korraldaja on Tuleva või tema litsentseeritud partner. See ei ole laenupakkumine.",
   "review.consent": "Nõustun, et minu laenu ja sissetulekute andmed edastatakse pankadele isikustamata kujul. Isikustatud andmed saab ainult minu valitud pank ja ainult minu eraldi nõusolekul.",
-  "review.sign.method": "Allkirjasta",
-  "review.sign.SMART_ID": "Smart-ID",
-  "review.sign.MOBILE_ID": "Mobiil-ID",
-  "review.sign.submit": "Allkirjastan ja liitun",
   "review.sign.pending": "Allkirjastamine",
   "review.committed.heading": "Oled ühispakkumisega liitunud",
   "review.committed.lead": "Allkirjastasid tingimusliku kohustuse {date} marginaaliga {margin}.",
@@ -244,5 +240,7 @@
   "review.error.ALREADY_COMMITTED": "Oled juba liitunud.",
   "review.error.PHONE_NUMBER_INVALID": "Kontrolli telefoninumbrit.",
   "review.error.GENERIC": "Allkirjastamine ebaõnnestus. Proovi uuesti.",
-  "done.commitment": "Liitusid laenujäägiga {balance} ja praeguse marginaaliga {margin}."
+  "done.commitment": "Liitusid laenujäägiga {balance} ja praeguse marginaaliga {margin}.",
+  "review.sign.submit.SMART_ID": "Allkirjastan Smart-ID-ga",
+  "review.sign.submit.MOBILE_ID": "Allkirjastan Mobiil-ID-ga"
 }

@@ -27,8 +27,8 @@ export function useCommitment() {
   })
 }
 
-export const startSigning = (method: SigningMethod, phoneNumber?: string) =>
-  api.post<SigningStart>('/v1/me/commitment/signing', { method, phoneNumber })
+/** Signs with the login's method (and Mobile-ID phone), which the backend keeps in the session. */
+export const startSigning = () => api.post<SigningStart>('/v1/me/commitment/signing', {})
 
 export const pollSigning = (signingId: string) =>
   api.get<{ status: SigningStatus }>(`/v1/me/commitment/signing/${signingId}`)

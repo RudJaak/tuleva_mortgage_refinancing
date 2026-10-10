@@ -27,7 +27,11 @@ import org.springframework.web.server.ResponseStatusException;
 class AuthController {
 
   static final String BORROWER_ID = "borrowerId";
+  static final String LOGIN_METHOD = "loginMethod";
+  static final String LOGIN_PHONE = "loginPhone";
   private static final String PENDING_LOGIN = "pendingLogin";
+  private static final String PENDING_METHOD = "pendingMethod";
+  private static final String PENDING_PHONE = "pendingPhone";
   private static final Pattern ESTONIAN_MOBILE = Pattern.compile("\\+372\\d{7,8}");
 
   private final AuthProvider authProvider;
@@ -41,6 +45,12 @@ class AuthController {
     String personalCode = requireValid(authMethod, request);
     var challenge = authProvider.start(authMethod, personalCode, request.phoneNumber());
     session.setAttribute(PENDING_LOGIN, challenge.loginId());
+    session.setAttribute(PENDING_METHOD, authMethod);
+    if (authMethod == AuthMethod.MOBILE_ID) {
+      session.setAttribute(PENDING_PHONE, request.phoneNumber());
+    } else {
+      session.removeAttribute(PENDING_PHONE);
+    }
     return new StartResponse(
         challenge.loginId(), challenge.verificationCode(), challenge.firstName());
   }
@@ -58,6 +68,11 @@ class AuthController {
     request.changeSessionId();
     session.removeAttribute(PENDING_LOGIN);
     session.setAttribute(BORROWER_ID, borrower.getId());
+    // Signing the commitment later uses the same method (and Mobile-ID phone) as the login
+    session.setAttribute(LOGIN_METHOD, session.getAttribute(PENDING_METHOD));
+    session.setAttribute(LOGIN_PHONE, session.getAttribute(PENDING_PHONE));
+    session.removeAttribute(PENDING_METHOD);
+    session.removeAttribute(PENDING_PHONE);
     events.publishEvent(new BorrowerLoggedIn(borrower.getId()));
     return new PollResponse(outcome.status(), person.firstName());
   }
@@ -77,7 +92,13 @@ class AuthController {
     }
     return borrowerService
         .find(borrowerId)
-        .map(b -> ResponseEntity.ok(new MeResponse(b.getFirstName(), b.getLastName())))
+        .map(
+            b ->
+                ResponseEntity.ok(
+                    new MeResponse(
+                        b.getFirstName(),
+                        b.getLastName(),
+                        CurrentBorrower.loginMethod(session).orElse(null))))
         .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
   }
 
@@ -121,5 +142,7 @@ class AuthController {
 
   record PollResponse(AuthProvider.Status status, @Nullable String firstName) {}
 
-  record MeResponse(@Nullable String firstName, @Nullable String lastName) {}
+  /** {@code loginMethod} is how they logged in, which signing the commitment reuses. */
+  record MeResponse(
+      @Nullable String firstName, @Nullable String lastName, @Nullable AuthMethod loginMethod) {}
 }

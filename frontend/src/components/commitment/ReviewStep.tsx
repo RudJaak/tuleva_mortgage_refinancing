@@ -4,11 +4,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ApiError } from '../../api/client'
 import { Loader } from '../common/Loader'
 import { useLoan } from '../loan/api'
-import { normalizeMobileIdPhoneNumber } from '../login/mobileIdPhoneNumber'
+import { useMe } from '../login/api'
 import { VerificationCodeLoader } from '../login/VerificationCodeLoader'
 import { paths } from '../paths'
 import { useStatementDocuments, useStatementsOverview } from '../statements/api'
-import { useCommitment, type SigningMethod } from './api'
+import { useCommitment } from './api'
 import { useSigning } from './useSigning'
 
 /**
@@ -23,10 +23,10 @@ export function ReviewStep() {
   const overview = useStatementsOverview(documents.data)
   const commitment = useCommitment()
   const { state, sign, cancel } = useSigning()
+  const me = useMe()
   const [consent, setConsent] = useState(false)
-  const [method, setMethod] = useState<SigningMethod>('SMART_ID')
-  const [phone, setPhone] = useState('')
-  const [phoneProblem, setPhoneProblem] = useState(false)
+  // Signing reuses the login's method; the backend keeps it (and the Mobile-ID phone) in the session
+  const method = me.data?.loginMethod ?? 'SMART_ID'
 
   useEffect(() => {
     if (state.phase === 'signed') {
@@ -100,16 +100,7 @@ export function ReviewStep() {
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    if (method === 'MOBILE_ID') {
-      const normalized = normalizeMobileIdPhoneNumber(phone)
-      if ('problem' in normalized) {
-        setPhoneProblem(true)
-        return
-      }
-      sign(method, normalized.phoneNumber)
-    } else {
-      sign(method)
-    }
+    sign()
   }
 
   return (
@@ -233,40 +224,6 @@ export function ReviewStep() {
           </label>
         </div>
 
-        <fieldset className="d-flex flex-column gap-2">
-          <legend className="fs-6 fw-medium mb-1">
-            <FormattedMessage id="review.sign.method" />
-          </legend>
-          {(['SMART_ID', 'MOBILE_ID'] as const).map((option) => (
-            <div className="form-check" key={option}>
-              <input
-                id={`review-method-${option}`}
-                className="form-check-input"
-                type="radio"
-                name="method"
-                checked={method === option}
-                onChange={() => setMethod(option)}
-              />
-              <label className="form-check-label" htmlFor={`review-method-${option}`}>
-                <FormattedMessage id={`review.sign.${option}`} />
-              </label>
-            </div>
-          ))}
-          {method === 'MOBILE_ID' && (
-            <input
-              type="tel"
-              className={`form-control${phoneProblem ? ' is-invalid' : ''}`}
-              placeholder={intl.formatMessage({ id: 'login.phone.number' })}
-              aria-label={intl.formatMessage({ id: 'login.phone.number' })}
-              value={phone}
-              onChange={(event) => {
-                setPhone(event.target.value)
-                setPhoneProblem(false)
-              }}
-            />
-          )}
-        </fieldset>
-
         {state.phase === 'idle' && state.errorReason && (
           <p className="alert alert-danger mb-0" role="alert">
             <FormattedMessage id={signingErrorId(state.errorReason)} />
@@ -276,9 +233,9 @@ export function ReviewStep() {
           <button
             type="submit"
             className="btn btn-primary btn-lg"
-            disabled={!consent || !loanReady || (method === 'MOBILE_ID' && !phone)}
+            disabled={!consent || !loanReady}
           >
-            <FormattedMessage id="review.sign.submit" />
+            <FormattedMessage id={`review.sign.submit.${method}`} />
           </button>
         </div>
       </form>
