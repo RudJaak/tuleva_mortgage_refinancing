@@ -38,13 +38,11 @@ class AuthController {
   StartResponse start(
       @PathVariable String method, @RequestBody StartRequest request, HttpSession session) {
     AuthMethod authMethod = parse(method);
-    if (authMethod == AuthMethod.MOBILE_ID) {
-      requireValid(request);
-    }
-    var challenge = authProvider.start(authMethod, request.personalCode(), request.phoneNumber());
+    String personalCode = requireValid(authMethod, request);
+    var challenge = authProvider.start(authMethod, personalCode, request.phoneNumber());
     session.setAttribute(PENDING_LOGIN, challenge.loginId());
     return new StartResponse(
-        challenge.loginId(), challenge.verificationCode(), challenge.deviceLink());
+        challenge.loginId(), challenge.verificationCode(), challenge.firstName());
   }
 
   @GetMapping("/auth/logins/{loginId}")
@@ -93,19 +91,21 @@ class AuthController {
     return switch (method) {
       case "smart-id" -> AuthMethod.SMART_ID;
       case "mobile-id" -> AuthMethod.MOBILE_ID;
-      case "id-card" -> AuthMethod.ID_CARD;
       default -> throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     };
   }
 
-  private static void requireValid(StartRequest request) {
+  /** Both methods need the personal code; Mobile-ID also needs an Estonian mobile number. */
+  private static String requireValid(AuthMethod method, StartRequest request) {
     if (request.personalCode() == null || !PersonalCode.isValid(request.personalCode())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "personal code invalid");
     }
-    if (request.phoneNumber() == null
-        || !ESTONIAN_MOBILE.matcher(request.phoneNumber()).matches()) {
+    if (method == AuthMethod.MOBILE_ID
+        && (request.phoneNumber() == null
+            || !ESTONIAN_MOBILE.matcher(request.phoneNumber()).matches())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "phone number invalid");
     }
+    return request.personalCode();
   }
 
   private static void requireOwnLogin(String loginId, HttpSession session) {
@@ -116,8 +116,8 @@ class AuthController {
 
   record StartRequest(@Nullable String personalCode, @Nullable String phoneNumber) {}
 
-  record StartResponse(
-      String loginId, @Nullable String verificationCode, @Nullable String deviceLink) {}
+  /** {@code firstName} lets the code screen greet the person while they confirm on the phone. */
+  record StartResponse(String loginId, String verificationCode, @Nullable String firstName) {}
 
   record PollResponse(AuthProvider.Status status, @Nullable String firstName) {}
 

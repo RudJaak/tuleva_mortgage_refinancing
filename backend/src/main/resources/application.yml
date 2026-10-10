@@ -34,13 +34,22 @@ management:
 
 app:
   auth:
-    mode: ${AUTH_MODE:stub}
-    stub-delay: 2s
-    stub-mobile-id-code: 10s
-    stub-person:
-      personal-code: "40504040001"
-      first-name: Rudolf
-      last-name: ""
+    # Emulated Smart-ID / Mobile-ID: the verification code is shown this long, then a short
+    # verifying step
+    stub-code-display: 10s
+    stub-verifying: 2s
+    # Real names from the public eID certificate directories (docs/research/10). Exact personal
+    # codes only, never logged, rate-limited so the demo is not a name oracle
+    name-lookup:
+      enabled: ${DEMO_NAME_LOOKUP:true}
+      timeout: 3s
+      max-lookups: 30
+      window: 1m
+      directories:
+        - url: ldaps://esteid.ldap.sk.ee:636
+          base: c=EE
+        - url: ldaps://ldap.eidpki.ee:636
+          base: dc=ldap,dc=eidpki,dc=ee
   extraction:
     mode: ${EXTRACTION_MODE:stub}
     claude:

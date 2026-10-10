@@ -1,4 +1,5 @@
 // Adapted from TulevaEE/onboarding-client src/components/login/mobileId/MobileIdLoginForm.tsx (MIT, (c) 2017 Tuleva).
+// Used for both Smart-ID (personal code) and Mobile-ID (personal code and phone number).
 import { useState, type FormEvent } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { normalizeMobileIdPhoneNumber } from './mobileIdPhoneNumber'
@@ -11,10 +12,14 @@ const phoneNumberProblemMessages = {
   INVALID: 'login.mobile.id.phone.number.check',
 } as const
 
-export function MobileIdForm({
+export function PersonalCodeForm({
+  id,
+  withPhoneNumber,
   onSubmit,
 }: {
-  onSubmit: (personalCode: string, phoneNumber: string) => void
+  id: string
+  withPhoneNumber: boolean
+  onSubmit: (personalCode: string, phoneNumber?: string) => void
 }) {
   const { formatMessage } = useIntl()
   const [personalCode, setPersonalCode] = useState('')
@@ -32,6 +37,10 @@ export function MobileIdForm({
       setSubmittedInvalidCode(true)
       return
     }
+    if (!withPhoneNumber) {
+      onSubmit(personalCode)
+      return
+    }
     const normalized = normalizeMobileIdPhoneNumber(phoneNumber)
     if ('problem' in normalized) {
       setNumberProblem(normalized.problem)
@@ -44,7 +53,7 @@ export function MobileIdForm({
     <form onSubmit={submit} noValidate>
       <div className="mb-3">
         <input
-          id="mobile-id-personal-code"
+          id={`${id}-personal-code`}
           type="text"
           inputMode="numeric"
           autoComplete="username"
@@ -57,41 +66,43 @@ export function MobileIdForm({
           placeholder={formatMessage({ id: 'login.id.code' })}
           aria-label={formatMessage({ id: 'login.id.code' })}
           aria-invalid={showPersonalCodeError}
-          aria-describedby={showPersonalCodeError ? 'mobile-id-personal-code-error' : undefined}
+          aria-describedby={showPersonalCodeError ? `${id}-personal-code-error` : undefined}
         />
         {showPersonalCodeError && (
-          <div id="mobile-id-personal-code-error" className="invalid-feedback text-start">
+          <div id={`${id}-personal-code-error`} className="invalid-feedback text-start">
             <FormattedMessage id="login.mobile.id.personal.code.invalid" />
           </div>
         )}
       </div>
-      <div className="mb-3">
-        <input
-          id="mobile-id-number"
-          type="tel"
-          autoComplete="tel"
-          value={phoneNumber}
-          onChange={(event) => {
-            setPhoneNumber(event.target.value)
-            setNumberProblem(null)
-          }}
-          className={`form-control form-control-lg${numberProblem ? ' is-invalid' : ''}`}
-          placeholder={formatMessage({ id: 'login.phone.number' })}
-          aria-label={formatMessage({ id: 'login.phone.number' })}
-          aria-invalid={numberProblem !== null}
-          aria-describedby={numberProblem ? 'mobile-id-number-error' : undefined}
-        />
-        {numberProblem && (
-          <div id="mobile-id-number-error" className="invalid-feedback text-start">
-            <FormattedMessage id={phoneNumberProblemMessages[numberProblem]} />
-          </div>
-        )}
-      </div>
+      {withPhoneNumber && (
+        <div className="mb-3">
+          <input
+            id="mobile-id-number"
+            type="tel"
+            autoComplete="tel"
+            value={phoneNumber}
+            onChange={(event) => {
+              setPhoneNumber(event.target.value)
+              setNumberProblem(null)
+            }}
+            className={`form-control form-control-lg${numberProblem ? ' is-invalid' : ''}`}
+            placeholder={formatMessage({ id: 'login.phone.number' })}
+            aria-label={formatMessage({ id: 'login.phone.number' })}
+            aria-invalid={numberProblem !== null}
+            aria-describedby={numberProblem ? 'mobile-id-number-error' : undefined}
+          />
+          {numberProblem && (
+            <div id="mobile-id-number-error" className="invalid-feedback text-start">
+              <FormattedMessage id={phoneNumberProblemMessages[numberProblem]} />
+            </div>
+          )}
+        </div>
+      )}
       <div className="d-grid mb-3">
         <button
           type="submit"
           className="btn btn-primary btn-lg"
-          disabled={!personalCode || !phoneNumber}
+          disabled={!personalCode || (withPhoneNumber && !phoneNumber)}
         >
           <FormattedMessage id="login.enter" />
         </button>

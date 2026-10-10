@@ -43,8 +43,9 @@ These are adapted from Tuleva's onboarding-service so the code can be ported lat
   - Column names come from the default snake_case naming strategy, so no `@Column(name=…)` is needed.
 - **Flyway:** migrations are append-only, `V<n>__<snake_case>.sql`. Never edit an applied migration. While `bootRun` is running, devtools applies a new migration as soon as it compiles, so finish a migration before saving it or stop the app first.
 - **API:** REST under `/v1/...`, JSON. The API sketch is in `../TASKS.md`.
-- **External integrations** (eID, Claude, In-ADS, EHR, Enable Banking):
-  - Each one sits behind an interface with a **stub** implementation, selected by `app.<area>.mode` (`AUTH_MODE`, `EXTRACTION_MODE` in `../.env`).
+- **Login** is emulated (D29): `auth` shows a verification code and looks the name up in the public eID certificate directories over LDAPS. `EidDirectoryTls` re-allows RSA key exchange at startup because SK's directory offers nothing else.
+- **External integrations** (Claude, Enable Banking):
+  - Each one sits behind an interface with a **stub** implementation, selected by `app.<area>.mode` (`EXTRACTION_MODE` in `../.env`).
   - Stub mode must work offline.
 - **Copied Tuleva code** (onboarding-service is MIT; reuse is authorised): keep package-level attribution in a `package-info.java` or a short header comment naming the source path.
 

@@ -1,5 +1,7 @@
 # Research: Estonian eID login in a local hackathon setup
 
+> **Superseded (D29, 2026-10-10):** the SK DEMO integration is out of scope. The demo emulates Smart-ID and Mobile-ID and takes names from the public eID directories (see 10-name-from-personal-code.md).
+
 _Researched 2026-10-10. The SK DEMO endpoints were probed live on this date. Items marked [unverified] could not be confirmed._
 
 ## Short answers

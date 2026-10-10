@@ -10,6 +10,7 @@ type Call = { method: string; path: string; body: unknown }
 let calls: Call[]
 let pollsUntilComplete: number
 let verifyingPolls: number
+let knownName: string | null
 
 function json(body: unknown, status = 200) {
   return Promise.resolve(new Response(JSON.stringify(body), { status }))
@@ -19,22 +20,17 @@ beforeEach(() => {
   calls = []
   pollsUntilComplete = 1
   verifyingPolls = 0
+  knownName = 'Mari'
+
   vi.mocked(fetch).mockImplementation((input, init) => {
     const path = String(input)
     const method = init?.method ?? 'GET'
     calls.push({ method, path, body: init?.body ? JSON.parse(String(init.body)) : undefined })
     if (method === 'POST' && path === '/v1/auth/mobile-id') {
-      return json({ loginId: 'login-1', verificationCode: '1234', deviceLink: null })
+      return json({ loginId: 'login-1', verificationCode: '1234', firstName: knownName })
     }
     if (method === 'POST' && path === '/v1/auth/smart-id') {
-      return json({
-        loginId: 'login-1',
-        verificationCode: null,
-        deviceLink: 'https://smart-id.com/demo',
-      })
-    }
-    if (method === 'POST' && path === '/v1/auth/id-card') {
-      return json({ loginId: 'login-1', verificationCode: null, deviceLink: null })
+      return json({ loginId: 'login-1', verificationCode: '5678', firstName: knownName })
     }
     if (method === 'GET' && path === '/v1/auth/logins/login-1') {
       pollsUntilComplete -= 1
@@ -65,13 +61,13 @@ function renderLogin() {
 const success = { timeout: 4000 }
 
 describe('LoginPage', () => {
-  it('offers Smart-ID, Mobile-ID and ID-card', () => {
+  it('offers Smart-ID and Mobile-ID only', () => {
     renderLogin()
 
     expect(screen.getByRole('heading', { name: 'Tuvasta end' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Smart-ID' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByRole('tab', { name: 'Mobiil-ID' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'ID-kaart' })).toBeInTheDocument()
+    expect(screen.getAllByRole('tab')).toHaveLength(2)
   })
 
   it('hides the Mobile-ID code once it is confirmed on the phone, then logs in', async () => {
@@ -102,26 +98,36 @@ describe('LoginPage', () => {
     expect(screen.getByText('Veendu, et telefonis on see kood ja nimi Tuleva:')).toBeInTheDocument()
     expect(calls[0].body).toEqual({ personalCode: '60001017869', phoneNumber: '+37268000769' })
 
-    expect(await screen.findByRole('heading', { name: 'Tere, Mari!' }, success)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Jätkan' })).toHaveAttribute('href', '/laen')
+    expect(await screen.findByRole('link', { name: 'Jätkan' }, success)).toHaveAttribute(
+      'href',
+      '/laen',
+    )
+    expect(screen.getByRole('heading', { name: 'Tere, Mari!' })).toBeInTheDocument()
   })
 
-  it('shows the Smart-ID QR code while waiting', async () => {
+  it('logs in with Smart-ID by personal code, greeting the person by name meanwhile', async () => {
     renderLogin()
-    await userEvent.click(screen.getByRole('button', { name: /Sisenen/ }))
-
-    expect(
-      await screen.findByRole('img', { name: 'Skänni Smart‑ID rakendusega' }),
-    ).toBeInTheDocument()
-    expect(await screen.findByRole('heading', { name: 'Tere, Mari!' }, success)).toBeInTheDocument()
-  })
-
-  it('logs in with an ID-card', async () => {
-    renderLogin()
-    await userEvent.click(screen.getByRole('tab', { name: 'ID-kaart' }))
+    await userEvent.type(screen.getByLabelText('Isikukood'), '60001017869')
     await userEvent.click(screen.getByRole('button', { name: 'Sisenen' }))
 
-    expect(await screen.findByRole('heading', { name: 'Tere, Mari!' }, success)).toBeInTheDocument()
+    expect(await screen.findByTestId('verification-code')).toHaveTextContent('5678')
+    expect(screen.getByTestId('login-greeting')).toHaveTextContent('Tere, Mari!')
+    expect(calls[0]).toMatchObject({
+      path: '/v1/auth/smart-id',
+      body: { personalCode: '60001017869' },
+    })
+    expect(await screen.findByRole('link', { name: 'Jätkan' }, success)).toBeInTheDocument()
+  })
+
+  it('shows no greeting when the name is not known', async () => {
+    knownName = null
+    pollsUntilComplete = 100
+    renderLogin()
+    await userEvent.type(screen.getByLabelText('Isikukood'), '60001017869')
+    await userEvent.click(screen.getByRole('button', { name: 'Sisenen' }))
+
+    expect(await screen.findByTestId('verification-code')).toHaveTextContent('5678')
+    expect(screen.queryByTestId('login-greeting')).not.toBeInTheDocument()
   })
 
   it('cancels a pending login', async () => {

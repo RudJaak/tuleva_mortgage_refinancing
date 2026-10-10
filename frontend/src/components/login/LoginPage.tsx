@@ -1,18 +1,18 @@
 import { FormattedMessage } from 'react-intl'
-import { MobileIdForm } from './MobileIdForm'
-import { IdCardTab } from './IdCardTab'
 import { LoginSuccess } from './LoginSuccess'
 import { LoginTabs } from './LoginTabs'
-import { SmartIdQrLogin } from './SmartIdQrLogin'
-import { SmartIdTab } from './SmartIdTab'
+import { PersonalCodeForm } from './PersonalCodeForm'
 import { useLogin } from './useLogin'
 import { VerificationCodeLoader } from './VerificationCodeLoader'
 
+/**
+ * Smart-ID and Mobile-ID, both emulated: the person types their personal code, sees a
+ * verification code (greeted by name when the eID directory knows them), then is logged in.
+ */
 export function LoginPage() {
   const { state, start, cancel } = useLogin()
 
   const pending = state.phase === 'pending' ? state : null
-  const confirmingOnThePhone = pending && pending.method !== 'id-card'
   const errorAlert =
     state.phase === 'idle' && state.errorId ? (
       <div className="alert alert-danger text-start" role="alert">
@@ -25,20 +25,17 @@ export function LoginPage() {
       <div className="bg-white shadow-sm rounded-3 p-4 p-sm-5 text-center border">
         {state.phase === 'success' ? (
           <LoginSuccess firstName={state.firstName} />
-        ) : confirmingOnThePhone ? (
+        ) : pending ? (
           <section
             aria-label={pending.method === 'smart-id' ? 'Smart-ID' : 'Mobiil-ID'}
             data-testid="pending-login"
           >
-            {pending.method === 'smart-id' ? (
-              <SmartIdQrLogin deviceLink={pending.deviceLink} onCancel={cancel} />
-            ) : (
-              <VerificationCodeLoader
-                verificationCode={pending.verificationCode}
-                verifying={pending.verifying}
-                onCancel={cancel}
-              />
-            )}
+            <VerificationCodeLoader
+              verificationCode={pending.verificationCode}
+              firstName={pending.firstName}
+              verifying={pending.verifying}
+              onCancel={cancel}
+            />
           </section>
         ) : (
           <>
@@ -56,7 +53,11 @@ export function LoginPage() {
                   content: (
                     <>
                       {errorAlert}
-                      <SmartIdTab onStart={() => start('smart-id')} />
+                      <PersonalCodeForm
+                        id="smart-id"
+                        withPhoneNumber={false}
+                        onSubmit={(personalCode) => start('smart-id', { personalCode })}
+                      />
                     </>
                   ),
                 },
@@ -65,23 +66,12 @@ export function LoginPage() {
                   content: (
                     <>
                       {errorAlert}
-                      <MobileIdForm
+                      <PersonalCodeForm
+                        id="mobile-id"
+                        withPhoneNumber
                         onSubmit={(personalCode, phoneNumber) =>
                           start('mobile-id', { personalCode, phoneNumber })
                         }
-                      />
-                    </>
-                  ),
-                },
-                {
-                  labelId: 'login.id.card',
-                  hideOnMobile: true,
-                  content: (
-                    <>
-                      {errorAlert}
-                      <IdCardTab
-                        loading={pending?.method === 'id-card'}
-                        onStart={() => start('id-card')}
                       />
                     </>
                   ),

@@ -12,7 +12,7 @@ export type LoginState =
       method: LoginMethod
       loginId: string
       verificationCode: string | null
-      deviceLink: string | null
+      firstName: string | null
       /** Confirmed on the phone; the code is no longer needed while the login completes */
       verifying?: boolean
     }
@@ -24,7 +24,7 @@ export function useLogin() {
 
   const start = useCallback(
     async (method: LoginMethod, body?: { personalCode?: string; phoneNumber?: string }) => {
-      setState({ phase: 'pending', method, loginId: '', verificationCode: null, deviceLink: null })
+      setState({ phase: 'pending', method, loginId: '', verificationCode: null, firstName: null })
       try {
         const challenge = await startLogin(method, body)
         setState({ phase: 'pending', method, ...challenge })
@@ -32,7 +32,11 @@ export function useLogin() {
         const invalidInput = error instanceof ApiError && error.status === 400
         setState({
           phase: 'idle',
-          errorId: invalidInput ? 'login.error.mobile.id.check.input' : 'login.error.generic',
+          errorId: !invalidInput
+            ? 'login.error.generic'
+            : method === 'smart-id'
+              ? 'login.mobile.id.personal.code.invalid'
+              : 'login.error.mobile.id.check.input',
         })
       }
     },

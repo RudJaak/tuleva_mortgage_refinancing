@@ -6,6 +6,8 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class StubAuthProviderTest {
@@ -29,18 +31,28 @@ class StubAuthProviderTest {
         }
       };
 
+  private final NameDirectory names =
+      code ->
+          code.equals("60001017869")
+              ? Optional.of(new PersonName("Mari Liis", "Õunapuu"))
+              : Optional.empty();
+
   private final StubAuthProvider provider =
       new StubAuthProvider(
           new AuthProperties(
-              "stub",
-              Duration.ofSeconds(2),
               Duration.ofSeconds(10),
-              new AuthProperties.StubPerson("40504040001", "Mari", "Maasikas")),
+              Duration.ofSeconds(2),
+              new AuthProperties.NameLookup(
+                  false, Duration.ofSeconds(3), 30, Duration.ofMinutes(1), List.of())),
+          names,
           clock);
 
   @Test
-  void mobileIdShowsTheCodeThenVerifiesThenLogsIn() {
+  void showsTheCodeThenVerifiesThenLogsInTheNamedPerson() {
     var challenge = provider.start(AuthMethod.MOBILE_ID, "60001017869", "+37268000769");
+
+    assertThat(challenge.verificationCode()).matches("\\d{4}");
+    assertThat(challenge.firstName()).isEqualTo("Mari Liis");
 
     now = now.plusSeconds(9);
     assertThat(provider.poll(challenge.loginId()).status()).isEqualTo(AuthProvider.Status.PENDING);
@@ -53,33 +65,38 @@ class StubAuthProviderTest {
     var outcome = provider.poll(challenge.loginId());
     assertThat(outcome.status()).isEqualTo(AuthProvider.Status.COMPLETE);
     assertThat(outcome.person().personalCode()).isEqualTo("60001017869");
-    assertThat(outcome.person().firstName()).isEqualTo("Mari");
+    assertThat(outcome.person().firstName()).isEqualTo("Mari Liis");
+    assertThat(outcome.person().lastName()).isEqualTo("Õunapuu");
   }
 
   @Test
-  void showsAVerificationCodeForMobileIdAndADeviceLinkForSmartId() {
-    assertThat(
-            provider.start(AuthMethod.MOBILE_ID, "60001017869", "+37268000769").verificationCode())
-        .matches("\\d{4}");
-    assertThat(provider.start(AuthMethod.SMART_ID, null, null).deviceLink()).startsWith("https://");
+  void smartIdTakesTheSameSteps() {
+    var challenge = provider.start(AuthMethod.SMART_ID, "60001017869", null);
+
+    now = now.plusSeconds(11);
+    assertThat(provider.poll(challenge.loginId()).status())
+        .isEqualTo(AuthProvider.Status.VERIFYING);
   }
 
   @Test
-  void logsInTheStubPersonWhenNoPersonalCodeIsGiven() {
-    var challenge = provider.start(AuthMethod.ID_CARD, null, null);
-    now = now.plusSeconds(2);
+  void someoneNotInTheDirectoryLogsInWithoutAName() {
+    var challenge = provider.start(AuthMethod.SMART_ID, "39901012239", null);
+    now = now.plusSeconds(12);
 
-    assertThat(provider.poll(challenge.loginId()).person().personalCode()).isEqualTo("40504040001");
+    var person = provider.poll(challenge.loginId()).person();
+    assertThat(challenge.firstName()).isNull();
+    assertThat(person.firstName()).isNull();
+    assertThat(person.lastName()).isNull();
   }
 
   @Test
   void aCancelledOrCompletedLoginCannotBePolledAgain() {
-    var cancelled = provider.start(AuthMethod.SMART_ID, null, null);
+    var cancelled = provider.start(AuthMethod.SMART_ID, "60001017869", null);
     provider.cancel(cancelled.loginId());
     assertThat(provider.poll(cancelled.loginId()).status()).isEqualTo(AuthProvider.Status.FAILED);
 
-    var completed = provider.start(AuthMethod.SMART_ID, null, null);
-    now = now.plusSeconds(2);
+    var completed = provider.start(AuthMethod.SMART_ID, "60001017869", null);
+    now = now.plusSeconds(12);
     provider.poll(completed.loginId());
     assertThat(provider.poll(completed.loginId()).status()).isEqualTo(AuthProvider.Status.FAILED);
   }

@@ -4,16 +4,17 @@ import org.jspecify.annotations.Nullable;
 
 public interface AuthProvider {
 
-  Challenge start(AuthMethod method, @Nullable String personalCode, @Nullable String phoneNumber);
+  Challenge start(AuthMethod method, String personalCode, @Nullable String phoneNumber);
 
   Outcome poll(String loginId);
 
   void cancel(String loginId);
 
-  record Challenge(
-      String loginId, @Nullable String verificationCode, @Nullable String deviceLink) {}
+  /** {@code firstName} is known from the start when the name directory has the person. */
+  record Challenge(String loginId, String verificationCode, @Nullable String firstName) {}
 
-  record Person(String personalCode, String firstName, String lastName) {}
+  /** Names are null when the person is not in the name directory. */
+  record Person(String personalCode, @Nullable String firstName, @Nullable String lastName) {}
 
   record Outcome(Status status, @Nullable Person person) {
     static Outcome pending() {

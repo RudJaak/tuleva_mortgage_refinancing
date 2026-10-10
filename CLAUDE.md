@@ -94,7 +94,8 @@ The full research is in `docs/research/`. Verify before quoting numbers external
 
   | Source | Provides | Status |
   |---|---|---|
-  | Smart-ID / Mobile-ID / ID-card | Identity, isikukood (birth date) | |
+  | Smart-ID / Mobile-ID | Identity, isikukood (birth date) | Emulated in the demo (D29) |
+  | SK / Zetes eID certificate directories (LDAP) | Name by personal code | Public; used for the demo greeting |
   | In-ADS (address register) | Address autocomplete | |
   | Ehitisregister | Building type, area, year, energy class | |
   | Maa-amet | Price statistics | |

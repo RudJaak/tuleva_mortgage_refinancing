@@ -2,6 +2,5 @@ package ee.tuleva.mortgage.auth;
 
 public enum AuthMethod {
   SMART_ID,
-  MOBILE_ID,
-  ID_CARD
+  MOBILE_ID
 }

@@ -6,15 +6,22 @@ import { Loader } from '../common/Loader'
 
 export function VerificationCodeLoader({
   verificationCode,
+  firstName,
   verifying = false,
   onCancel,
 }: {
   verificationCode: string | null
+  firstName?: string | null
   verifying?: boolean
   onCancel: () => void
 }) {
   return (
     <>
+      {firstName && (
+        <h2 className="h3 m-0 mb-3" data-testid="login-greeting">
+          <FormattedMessage id="login.success.greeting" values={{ firstName }} />
+        </h2>
+      )}
       {verifying && (
         <FocusedParagraph className="m-0 mb-4 text-balance">
           <FormattedMessage id="login.verifying" />

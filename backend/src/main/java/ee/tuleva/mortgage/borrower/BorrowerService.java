@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,12 +16,16 @@ public class BorrowerService {
   private final Clock clock;
 
   @Transactional
-  public Borrower findOrCreate(String personalCode, String firstName, String lastName) {
+  /** A login without a known name keeps the name a returning borrower already has. */
+  public Borrower findOrCreate(
+      String personalCode, @Nullable String firstName, @Nullable String lastName) {
     return borrowers
         .findByPersonalCode(personalCode)
         .map(
             existing -> {
-              existing.rename(firstName, lastName);
+              if (firstName != null) {
+                existing.rename(firstName, lastName);
+              }
               return existing;
             })
         .orElseGet(

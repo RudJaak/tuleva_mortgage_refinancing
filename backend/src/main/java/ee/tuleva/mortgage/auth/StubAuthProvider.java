@@ -9,30 +9,31 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * Emulates a Smart-ID or Mobile-ID login: shows a verification code while the person would confirm
+ * on their phone, then a short verifying step. Nothing is checked; the name comes from the public
+ * eID certificate directories, so the demo greets people by their real name.
+ */
 @RequiredArgsConstructor
 class StubAuthProvider implements AuthProvider {
 
   private final AuthProperties properties;
+  private final NameDirectory names;
   private final Clock clock;
   private final SecureRandom random = new SecureRandom();
   private final Map<String, PendingLogin> logins = new ConcurrentHashMap<>();
 
   @Override
-  public Challenge start(
-      AuthMethod method, @Nullable String personalCode, @Nullable String phoneNumber) {
+  public Challenge start(AuthMethod method, String personalCode, @Nullable String phoneNumber) {
     String loginId = UUID.randomUUID().toString();
-    var stubPerson = properties.stubPerson();
+    var name = names.find(personalCode);
     var person =
         new Person(
-            personalCode != null ? personalCode : stubPerson.personalCode(),
-            stubPerson.firstName(),
-            stubPerson.lastName());
-    logins.put(loginId, new PendingLogin(method, person, clock.instant()));
-    return switch (method) {
-      case MOBILE_ID -> new Challenge(loginId, verificationCode(), null);
-      case SMART_ID -> new Challenge(loginId, null, "https://smart-id.com/demo?login=" + loginId);
-      case ID_CARD -> new Challenge(loginId, null, null);
-    };
+            personalCode,
+            name.map(PersonName::firstName).orElse(null),
+            name.map(PersonName::lastName).orElse(null));
+    logins.put(loginId, new PendingLogin(person, clock.instant()));
+    return new Challenge(loginId, verificationCode(), person.firstName());
   }
 
   @Override
@@ -41,18 +42,13 @@ class StubAuthProvider implements AuthProvider {
     if (login == null) {
       return Outcome.failed();
     }
-    // Mobile-ID: the code stays on screen while the person confirms on their phone, then a short
-    // verifying step; other methods only take the delay
-    Instant confirmedOnDevice =
-        login.method() == AuthMethod.MOBILE_ID
-            ? login.startedAt().plus(properties.stubMobileIdCode())
-            : login.startedAt();
+    Instant confirmedOnPhone = login.startedAt().plus(properties.stubCodeDisplay());
     Instant now = clock.instant();
-    if (now.isBefore(confirmedOnDevice)) {
+    if (now.isBefore(confirmedOnPhone)) {
       return Outcome.pending();
     }
-    if (now.isBefore(confirmedOnDevice.plus(properties.stubDelay()))) {
-      return login.method() == AuthMethod.MOBILE_ID ? Outcome.verifying() : Outcome.pending();
+    if (now.isBefore(confirmedOnPhone.plus(properties.stubVerifying()))) {
+      return Outcome.verifying();
     }
     logins.remove(loginId);
     return Outcome.complete(login.person());
@@ -67,5 +63,5 @@ class StubAuthProvider implements AuthProvider {
     return String.format("%04d", random.nextInt(10_000));
   }
 
-  private record PendingLogin(AuthMethod method, Person person, Instant startedAt) {}
+  private record PendingLogin(Person person, Instant startedAt) {}
 }

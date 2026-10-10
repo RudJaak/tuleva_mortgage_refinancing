@@ -10,7 +10,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 
 | Lane | Focus | Tasks |
 |---|---|---|
-| **A: Platform** | repo, backend skeleton, auth, signing | T01–T06, T40–T42 |
+| **A: Platform** | repo, backend skeleton, auth, signing | T05, T40–T42 |
 | **B: Frontend** | landing page, calculator, tracker, flow screens | T10–T15, T30, T33, T34, T43 |
 | **C: Documents** | upload pipeline, extraction, statements | T20–T27 |
 | **D: Domain** | property lookups, risk class, pool stats, synthetic data | T35–T38, T50–T51 |
@@ -19,7 +19,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 
 | Milestone | What it shows | Must be done by |
 |---|---|---|
-| **M1 Walking skeleton** | Landing page with a working calculator and tracker (seeded), Mobile-ID demo login, empty flow screens | Sat midday |
+| **M1 Walking skeleton** | Landing page with a working calculator and tracker (seeded), emulated Smart-ID / Mobile-ID login, empty flow screens | Sat midday |
 | **M2 Loan from document** | Upload the contract → extracted fields → confirm → personal savings on validated numbers | Sat evening |
 | **M3 Verified borrower** | Statement upload (PDF + sealed ASiC-E) → income and liabilities summary → risk class | Sun morning |
 | **M4 Commitment** | Review page → sign with Smart-ID/Mobile-ID → tracker goes up | Sun midday |
@@ -45,30 +45,6 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - **Outcome (part 1):**
   - `V2__borrower_and_commitment.sql`. `borrower` has a nullable personal code and a `synthetic` flag. `commitment` stores the committed balance (RREL30), the current margin (RREL46) and a `SIGNED`/`WITHDRAWN` status, with one signed commitment per borrower.
   - **The other tables (loan, property, liability, statement_summary, document, field provenance) are added with the tasks that use them** (T20, T22, T30), so we don't design them before they're needed.
-
-### T04 Auth: Mobile-ID + Smart-ID (SK demo) · A · 3h · after T02 · 🟡 stub done, SK integration deferred
-- **Already in place (T15):**
-  - The login UI.
-  - `AuthProvider` interface + `StubAuthProvider` (`AUTH_MODE=stub`, confirms after 3 s).
-  - The session-bound `/v1/auth/*` and `/v1/me` endpoints.
-  - **What remains is an SK DEMO implementation of `AuthProvider` only.**
-- **Research done** (`docs/research/09-eid-login-local.md`). Key points:
-  - **Real phone against production** needs an SK contract (from €60/month) or Tuleva's credentials, which means legal and billing implications.
-  - **Your real phone against SK DEMO works for free:** install the Smart-ID **demo app**, register with your ID card or Mobile-ID, and use the cross-device **QR flow**, which works from `http://localhost`. Set `smartid.callback-url` to any `https://localhost…` value; it's never called in the QR flow. Then either upload your demo certificate to demo.sk.ee/upload_cert or skip the OCSP check.
-  - **No-phone fallback:**
-    - Smart-ID notification with `40504040001` auto-completes, but needs a dev-only endpoint by personal code;
-    - Mobile-ID `+37268000769` auto-completes.
-  - **A real Mobile-ID SIM can't be used on DEMO any more** (MIDCertsReg is gone).
-  - **A real ID card works through Web eID** with an https origin or the extension's `ALLOW_HTTP_LOCALHOST` option.
-  - **Reuse Tuleva's `truststore.jks`.** SK's pinned certificates rotate on 2026-10-11 and the truststore already covers the new ones.
-- Copy from `TulevaEE/onboarding-service` (MIT; reuse authorised): `auth/mobileid`, `auth/smartid`, `config/MobileIdConfiguration`, `SmartIdClientConfiguration`, `SmartIdTrustedCaCertificates`, the demo certificates, and the truststore.
-- Strip out EPIS, user, AML and other dependencies.
-- **Mobile-ID first:** pure REST, no callback, so it's the easiest locally. Then **Smart-ID via the notification flow by personal code**. The device-link callback needs https, so skip it unless we tunnel.
-- Issue our own session JWT.
-- `AUTH_MODE=stub` logs in as a fixed demo person.
-- **Done when:** demo Mobile-ID `+37268000769` / `60001017869` and Smart-ID `40504040001` log in, show the verification code in the UI, and return a session with name and birth date.
-
-## Phase 3: Landing page and collection flow
 
 ### T14 Landing page assembly · B · 2h · after T12, T13
 - Hero with headline (Estonia ≈1.55 pp vs Finland ≈0.5 pp over Euribor; ECB MIR Aug 2026), calculator, tracker, "Kuidas see töötab" (how it works, 3 steps), placeholder blocks for teammates' facts, statistics and slogans (D17), FAQ placeholder, CTA "Liitu ühispakkumisega" (join the joint offer).

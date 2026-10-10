@@ -26,11 +26,14 @@ public class Borrower {
   private Instant createdAt;
 
   public static Borrower identified(
-      String personalCode, String firstName, String lastName, Instant createdAt) {
+      String personalCode,
+      @Nullable String firstName,
+      @Nullable String lastName,
+      Instant createdAt) {
     return new Borrower(UUID.randomUUID(), personalCode, firstName, lastName, false, createdAt);
   }
 
-  public void rename(String firstName, String lastName) {
+  public void rename(@Nullable String firstName, @Nullable String lastName) {
     this.firstName = firstName;
     this.lastName = lastName;
   }

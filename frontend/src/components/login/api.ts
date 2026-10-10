@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { api, ApiError } from '../../api/client'
 
-export type LoginMethod = 'smart-id' | 'mobile-id' | 'id-card'
+export type LoginMethod = 'smart-id' | 'mobile-id'
 
 export type LoginStart = {
   loginId: string
-  verificationCode: string | null
-  deviceLink: string | null
+  verificationCode: string
+  /** Known from the start when the eID directory has the person; for a personal greeting */
+  firstName: string | null
 }
 
 export type LoginPoll = {

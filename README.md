@@ -49,7 +49,7 @@ Every external integration has an offline stub. You switch between them in `.env
 
 | Variable | Values | Notes |
 |---|---|---|
-| `AUTH_MODE` | `stub` / `sk-demo` | `sk-demo` uses SK's public Smart-ID / Mobile-ID DEMO environment |
+| `DEMO_NAME_LOOKUP` | `true` / `false` | Looks the logging-in person's name up by personal code in the public eID certificate directories (SK, Zetes). `false` logs everyone in without a name |
 | `EXTRACTION_MODE` | `stub` / `claude` | `claude` needs `ANTHROPIC_API_KEY` |
 | `REQUIRE_BANK_SEAL` | `false` / `true` | `true` rejects uploads that aren't sealed by a known bank. With `false`, they're accepted at a lower verification level |
 | `STATEMENT_RECENCY_CHECKS` | `true` / `false` | `false` only for studying old statements: no staleness flag, and a long statement is analysed whole instead of over its last 6 months |

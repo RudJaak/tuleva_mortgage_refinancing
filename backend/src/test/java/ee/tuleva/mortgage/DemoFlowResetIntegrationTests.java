@@ -23,7 +23,9 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(
     properties = {
-      "app.auth.mode=stub",
+      "app.auth.name-lookup.enabled=false",
+      "app.auth.stub-code-display=0s",
+      "app.auth.stub-verifying=0s",
       "app.demo.seed-enabled=true",
       "app.demo.fresh-start-on-login=true",
       "app.demo.simulated-joiners.enabled=false",
@@ -104,7 +106,9 @@ class DemoFlowResetIntegrationTests {
                     post("/v1/auth/smart-id")
                         .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                        .content(
+                            """
+                            {"personalCode": "60001017869"}"""))
                 .andReturn()
                 .getResponse()
                 .getContentAsString(),
