@@ -3,6 +3,10 @@
 .counter-block {
   margin-right: 0.75rem;
 
+  @include media-breakpoint-between(sm, lg) {
+    margin-right: 0.5rem;
+  }
+
   &:last-child {
     margin: 0;
   }
@@ -26,6 +30,7 @@
       font-family: $font-family-serif;
       font-variant-numeric: lining-nums;
       border-radius: 0.25rem;
+      overflow: hidden;
 
       &:first-child {
         border-radius: 0.5rem 0.25rem 0.25rem 0.5rem;
@@ -34,6 +39,23 @@
       &:last-child {
         margin-right: 0;
         border-radius: 0.25rem 0.5rem 0.5rem 0.25rem;
+      }
+
+      // Four tiles share half a row from sm to lg, so they shrink there
+      @include media-breakpoint-between(sm, lg) {
+        width: 1.625rem;
+        font-size: 1.25rem;
+        line-height: 2.25rem;
+      }
+    }
+
+    // The digit slides in from above when it changes
+    .counter-digit {
+      display: block;
+      animation: counter-tick 0.35s ease-out;
+
+      @media (prefers-reduced-motion: reduce) {
+        animation: none;
       }
     }
   }
@@ -44,5 +66,17 @@
     text-transform: uppercase;
     text-align: center;
     color: $navy-blue;
+  }
+}
+
+@keyframes counter-tick {
+  from {
+    transform: translateY(-0.4em);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
   }
 }

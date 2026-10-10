@@ -10,7 +10,7 @@ export function Countdown({ deadline }: { deadline: string }) {
   const intl = useIntl()
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 15_000)
+    const timer = window.setInterval(() => setNow(new Date()), 1000)
     return () => window.clearInterval(timer)
   }, [])
   const remaining = remainingUntil(new Date(deadline), now)
@@ -18,6 +18,7 @@ export function Countdown({ deadline }: { deadline: string }) {
     { value: remaining.days, labelId: 'tracker.countdown.days' },
     { value: remaining.hours, labelId: 'tracker.countdown.hours' },
     { value: remaining.minutes, labelId: 'tracker.countdown.minutes' },
+    { value: remaining.seconds, labelId: 'tracker.countdown.seconds' },
   ]
   return (
     <div
@@ -29,7 +30,12 @@ export function Countdown({ deadline }: { deadline: string }) {
         <div key={block.labelId} className="counter-block" aria-hidden="true">
           <div className="counter-number">
             {digits(block.value).map((digit, index) => (
-              <span key={index}>{digit}</span>
+              <span key={index} className="counter-tile">
+                {/* Keyed by the digit, so a changed digit remounts and slides in */}
+                <span key={digit} className="counter-digit">
+                  {digit}
+                </span>
+              </span>
             ))}
           </div>
           <div className="counter-label mt-2">
