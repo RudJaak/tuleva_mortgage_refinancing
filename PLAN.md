@@ -44,6 +44,7 @@ Build a **borrower-facing** app that:
 | D30 | **Signing the commitment is emulated too** (T41, re-authentication as confirmation): the borrower signs on `/kinnitus` with the same Smart-ID / Mobile-ID emulation as the login. Signing needs a confirmed loan with balance and margin and a margin above the pool's best target (D14); it creates the commitment the tracker counts. No digidoc4j signature container | 2026-10-10 |
 | D31 | **Demo feedback round 1.** The pool is counted in **people, not euros**, so any balance feels welcome: minimum 1 000 people → 1.35%, 2 500 → 1.30%, 5 000 → 1.20% (worst / expected / best scenario in the calculator; placeholders, D18). **Deadline 10.11.2026 00:00 Tallinn time.** Landing order: tracker, calculator, join button. Every flow step explains why it asks and what happens to the data (describing a model running on our own server). The loan screening lists what was checked and found | 2026-10-10 |
 | D32 | **Tuleva membership is required to join the pool** (supersedes D10): the €150 fee is a cost of joining in the savings calculation, shown struck through for members. After login an emulated check confirms membership (every demo login is a member). **A payment-default check comes after the documents** (it is a paid query): emulated Creditinfo query on Kinnitus, run only with consent, required before signing; only the result is stored (docs/research/11) | 2026-10-10 |
+| D33 | **The teammates' facts, statistics and slogans go in the presentation, not on the landing page** (supersedes D17): the landing page is heading, pool tracker, calculator and CTA | 2026-10-10 |
 
 ## Non-goals for the hackathon
 
@@ -111,7 +112,7 @@ Open points:
 Each stage asks only for what the next decision needs. Anything an upload can provide is pre-filled; the user only confirms it.
 
 **Stage 0: Landing page (no login).**
-- Placeholder sections for the teammates' facts, statistics and slogans (D17), plus the savings calculator and the pool tracker (see "Landing page").
+- The savings calculator and the pool tracker (see "Landing page"); the teammates' facts, statistics and slogans are in the presentation (D33).
 - Headline comparison: Estonia ≈1.55 pp over Euribor vs Finland ≈0.5 pp.
 - The calculator inputs carry over into the flow after login.
 

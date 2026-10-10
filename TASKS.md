@@ -47,9 +47,8 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
   - **The other tables (loan, property, liability, statement_summary, document, field provenance) are added with the tasks that use them** (T20, T22, T30), so we don't design them before they're needed.
 
 ### T14 Landing page assembly · B · 2h · after T12, T13
-- Hero with headline (Estonia ≈1.55 pp vs Finland ≈0.5 pp over Euribor; ECB MIR Aug 2026), calculator, tracker, "Kuidas see töötab" (how it works, 3 steps), placeholder blocks for teammates' facts, statistics and slogans (D17), FAQ placeholder, CTA "Liitu ühispakkumisega" (join the joint offer).
-- Content comes from one `content.et.json` so teammates can edit it without touching code.
-- **Done when:** the page is responsive and every content slot is fed from JSON.
+- Hero with headline (Estonia ≈1.55 pp vs Finland ≈0.5 pp over Euribor; ECB MIR Aug 2026), calculator, tracker, "Kuidas see töötab" (how it works, 3 steps), FAQ placeholder, CTA "Liitu ühispakkumisega" (join the joint offer).
+- **Done when:** the page is responsive at 1280 px and 390 px.
 
 ### T20 Upload pipeline · C · 3h · after T05, T03 · 🟡 core done
 - Done: `POST /v1/documents?type=…` (multipart, logged-in borrower) in the `document` module. PDF and ASiC-E/BDOC are sniffed, the container is opened and its seal checked, metadata is stored in `document`, and the files go to the `DocumentProcessor` registered for the type. The bytes are never stored.
@@ -173,5 +172,5 @@ GET  /v1/me/risk-class                 (T35, not built yet)
 Done: login (D29), contract → loan step (M2), statements (M3 minus the risk class), review and emulated signing (M4).
 
 ```
-T35 (risk class) → T36 (eligibility) → M5 (T14 landing content, T52, T53, T54)
+T35 (risk class) → T36 (eligibility) → M5 (T14 landing page, T52, T53, T54)
 ```

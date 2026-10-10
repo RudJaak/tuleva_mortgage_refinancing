@@ -1,7 +1,6 @@
 import { FormattedMessage } from 'react-intl'
 import { Link } from 'react-router-dom'
 import { SavingsCalculator } from '../calculator/SavingsCalculator'
-import { Placeholder } from '../layout/Placeholder'
 import { paths } from '../paths'
 import { PoolTracker } from '../pool/PoolTracker'
 
@@ -23,9 +22,6 @@ export function LandingPage() {
           <SavingsCalculator />
         </div>
       </section>
-      <Placeholder>
-        <FormattedMessage id="landing.content.placeholder" />
-      </Placeholder>
       <section className="d-flex flex-column align-items-center gap-2 text-center">
         <Link to={paths.login} className="btn btn-primary btn-lg px-5">
           <FormattedMessage id="landing.cta" />

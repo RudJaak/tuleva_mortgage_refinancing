@@ -40,7 +40,7 @@ src/
 - **The UI is Estonian only (D11).**
   - Every user-visible string goes in `translations.et.json` and is rendered with `FormattedMessage` / `useIntl`. No hard-coded copy.
   - Keys are dotted by feature (`flow.loan.heading`).
-- **Landing-page persuasion content** (facts, statistics, slogans from teammates) comes from a JSON content file (T14), not from translations.
+- **Teammates' facts, statistics and slogans** are in the presentation, not on the landing page (D33).
 - **Compliance wording** (Reklaamiseadus § 29): show margins as goals ("Eesmärk"), never as offers ("Pakkumine"). Pair any margin figure with a disclaimer.
 - **Code:** function components with named exports, and colocated tests (`*.test.tsx`). Query with `getByRole` and Estonian accessible names. Write the test first where practical.
 - **Data fetching:** use TanStack Query hooks per feature. **Keep financial maths in a single tested module** (`src/calc/`, T11) and never duplicate it in components.
