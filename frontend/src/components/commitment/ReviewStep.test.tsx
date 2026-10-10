@@ -163,7 +163,9 @@ describe('ReviewStep', () => {
     })
     renderStep()
 
-    expect(await screen.findByTestId('already-committed')).toHaveTextContent('praegune marginaal 1,85%')
+    expect(await screen.findByTestId('already-committed')).toHaveTextContent(
+      'praegune marginaal 1,85%',
+    )
     expect(screen.queryByRole('button', { name: /Allkirjastan/ })).not.toBeInTheDocument()
   })
 })

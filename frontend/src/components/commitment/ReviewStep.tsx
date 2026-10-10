@@ -10,6 +10,7 @@ import { useMe } from '../login/api'
 import { VerificationCodeLoader } from '../login/VerificationCodeLoader'
 import { paths } from '../paths'
 import { useStatementDocuments, useStatementsOverview } from '../statements/api'
+import { OurPromises } from './OurPromises'
 import { useCommitment } from './api'
 import { useSigning } from './useSigning'
 
@@ -200,6 +201,8 @@ export function ReviewStep() {
       </section>
 
       <CreditCheckCard />
+
+      <OurPromises />
 
       <form className="card rounded-4 p-4 d-flex flex-column gap-3" onSubmit={submit} noValidate>
         <h2 className="h5 text-navy mb-0">

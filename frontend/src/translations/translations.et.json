@@ -215,7 +215,7 @@
   "review.statements.heading": "Sissetulek ja kohustused",
   "review.statements.missing": "Väljavõtteid pole lisatud. Liituda saab ka ilma, kuid pank vajab neid hiljem. <link>Lisa väljavõtted</link>",
   "review.commitment.heading": "Sinu osalemissoov",
-  "review.commitment.text": "Soovin oma kodulaenu üle viia, kui ühispakkumises saavutatud marginaal on madalam kui minu praegune marginaal {margin}.",
+  "review.commitment.text": "Soovin oma kodulaenu üle viia, kui ühispakkumises saavutatud marginaal on piisavalt palju madalam kui minu praegune marginaal {margin}.",
   "review.commitment.conditions": "See ei ole leping ega laenutaotlus ja sind see millekski ei kohusta. Allkiri ja lisatud dokumendid näitavad pankadele, et liitujate huvi on päris, ning just see aitab saada parema pakkumise. Kui pakkumine on käes, otsustad ise, kas vahetad panka. Liitumise saad igal ajal tagasi võtta. Ühispakkumise korraldaja on Tuleva või tema litsentseeritud partner. See ei ole laenupakkumine.",
   "review.consent": "Nõustun, et minu laenu ja sissetulekute andmed edastatakse pankadele isikustamata kujul. Isikustatud andmed saab ainult minu valitud pank ja ainult minu eraldi nõusolekul.",
   "review.sign.pending": "Allkirjastamine",
@@ -276,5 +276,17 @@
   "creditCheck.result.DEFAULTS_FOUND": "Leiti {count, plural, one {# kehtiv maksehäire} other {# kehtivat maksehäiret}}",
   "creditCheck.checked": "{source}, {date}",
   "creditCheck.failed": "Päring ebaõnnestus. Proovi uuesti.",
-  "review.error.CREDIT_CHECK_MISSING": "Tee enne allkirjastamist maksehäirete kontroll."
+  "review.error.CREDIT_CHECK_MISSING": "Tee enne allkirjastamist maksehäirete kontroll.",
+  "review.promises.heading": "Mida me teeme ja mida mitte",
+  "review.promises.do.heading": "Meie teeme",
+  "review.promises.do.verify": "Kontrollime esialgu sinu laenu, sissetulekud ja maksehäired, et pangad saaksid ühispakkumise laenusaajate maksevõimes kindlad olla.",
+  "review.promises.do.bargain": "Anname endast parima, et kõigi liitujate ühise läbirääkimisjõuga sulle parem pakkumine välja kaubelda. Tulemust lubada me ei saa.",
+  "review.promises.do.anonymise": "Pangad näevad ühispakkumise andmeid ainult isikustamata ja koondatud kujul.",
+  "review.promises.do.notify": "Anname sulle teada, kui pakkumised on käes, ja näitame, kui palju sa nendega säästaksid.",
+  "review.promises.do.delete": "Kustutame sinu andmed, kui liitumise tagasi võtad.",
+  "review.promises.dont.heading": "Meie ei tee",
+  "review.promises.dont.contract": "Me ei sõlmi sinu eest lepinguid. Kui pakkumine sulle sobib, vormistad uue laenu otse pangaga.",
+  "review.promises.dont.documents": "Me ei säilita sinu dokumente. Alles jäävad ainult neist välja loetud andmed.",
+  "review.promises.dont.identify": "Me ei näita pankadele, kes konkreetselt ühispakkumises on. Sinu nime saab ainult pank, mille pakkumise sa ise valid.",
+  "review.promises.dont.decide": "Me ei tee sinu eest otsust ega laenuotsust. Panka vahetad ainult siis, kui ise soovid, ja laenuotsuse teeb pank."
 }
