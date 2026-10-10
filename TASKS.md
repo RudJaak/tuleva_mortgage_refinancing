@@ -119,7 +119,9 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 
 ## Phase 5: Data, polish, demo
 
-### T50 Synthetic documents · C · 2h · early (needed by T05, T21, T22)
+### T50 Synthetic documents · C · 2h · early (needed by T05, T21, T22) · 🟡 loan contract done
+- Done: `tools/synthetic-documents/generate-contract.mjs` makes a NÄIDIS loan contract and its ESIS for any name and figures; `fixtures/loan-contract/` holds a fictional one with its expected extraction (read correctly by Claude on 2026-10-10).
+- Remaining:
 - Generate realistic Estonian-language **fake** documents with fictional names and SK demo personal codes:
   - a loan contract PDF (Swedbank-like layout, but no logo);
   - a 6-month statement PDF with salary, utilities, a loan payment and a leasing payment;

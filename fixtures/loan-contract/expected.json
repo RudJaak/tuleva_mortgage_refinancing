@@ -1,0 +1,27 @@
+{
+  "comment": "What the extractor should read from mari-maasikas-laenuleping.pdf + mari-maasikas-standardinfo-teabeleht.pdf (generated with tools/synthetic-documents, fictional person and lender). Checked against Claude on 2026-10-10.",
+  "contract": {
+    "lender": "AS Näidispank",
+    "contractNumber": "NÄIDIS-2019-0614",
+    "contractDate": "2019-06-14",
+    "borrowers": ["Mari Maasikas"],
+    "principal": 185000,
+    "baseRate": "6 kuu Euribor",
+    "margin": 1.95,
+    "rateType": "VARIABLE",
+    "maturityDate": "2049-06-14",
+    "termMonths": 360,
+    "monthlyPayment": 679.18,
+    "paymentDay": 14,
+    "repaymentType": "ANNUITY",
+    "mortgageAmount": 222000,
+    "propertyValue": 231000
+  },
+  "summaryOn2026-10-10": {
+    "currentInterestRate": 4.886,
+    "remainingMonths": 272,
+    "balance": 149655,
+    "balanceSource": "ESTIMATED",
+    "loanToValue": 0.65
+  }
+}
