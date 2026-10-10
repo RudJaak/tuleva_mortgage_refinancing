@@ -34,7 +34,7 @@ export type PoolStats = {
   nextMilestone: MilestoneStatus | null
 }
 
-export const poolStatsRefreshMs = 5_000
+export const poolStatsRefreshMs = 2_000
 
 export function usePublicConfig() {
   return useQuery({

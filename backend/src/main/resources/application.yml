@@ -87,11 +87,11 @@ app:
     fresh-start-on-login: ${DEMO_FRESH_LOGIN:true}
     seed-borrowers: 520
     seed-volume: 60000000
-    # Adds an in-memory "joiner" to the tracker at random intervals; resets on restart
+    # Adds an in-memory "joiner" to the tracker every 5 s; survives page reloads, resets on restart
     simulated-joiners:
       enabled: ${DEMO_LIVE:true}
-      min-interval: 15s
-      max-interval: 45s
+      min-interval: 5s
+      max-interval: 5s
       min-balance: 100000
       max-balance: 350000
   statements:

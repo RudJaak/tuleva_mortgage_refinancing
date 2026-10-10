@@ -14,8 +14,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
 
 /**
- * Keeps the landing-page tracker alive in a demo: every 15–45 s one more borrower "joins" with a
- * random balance. Held in memory only, so the pool falls back to the database totals on restart.
+ * Keeps the landing-page tracker alive in a demo: every few seconds (app.demo.simulated-joiners)
+ * one more borrower "joins" with a random balance. Held in memory only, so the pool falls back to
+ * the database totals on restart.
  */
 @RequiredArgsConstructor
 class SimulatedJoiners implements PoolTotalsAdjustment {
