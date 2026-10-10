@@ -44,7 +44,7 @@ src/
 - **Compliance wording** (Reklaamiseadus § 29): show margins as goals ("Eesmärk"), never as offers ("Pakkumine"). Pair any margin figure with a disclaimer.
 - **Code:** function components with named exports, and colocated tests (`*.test.tsx`). Query with `getByRole` and Estonian accessible names. Write the test first where practical.
 - **Data fetching:** use TanStack Query hooks per feature. **Keep financial maths in a single tested module** (`src/calc/`, T11) and never duplicate it in components.
-- **Personal data:** never log or persist personal codes or documents client-side. `sessionStorage` is allowed only for anonymous calculator inputs.
+- **Personal data:** never log or persist personal codes or documents client-side. Nothing is persisted client-side; the calculator starts from its defaults on every load.
 
 ## Commands
 

@@ -1,9 +1,9 @@
-import { screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { mockApi, renderWithProviders } from '../../test/render'
 import { publicConfig } from '../pool/fixtures'
-import { calculatorStorageKey, SavingsCalculator, type ValidatedLoan } from './SavingsCalculator'
+import { SavingsCalculator, type ValidatedLoan } from './SavingsCalculator'
 
 function renderCalculator(validated?: ValidatedLoan) {
   return renderWithProviders(<SavingsCalculator validated={validated} />)
@@ -13,8 +13,6 @@ const monthlySaving = () => screen.getByTestId('monthly-saving').textContent
 const lifetimeSaving = () => screen.getByTestId('lifetime-saving').textContent
 
 describe('SavingsCalculator', () => {
-  beforeEach(() => window.sessionStorage.clear())
-
   it('shows a saving for the default loan at the goal margin', () => {
     renderCalculator()
 
@@ -75,13 +73,14 @@ describe('SavingsCalculator', () => {
   })
 
   it('explains when the scenario would not save anything', async () => {
-    window.sessionStorage.setItem(calculatorStorageKey, JSON.stringify({ margin: 0.9 }))
     renderCalculator()
+
+    fireEvent.change(screen.getByLabelText('Sinu praegune marginaal'), { target: { value: '0.9' } })
 
     expect(screen.getByText(/juba sama madal või madalam/)).toBeInTheDocument()
   })
 
-  it('remembers the inputs for the rest of the session', async () => {
+  it('starts over from the defaults when shown again', async () => {
     const { unmount } = renderCalculator()
     const balance = screen.getByLabelText('Laenujääk')
     await userEvent.clear(balance)
@@ -90,7 +89,7 @@ describe('SavingsCalculator', () => {
 
     renderCalculator()
 
-    expect(screen.getByLabelText('Laenujääk')).toHaveValue(250000)
+    expect(screen.getByLabelText('Laenujääk')).toHaveValue(180000)
   })
 
   it('shows validated loan figures without editable inputs', () => {

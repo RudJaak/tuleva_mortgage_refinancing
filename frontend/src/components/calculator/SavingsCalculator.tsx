@@ -1,10 +1,9 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { compareMargins } from '../../calc/savings'
 import { useMembership } from '../membership/api'
 import { MarginSlider } from './MarginSlider'
 import { scenarioMargins, scenarios, useCalculatorSettings, type Scenario } from './settings'
-import { usePersistedState } from './usePersistedState'
 
 export type ValidatedLoan = {
   balance: number
@@ -20,8 +19,6 @@ type CalculatorInputs = {
   margin: number | null
   scenario: Scenario
 }
-
-export const calculatorStorageKey = 'mortgage-pool.calculator.v2'
 
 const initialInputs: CalculatorInputs = {
   balance: '180000',
@@ -41,7 +38,7 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
   const id = useId()
   const settings = useCalculatorSettings()
   const margins = scenarioMargins(settings)
-  const [inputs, setInputs] = usePersistedState(calculatorStorageKey, initialInputs)
+  const [inputs, setInputs] = useState(initialInputs)
   // Members have already paid the fee; for anyone else (or not yet known) it is a cost of joining
   const member = useMembership().data?.member === true
   const membershipCost = member ? 0 : settings.membershipFee
