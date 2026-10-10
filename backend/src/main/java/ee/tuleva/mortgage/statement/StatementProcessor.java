@@ -31,7 +31,10 @@ import tools.jackson.databind.json.JsonMapper;
 class StatementProcessor implements DocumentProcessor {
 
   record StatementResult(
-      @Nullable String account, StatementSummary summary, List<CountedTransaction> counted) {}
+      @Nullable String accountHolder,
+      @Nullable String account,
+      StatementSummary summary,
+      List<CountedTransaction> counted) {}
 
   record CountedTransaction(
       LocalDate date,
@@ -65,7 +68,8 @@ class StatementProcessor implements DocumentProcessor {
         .map(
             stored ->
                 new StatementResult(
-                    null,
+                    stored.getAccountHolder(),
+                    stored.getAccount(),
                     jsonMapper.readValue(stored.getSummary(), StatementSummary.class),
                     List.of()));
   }
@@ -96,10 +100,13 @@ class StatementProcessor implements DocumentProcessor {
             document.id(),
             document.borrowerId(),
             summary,
+            extracted.accountHolder(),
+            mask(extracted.iban()),
             jsonMapper.writeValueAsString(summary),
             clock.instant()));
 
     return new StatementResult(
+        extracted.accountHolder(),
         mask(extracted.iban()),
         summary,
         extracted.transactions().stream()

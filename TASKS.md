@@ -11,9 +11,9 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 | Lane | Focus | Tasks |
 |---|---|---|
 | **A: Platform** | repo, backend skeleton, auth, signing | T01–T06, T40–T42 |
-| **B: Frontend** | landing page, calculator, tracker, flow screens | T10–T15, T30, T31, T33, T34, T43 |
+| **B: Frontend** | landing page, calculator, tracker, flow screens | T10–T15, T30, T33, T34, T43 |
 | **C: Documents** | upload pipeline, extraction, statements | T20–T27 |
-| **D: Domain** | property lookups, risk class, pool stats, synthetic data | T16–T17, T35–T38, T50–T51 |
+| **D: Domain** | property lookups, risk class, pool stats, synthetic data | T35–T38, T50–T51 |
 
 ## Milestones and cut line
 
@@ -25,7 +25,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 | **M4 Commitment** | Review page → sign with Smart-ID/Mobile-ID → tracker goes up | Sun midday |
 | **M5 Demo-ready** | Polish, content placeholders filled, demo script rehearsed | Before pitch |
 
-**If behind schedule, drop in this order:** T27 (Enable Banking) → T25 (CSV) → T24 (camt.053) → T17 (EHR) → T42 (real ASiC-E signing; fall back to T41's auth-as-confirmation). **Never drop:** M2 (contract extraction) and the calculator/tracker. They carry the pitch.
+**If behind schedule, drop in this order:** T27 (Enable Banking) → T25 (CSV) → T24 (camt.053) → T42 (real ASiC-E signing; fall back to T41's auth-as-confirmation). **Never drop:** M2 (contract extraction) and the calculator/tracker. They carry the pitch.
 
 ---
 
@@ -44,7 +44,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - **Done when:** the migrations apply cleanly and repository slice tests pass.
 - **Outcome (part 1):**
   - `V2__borrower_and_commitment.sql`. `borrower` has a nullable personal code and a `synthetic` flag. `commitment` stores the committed balance (RREL30), the current margin (RREL46) and a `SIGNED`/`WITHDRAWN` status, with one signed commitment per borrower.
-  - **The other tables (loan, property, liability, statement_summary, document, field provenance) are added with the tasks that use them** (T20, T22, T30, T31), so we don't design them before they're needed.
+  - **The other tables (loan, property, liability, statement_summary, document, field provenance) are added with the tasks that use them** (T20, T22, T30), so we don't design them before they're needed.
 
 ### T04 Auth: Mobile-ID + Smart-ID (SK demo) · A · 3h · after T02 · 🟡 stub done, SK integration deferred
 - **Already in place (T15):**
@@ -115,23 +115,9 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - Wish: keep the term, extend it, or merge.
 - **Done when:** upload → confirmed loan saved with provenance.
 
-### T31 Property step UI `/vara` · B+D · 2.5h · after T15, T16
-- In-ADS autocomplete. Building data from EHR (T17) shown as read-only chips. Estimated value field.
-- Region is derived (Harjumaa vs others).
-- **Done when:** a real Tallinn address resolves to an ADS id and building data.
-
-### T16 In-ADS address proxy · D · 1.5h · after T02
-- Backend proxy to the Maa- ja Ruumiamet In-ADS gazetteer: address search → ADS id, normalised address, coordinates, cadastral number where available.
-- Stub with a few fixed addresses.
-- **Verify the current endpoint and terms first.**
-
-### T17 EHR building data · D · 2h · after T16 · *Should*
-- Ehitisregister public API: from ADS / EHR code to building type, area, year built, **energy class** (from the energy certificate).
-- Stub fallback.
-- **Verify the endpoint first.**
-
 ### T33 Statements step `/valjavotted` · B · 2.5h · after T15, T22 · 🟡 single upload done
 - Done: upload on `/valjavotted` with an instant seal badge, an estimated progress bar with stage messages while Claude reads (the borrower can move on), and a summary card per statement.
+- Done (D28): several files per upload (picker or drag-and-drop) with instructions to add every account; statements grouped per person (holder matched to the contract's borrowers), co-borrowers asked for theirs, per-person and household totals (`GET /v1/me/statements`, V6 holder and account columns, each account counted once).
 - Remaining:
 - Multi-file upload for "all accounts, 6 months". Show a short how-to per bank: where to download, and **a recommendation to choose the digitally sealed (.asice) export**.
 - Show the summary per account plus a combined total, with reconciliation and seal badges.
@@ -231,7 +217,6 @@ GET  /v1/me                        (borrower + progress)
 POST /v1/documents                 GET /v1/documents/{id}        (status + extraction)
 PUT  /v1/me/loan                   PUT /v1/me/property
 GET  /v1/me/statements/summary
-GET  /v1/address/search?q=         GET /v1/buildings/{adsId}
 GET  /v1/me/risk-class
 POST /v1/commitments               PUT /v1/commitments/{id}/signature/{method}
 GET  /v1/commitments/{id}/signature/{method}/status

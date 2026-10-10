@@ -69,6 +69,8 @@ app:
     annual-discount-rate: 3
   demo:
     seed-enabled: ${DEMO_SEED:true}
+    # Every login starts the flow over (the stub login always signs in the same person)
+    fresh-start-on-login: ${DEMO_FRESH_LOGIN:true}
     seed-borrowers: 520
     seed-volume: 60000000
     # Adds an in-memory "joiner" to the tracker at random intervals; resets on restart

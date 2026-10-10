@@ -9,4 +9,8 @@ interface StoredLoanContractRepository extends JpaRepository<StoredLoanContract,
   Optional<StoredLoanContract> findByDocumentIdAndBorrowerId(UUID documentId, UUID borrowerId);
 
   Optional<StoredLoanContract> findByDocumentId(UUID documentId);
+
+  Optional<StoredLoanContract> findFirstByBorrowerIdOrderByCreatedAtDesc(UUID borrowerId);
+
+  void deleteByBorrowerId(UUID borrowerId);
 }

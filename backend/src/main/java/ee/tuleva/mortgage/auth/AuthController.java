@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,6 +32,7 @@ class AuthController {
 
   private final AuthProvider authProvider;
   private final BorrowerService borrowerService;
+  private final ApplicationEventPublisher events;
 
   @PostMapping("/auth/{method}")
   StartResponse start(
@@ -58,6 +60,7 @@ class AuthController {
     request.changeSessionId();
     session.removeAttribute(PENDING_LOGIN);
     session.setAttribute(BORROWER_ID, borrower.getId());
+    events.publishEvent(new BorrowerLoggedIn(borrower.getId()));
     return new PollResponse(outcome.status(), person.firstName());
   }
 

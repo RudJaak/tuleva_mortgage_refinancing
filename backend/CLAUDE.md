@@ -13,7 +13,7 @@ This is the Spring Boot API for the borrower flow. Project context and decisions
   - `config`: CORS, Clock;
   - `borrower`;
   - `pool`: commitments, stats, public config;
-  - `demo`: seeder, reset and simulated joiners;
+  - `demo`: seeder, resets (whole demo, or one borrower's flow, also on every login) and simulated joiners;
   - `document`: `POST /v1/documents`, container intake and bank-seal check (digidoc4j), the `DocumentProcessor` hook;
   - `extraction`: shared Claude client (`ClaudeDocumentReader`: PDF in, structured output out);
   - `statement`: account-statement extraction (stub or Claude), analysis and summary;

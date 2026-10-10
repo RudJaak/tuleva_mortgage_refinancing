@@ -54,6 +54,7 @@ Every external integration has an offline stub. You switch between them in `.env
 | `REQUIRE_BANK_SEAL` | `false` / `true` | `true` rejects uploads that aren't sealed by a known bank. With `false`, they're accepted at a lower verification level |
 | `STATEMENT_RECENCY_CHECKS` | `true` / `false` | `false` only for studying old statements: no staleness flag, and a long statement is analysed whole instead of over its last 6 months |
 | `DEMO_SEED` | `true` / `false` | Seeds a synthetic pool (~520 borrowers, ~€60M) on startup. `POST /v1/demo/reset` removes everything signed during a demo |
+| `DEMO_FRESH_LOGIN` | `true` / `false` | Every login clears that borrower's documents and loan, so a demo starts over (the stub login always signs in the same person). The flow also has an "Alusta algusest" link |
 
 ## Attribution
 

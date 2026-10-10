@@ -1,22 +1,26 @@
-import { useRef } from 'react'
+import { useRef, useState, type DragEvent } from 'react'
 import { FormattedMessage } from 'react-intl'
 import { ApiError } from '../../api/client'
 import { failureMessageId } from './failure'
 
+/** A file picker that also takes files dropped on it; {@code multiple} allows several at once. */
 export function DocumentUpload({
   hintId,
   chooseId,
+  multiple = false,
   onSelect,
   pending,
   error,
 }: {
   hintId: string
   chooseId: string
-  onSelect: (file: File) => void
+  multiple?: boolean
+  onSelect: (files: File[]) => void
   pending: boolean
   error: Error | null
 }) {
   const input = useRef<HTMLInputElement>(null)
+  const [dragging, setDragging] = useState(false)
   const messageId =
     error === null
       ? undefined
@@ -24,8 +28,29 @@ export function DocumentUpload({
         ? 'documents.failure.UNAUTHORIZED'
         : failureMessageId(error instanceof ApiError ? error.reason : undefined)
 
+  const select = (files: FileList | null) => {
+    const chosen = Array.from(files ?? [])
+    if (chosen.length > 0 && !pending) {
+      onSelect(multiple ? chosen : chosen.slice(0, 1))
+    }
+  }
+  const onDrop = (event: DragEvent) => {
+    event.preventDefault()
+    setDragging(false)
+    select(event.dataTransfer.files)
+  }
+
   return (
-    <div className="card rounded-4 p-4 d-flex flex-column gap-3">
+    <div
+      className={`card rounded-4 p-4 d-flex flex-column gap-3 document-drop ${dragging ? 'document-drop-active' : ''}`}
+      data-testid="document-drop"
+      onDragOver={(event) => {
+        event.preventDefault()
+        setDragging(true)
+      }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={onDrop}
+    >
       <p className="mb-0">
         <FormattedMessage id={hintId} />
       </p>
@@ -44,12 +69,10 @@ export function DocumentUpload({
             type="file"
             className="visually-hidden"
             accept=".asice,.bdoc,.pdf,application/pdf"
+            multiple={multiple}
             disabled={pending}
             onChange={(event) => {
-              const file = event.target.files?.[0]
-              if (file) {
-                onSelect(file)
-              }
+              select(event.target.files)
               if (input.current) {
                 input.current.value = ''
               }
@@ -57,7 +80,7 @@ export function DocumentUpload({
           />
         </label>
         <span className="small text-body-secondary">
-          <FormattedMessage id="documents.upload.formats" />
+          <FormattedMessage id={multiple ? 'documents.upload.dropMany' : 'documents.upload.drop'} />
         </span>
       </div>
       {messageId && (

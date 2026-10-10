@@ -1,3 +1,5 @@
+import { useQuery } from '@tanstack/react-query'
+import { api } from '../../api/client'
 import { useDocuments, useUploadDocument, type UploadedDocument } from '../documents/api'
 
 export type FlagCode =
@@ -40,6 +42,7 @@ export type StatementSummary = {
 }
 
 export type StatementResult = {
+  accountHolder: string | null
   account: string | null
   summary: StatementSummary
 }
@@ -52,4 +55,34 @@ export function useStatementDocuments() {
 
 export function useUploadStatement() {
   return useUploadDocument<StatementResult>('ACCOUNT_STATEMENT')
+}
+
+export type StatementTotals = {
+  monthlyIncome: number
+  monthlyObligations: number
+  monthlyCardRepayments: number
+  monthlySavings: number
+  debtServiceRatio: number | null
+}
+
+export type StatementsOverview = {
+  persons: {
+    name: string
+    onLoan: boolean
+    documentIds: string[]
+    totals: StatementTotals
+    flags: FlagCode[]
+  }[]
+  household: StatementTotals
+}
+
+/** Statements per person and for the household; refetched whenever a document changes. */
+export function useStatementsOverview(documents: StatementDocument[] | undefined) {
+  const version = documents?.map((d) => `${d.documentId}:${d.status}`).join(',')
+  return useQuery({
+    queryKey: ['statements', 'overview', version],
+    queryFn: () => api.get<StatementsOverview>('/v1/me/statements'),
+    enabled: documents !== undefined,
+    placeholderData: (previous) => previous,
+  })
 }

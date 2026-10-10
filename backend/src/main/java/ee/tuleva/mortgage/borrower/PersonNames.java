@@ -29,6 +29,16 @@ public final class PersonNames {
         : Match.MISMATCH;
   }
 
+  /** The same person when one name's words include all of the other's, e.g. "TAMM, JAAN". */
+  public static boolean sameName(@Nullable String a, @Nullable String b) {
+    if (a == null || b == null || a.isBlank() || b.isBlank()) {
+      return false;
+    }
+    Set<String> first = tokens(a);
+    Set<String> second = tokens(b);
+    return first.containsAll(second) || second.containsAll(first);
+  }
+
   public static String normalise(String text) {
     return Normalizer.normalize(text, Normalizer.Form.NFD)
         .replaceAll("\\p{M}", "")

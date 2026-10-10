@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { ApiError } from '../../api/client'
-import { cancelLogin, meQueryKey, pollLogin, startLogin, type LoginMethod } from './api'
+import { cancelLogin, pollLogin, startLogin, type LoginMethod } from './api'
 
 export const loginPollIntervalMs = 1000
 
@@ -53,7 +53,8 @@ export function useLogin() {
         window.clearInterval(timer)
         if (result.status === 'COMPLETE') {
           setState({ phase: 'success', firstName: result.firstName })
-          await queryClient.invalidateQueries({ queryKey: meQueryKey })
+          // A login can start the flow over on the server, so drop everything cached
+          await queryClient.resetQueries()
         } else {
           setState({ phase: 'idle', errorId: 'login.error.generic' })
         }

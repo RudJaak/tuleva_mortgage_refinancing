@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 interface LoanRepository extends JpaRepository<Loan, UUID> {
 
   Optional<Loan> findByBorrowerId(UUID borrowerId);
+
+  void deleteByBorrowerId(UUID borrowerId);
 }

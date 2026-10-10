@@ -29,6 +29,8 @@ class StoredStatementSummary {
   private @Nullable LocalDate periodEnd;
   private BigDecimal averageMonthlyIncome;
   private BigDecimal monthlyObligations;
+  private @Nullable String accountHolder;
+  private @Nullable String account;
 
   @JdbcTypeCode(SqlTypes.JSON)
   private String summary;
@@ -39,6 +41,8 @@ class StoredStatementSummary {
       UUID documentId,
       UUID borrowerId,
       StatementSummary summary,
+      @Nullable String accountHolder,
+      @Nullable String account,
       String summaryJson,
       Instant createdAt) {
     return new StoredStatementSummary(
@@ -49,6 +53,8 @@ class StoredStatementSummary {
         summary.periodEnd(),
         summary.income().averageMonthlyTotal(),
         summary.monthlyObligations(),
+        accountHolder,
+        account,
         summaryJson,
         createdAt);
   }

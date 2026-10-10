@@ -55,7 +55,7 @@ export function LoanStep() {
       <DocumentUpload
         hintId="loan.upload.hint"
         chooseId="loan.upload.choose"
-        onSelect={(file) => upload.mutate(file)}
+        onSelect={([file]) => upload.mutate(file)}
         pending={upload.isPending}
         error={upload.error}
       />

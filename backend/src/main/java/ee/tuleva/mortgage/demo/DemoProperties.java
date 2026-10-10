@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.demo")
 record DemoProperties(
     boolean seedEnabled,
+    boolean freshStartOnLogin,
     int seedBorrowers,
     BigDecimal seedVolume,
     SimulatedJoiners simulatedJoiners) {

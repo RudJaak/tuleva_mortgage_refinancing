@@ -62,6 +62,20 @@ describe('LoanStep', () => {
     )
     expect(within(card).getByRole('status')).toHaveTextContent('Loeme lepingut…')
     expect(within(card).getByRole('progressbar', { name: 'Lepingu lugemine' })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'Kontrolli lepingu andmeid' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('shows only the upload before a contract has been read', async () => {
+    mockBackend({ loan: null, contracts: [] })
+    renderStep()
+
+    expect(await screen.findByLabelText('Lisa laenuleping')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'Kontrolli lepingu andmeid' }),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Marginaal')).not.toBeInTheDocument()
   })
 
   it('pre-fills the fields with where each was read', async () => {

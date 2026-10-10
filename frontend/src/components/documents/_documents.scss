@@ -34,3 +34,12 @@
   border-left: 3px solid $warning;
   padding-left: 0.75rem;
 }
+
+.document-drop {
+  border: 2px dashed var(--gray-border-2);
+
+  &.document-drop-active {
+    border-color: $blue;
+    background-color: var(--blue-bg-1);
+  }
+}

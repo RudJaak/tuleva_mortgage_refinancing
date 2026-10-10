@@ -24,6 +24,7 @@ export const processed: StatementDocument = {
   ...inProgress,
   status: 'PROCESSED',
   result: {
+    accountHolder: 'MARI MAASIKAS',
     account: 'EE…3456',
     summary: {
       periodStart: '2026-04-10',

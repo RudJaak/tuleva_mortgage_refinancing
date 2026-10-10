@@ -129,7 +129,10 @@ class DocumentService {
           new Outcome(null, new Failure(PROCESSING_FAILED, "The document could not be processed")));
       document.failed();
     } finally {
-      documents.save(document);
+      // A reset may have deleted the document while it was being read; don't bring it back
+      if (documents.existsById(document.getId())) {
+        documents.save(document);
+      }
       running.remove(document.getId());
     }
   }
