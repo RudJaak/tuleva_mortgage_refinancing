@@ -242,5 +242,7 @@
   "review.error.GENERIC": "Allkirjastamine ebaõnnestus. Proovi uuesti.",
   "done.commitment": "Liitusid laenujäägiga {balance} ja praeguse marginaaliga {margin}.",
   "review.sign.submit.SMART_ID": "Allkirjastan Smart-ID-ga",
-  "review.sign.submit.MOBILE_ID": "Allkirjastan Mobiil-ID-ga"
+  "review.sign.submit.MOBILE_ID": "Allkirjastan Mobiil-ID-ga",
+  "documents.seal.SIGNED_UNNAMED": "Digiallkirjastatud",
+  "documents.seal.SIGNED_BY_OTHERS_UNNAMED": "Digiallkirjastatud, sinu allkirja pole"
 }

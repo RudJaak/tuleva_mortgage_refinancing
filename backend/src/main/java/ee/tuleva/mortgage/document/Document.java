@@ -33,6 +33,7 @@ class Document {
 
   private @Nullable String sealedByBank;
   private @Nullable Instant sealedAt;
+  private @Nullable Boolean signedByBorrower;
 
   @Enumerated(EnumType.STRING)
   private DocumentStatus status;
@@ -53,6 +54,7 @@ class Document {
         verification.level(),
         verification.bankName(),
         verification.sealedAt(),
+        verification.signedByBorrower(),
         DocumentStatus.RECEIVED,
         createdAt);
   }

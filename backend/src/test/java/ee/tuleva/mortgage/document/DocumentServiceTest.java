@@ -109,11 +109,19 @@ class DocumentServiceTest {
         .willReturn(
             new ContainerReader.Contents(List.of(PDF), signed, java.util.Set.of("60001017869")));
 
-    var accepted =
-        service(false, queued::add)
-            .receive(BORROWER, DocumentType.ACCOUNT_STATEMENT, "c.asice", UPLOAD);
+    var service = service(false, queued::add);
+    var accepted = service.receive(BORROWER, DocumentType.ACCOUNT_STATEMENT, "c.asice", UPLOAD);
 
     assertThat(accepted.verification().signedByBorrower()).isTrue();
+    assertThat(saved.getLast().getSignedByBorrower()).isTrue();
+    assertThat(service.list(BORROWER, DocumentType.ACCOUNT_STATEMENT))
+        .as("polling keeps the signers the upload answered with")
+        .singleElement()
+        .satisfies(
+            view -> {
+              assertThat(view.verification().signers()).hasSize(1);
+              assertThat(view.verification().signedByBorrower()).isTrue();
+            });
     assertThat(accepted.verification().signers())
         .extracting(Verification.Signer::name)
         .containsExactly("Mari Maasikas");

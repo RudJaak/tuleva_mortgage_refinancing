@@ -60,6 +60,8 @@ class DocumentService {
   private final Executor documentProcessingExecutor;
 
   private final Map<UUID, Outcome> outcomes = new ConcurrentHashMap<>();
+  // Signer names are kept only in memory: one of them may be a bank employee
+  private final Map<UUID, Verification> verifications = new ConcurrentHashMap<>();
   private final Set<UUID> running = ConcurrentHashMap.newKeySet();
 
   DocumentView receive(UUID borrowerId, DocumentType type, String fileName, byte[] upload) {
@@ -93,6 +95,7 @@ class DocumentService {
             Document.received(borrowerId, type, sha256(upload), verification, clock.instant()));
     var received =
         new ReceivedDocument(document.getId(), borrowerId, type, contents.files(), verification);
+    verifications.put(document.getId(), verification);
     running.add(document.getId());
     documentProcessingExecutor.execute(() -> process(document, processor, received));
     return view(document, verification);
@@ -104,13 +107,15 @@ class DocumentService {
             document ->
                 view(
                     document,
-                    new Verification(
-                        document.getVerificationLevel(),
-                        document.getSealedByBank(),
-                        null,
-                        document.getSealedAt(),
-                        List.of(),
-                        null)))
+                    verifications.getOrDefault(
+                        document.getId(),
+                        new Verification(
+                            document.getVerificationLevel(),
+                            document.getSealedByBank(),
+                            null,
+                            document.getSealedAt(),
+                            List.of(),
+                            document.getSignedByBorrower()))))
         .toList();
   }
 
