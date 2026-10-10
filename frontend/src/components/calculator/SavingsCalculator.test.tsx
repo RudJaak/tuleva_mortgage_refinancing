@@ -34,6 +34,27 @@ describe('SavingsCalculator', () => {
     expect(monthlySaving()).not.toBe(before)
   })
 
+  it('counts the extra months on top of the years', async () => {
+    renderCalculator()
+    const before = Number(lifetimeSaving()!.replace(/\D/g, ''))
+
+    await userEvent.type(screen.getByLabelText('Laenu lõpuni, lisaks kuud'), '{backspace}6')
+
+    expect(Number(lifetimeSaving()!.replace(/\D/g, ''))).toBeGreaterThan(before)
+  })
+
+  it('caps the extra months at eleven', async () => {
+    renderCalculator()
+    const months = screen.getByLabelText('Laenu lõpuni, lisaks kuud')
+    await userEvent.type(months, '{backspace}11')
+    const elevenMonths = lifetimeSaving()
+
+    await userEvent.clear(months)
+    await userEvent.type(months, '40')
+
+    expect(lifetimeSaving()).toBe(elevenMonths)
+  })
+
   it('saves more in the best case than in the modest case', async () => {
     renderCalculator()
 
@@ -75,6 +96,8 @@ describe('SavingsCalculator', () => {
 
   it('shows validated loan figures without editable inputs', () => {
     renderCalculator({ balance: 98_500, remainingMonths: 222, margin: 1.95 })
+
+    expect(screen.getByText('18 a 6 k')).toBeInTheDocument()
 
     expect(screen.queryByLabelText('Laenujääk')).not.toBeInTheDocument()
     expect(screen.getAllByText('✓ lepingust')).toHaveLength(3)

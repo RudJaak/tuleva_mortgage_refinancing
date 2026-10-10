@@ -31,7 +31,6 @@
   "notFound.back": "Tagasi avalehele",
   "calculator.balance": "Laenujääk",
   "calculator.years": "Laenu lõpuni",
-  "calculator.yearsUnit": "aastat",
   "calculator.margin": "Sinu praegune marginaal",
   "calculator.marginUnknown": "Ei tea oma marginaali",
   "calculator.marginUnknownHint": "Kasutame tüüpilist marginaali {margin}. Täpse numbri leiad laenulepingust.",
@@ -92,5 +91,9 @@
   "login.success.greeting": "Tere, {firstName}!",
   "login.success.lead": "Sisselogimine õnnestus. Jätka oma kodulaenu andmetega.",
   "login.success.continue": "Jätkan",
-  "header.logout": "Logi välja"
+  "header.logout": "Logi välja",
+  "calculator.yearsShort": "a",
+  "calculator.monthsShort": "k",
+  "calculator.months": "Laenu lõpuni, lisaks kuud",
+  "calculator.term": "{years} a {months} k"
 }

@@ -3,7 +3,7 @@ import { useState, type ReactNode } from 'react'
 import { IntlProvider } from 'react-intl'
 import { locale, messages } from '../translations'
 
-export function createQueryClient() {
+function createQueryClient() {
   return new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } } })
 }
 

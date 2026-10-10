@@ -38,8 +38,8 @@ app:
     stub-delay: 3s
     stub-person:
       personal-code: "40504040001"
-      first-name: Mari
-      last-name: Maasikas
+      first-name: Rudolf
+      last-name: ""
   extraction:
     mode: ${EXTRACTION_MODE:stub}
   cors:

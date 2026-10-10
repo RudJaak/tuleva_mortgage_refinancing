@@ -30,6 +30,11 @@ public class Borrower {
     return new Borrower(UUID.randomUUID(), personalCode, firstName, lastName, false, createdAt);
   }
 
+  public void rename(String firstName, String lastName) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
+
   public static Borrower synthetic(Instant createdAt) {
     return new Borrower(UUID.randomUUID(), null, null, null, true, createdAt);
   }

@@ -14,6 +14,7 @@ export type ValidatedLoan = {
 type CalculatorInputs = {
   balance: string
   years: string
+  months: string
   margin: number
   marginUnknown: boolean
   scenario: Scenario
@@ -24,6 +25,7 @@ export const calculatorStorageKey = 'mortgage-pool.calculator'
 const initialInputs: CalculatorInputs = {
   balance: '125000',
   years: '20',
+  months: '0',
   margin: 1.85,
   marginUnknown: false,
   scenario: 'expected',
@@ -42,7 +44,9 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
   const [inputs, setInputs] = usePersistedState(calculatorStorageKey, initialInputs)
 
   const balance = validated?.balance ?? toNumber(inputs.balance)
-  const remainingMonths = validated?.remainingMonths ?? Math.round(toNumber(inputs.years) * 12)
+  const remainingMonths =
+    validated?.remainingMonths ??
+    Math.round(toNumber(inputs.years) * 12) + Math.min(Math.round(toNumber(inputs.months)), 11)
   const currentMargin =
     validated?.margin ?? (inputs.marginUnknown ? settings.defaultMargin : inputs.margin)
   const targetMargin = margins[inputs.scenario]
@@ -77,7 +81,13 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
                 ['calculator.balance', euro(validated.balance)],
                 [
                   'calculator.years',
-                  `${intl.formatNumber(validated.remainingMonths / 12, { maximumFractionDigits: 1 })} ${intl.formatMessage({ id: 'calculator.yearsUnit' })}`,
+                  intl.formatMessage(
+                    { id: 'calculator.term' },
+                    {
+                      years: Math.floor(validated.remainingMonths / 12),
+                      months: validated.remainingMonths % 12,
+                    },
+                  ),
                 ],
                 ['calculator.margin', percent(validated.margin)],
               ]}
@@ -110,22 +120,40 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
                 <label htmlFor={`${id}-years`} className="col-sm-6 col-form-label pe-0">
                   <FormattedMessage id="calculator.years" />
                 </label>
-                <div className="col-sm-6">
+                <div className="col-sm-6 d-flex gap-2">
                   <div className="input-group">
                     <input
                       id={`${id}-years`}
                       type="number"
                       inputMode="numeric"
                       className="form-control text-end"
-                      min={1}
+                      min={0}
                       max={35}
                       step={1}
                       placeholder="20"
                       value={inputs.years}
                       onChange={(event) => update({ years: event.target.value })}
                     />
-                    <span className="input-group-text calculator-unit">
-                      <FormattedMessage id="calculator.yearsUnit" />
+                    <span className="input-group-text">
+                      <FormattedMessage id="calculator.yearsShort" />
+                    </span>
+                  </div>
+                  <div className="input-group">
+                    <input
+                      id={`${id}-months`}
+                      type="number"
+                      inputMode="numeric"
+                      className="form-control text-end"
+                      min={0}
+                      max={11}
+                      step={1}
+                      placeholder="0"
+                      aria-label={intl.formatMessage({ id: 'calculator.months' })}
+                      value={inputs.months}
+                      onChange={(event) => update({ months: event.target.value })}
+                    />
+                    <span className="input-group-text">
+                      <FormattedMessage id="calculator.monthsShort" />
                     </span>
                   </div>
                 </div>

@@ -18,6 +18,11 @@ public class BorrowerService {
   public Borrower findOrCreate(String personalCode, String firstName, String lastName) {
     return borrowers
         .findByPersonalCode(personalCode)
+        .map(
+            existing -> {
+              existing.rename(firstName, lastName);
+              return existing;
+            })
         .orElseGet(
             () ->
                 borrowers.save(
