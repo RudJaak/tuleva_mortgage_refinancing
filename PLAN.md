@@ -35,6 +35,8 @@ Build a **borrower-facing** app that:
 | D21 | **Up-front fields:** identity; old-loan facts incl. contract number; property (energy class auto-filled from EHR); household (co-borrower flag, marital status, property regime); other liabilities; 6 months of statements. **After a bank is chosen:** valuation, early-repayment application, notary | 2026-10-10 |
 | D22 | **Placeholder tracker values:** deadline **31.12.2026**; margin ladder €25M → 1.45%, €50M → 1.35%, €100M → 1.25% (margins superseded by D23). Both live in config and can change | 2026-10-10 |
 | D23 | **Ladder tiers = calculator scenarios:** €25M → **1.30%** (Tagasihoidlik), €50M → **1.20%** (Eesmärk), €100M → **1.10%** (Parim). Still placeholders until teammates confirm | 2026-10-10 |
+| D24 | **Milestones replace the D23 tiers.** **€100M is the minimum**: below it no tender happens. Tiers are €100M → **1.20%** (Tagasihoidlik), €300M → **1.00%** (Eesmärk), €500M → **0.80%** (Parim). Above €100M the pool keeps growing until the deadline, and the highest milestone reached sets the target margin M | 2026-10-10 |
+| D25 | **Tracker counts signed commitments only**; withdrawals subtract. The demo seed starts **mid-way to €100M** (~€60M, ~520 synthetic borrowers) | 2026-10-10 |
 
 ## Non-goals for the hackathon
 
@@ -61,7 +63,7 @@ Why commit at all? Incumbent banks can match any outside offer, and about 40% of
 - **Legal flag:** collecting signed switching mandates is even more clearly **mortgage credit intermediation** (KAVS § 4). The demo should label the operator "Tuleva or a licensed partner (TBD)".
 - **Stretch goal (D15):** authorise the 90-day early-repayment notice to the current bank as part of signing.
 
-**Tender trigger (D9):** the pool closes on **date D, or as soon as it reaches €N committed**, whichever comes first. The landing-page tracker displays both.
+**Tender trigger (D9, D24):** the pool closes on the deadline (31.12.2026). It must have reached the **€100M minimum** by then, or no tender happens. The highest milestone reached sets M.
 
 Open points:
 - **Out of scope (D19):** co-borrower signing. In production, every borrower on the loan must sign.
@@ -72,7 +74,7 @@ Open points:
 **1. Savings calculator.** Port of Tuleva's calculator UX; see `docs/research/08-tuleva-design-and-code.md`.
 - **Inputs:** remaining balance, remaining term, current margin (or "I don't know", which defaults to ~1.7%). The current bank is optional.
 - **Outputs:** savings per month, over the remaining term and as NPV, under three scenarios:
-  - The three scenarios are the three ladder tiers (D23): **Tagasihoidlik** (modest) = tier 1, **Eesmärk** (goal) = tier 2, **Parim** (best) = tier 3.
+  - The three scenarios are the three ladder tiers (D24): **Tagasihoidlik** (modest) = tier 1, **Eesmärk** (goal) = tier 2, **Parim** (best) = tier 3.
   - All scenario values live in config.
 - **After login and upload,** the same component re-renders with **validated** balance, term and margin. The only variable left is the tender margin, still shown as worst / expected / best. Mark validated values ("from your contract").
 
@@ -82,9 +84,9 @@ Open points:
 
   | Pool reaches | Target margin |
   |---|---|
-  | €25M | 1.30% |
-  | €50M | 1.20% |
-  | €100M | 1.10% |
+  | €100M (minimum) | 1.20% |
+  | €300M | 1.00% |
+  | €500M | 0.80% |
 
 - **Data:** a public, aggregate-only API endpoint (count, sum of balances, current ladder step). It must never return per-person data. For the demo, seed it with synthetic commitments.
 - **Compliance wording** (Reklaamiseadus § 29): show these as **targets or goals, not offers**. For example, use "Eesmärk" (goal) rather than "Pakkumine" (offer), and add a disclaimer that the final terms depend on the tender and each bank's credit decision.

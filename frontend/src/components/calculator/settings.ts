@@ -1,3 +1,5 @@
+import { usePublicConfig, type PublicConfig } from '../pool/api'
+
 export type LadderStep = { volume: number; margin: number }
 
 export type CalculatorSettings = {
@@ -18,9 +20,9 @@ export const defaultCalculatorSettings: CalculatorSettings = {
   switchingCost: 400,
   annualDiscountRate: 3,
   ladder: [
-    { volume: 25_000_000, margin: 1.3 },
-    { volume: 50_000_000, margin: 1.2 },
-    { volume: 100_000_000, margin: 1.1 },
+    { volume: 100_000_000, margin: 1.2 },
+    { volume: 300_000_000, margin: 1.0 },
+    { volume: 500_000_000, margin: 0.8 },
   ],
 }
 
@@ -35,6 +37,15 @@ export function scenarioMargins(settings: CalculatorSettings): Record<Scenario, 
   return { worst, expected, best }
 }
 
+export function toCalculatorSettings(config: PublicConfig): CalculatorSettings {
+  const [first, second, third] = config.pool.milestones
+  if (!first || !second || !third) {
+    return { ...defaultCalculatorSettings, ...config.calculator }
+  }
+  return { ...config.calculator, ladder: [first, second, third] }
+}
+
 export function useCalculatorSettings(): CalculatorSettings {
-  return defaultCalculatorSettings
+  const { data } = usePublicConfig()
+  return data ? toCalculatorSettings(data) : defaultCalculatorSettings
 }

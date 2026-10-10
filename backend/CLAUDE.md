@@ -8,6 +8,14 @@ This is the Spring Boot API for the borrower flow. Project context and decisions
 - **Spring Modulith 2.1.1.** Each top-level package under `ee.tuleva.mortgage` is a module, and sub-packages are internal to it. `ModularityTests` enforces this.
 - Planned modules: `auth`, `signature`, `borrower`, `loan`, `document`, `statement`, `property`, `risk`, `pool`, `config`.
 - PostgreSQL 18 (via `../docker-compose.yml`), Flyway migrations in `src/main/resources/db/migration`, JPA with `ddl-auto: validate`.
+- **Jackson 3** (`tools.jackson.*`, not `com.fasterxml.jackson.*`). Test annotations live in the new Boot 4 packages, e.g. `org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest` and `org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest`.
+- Modules so far:
+  - `config`: CORS, Clock;
+  - `borrower`;
+  - `pool`: commitments, stats, public config;
+  - `demo`: seeder and reset.
+
+  Cross-module references use IDs (UUID), not JPA relations.
 - Runs on port **9000**. The Vite dev server is on 5173 and is allowed by CORS on `/v1/**`.
 
 ## Conventions

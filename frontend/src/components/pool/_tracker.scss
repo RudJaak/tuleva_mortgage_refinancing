@@ -1,0 +1,32 @@
+.pool-tracker {
+  .tracker-figure {
+    font-family: $font-family-serif;
+    font-size: 2.5rem;
+    line-height: 1.1;
+    font-weight: $font-weight-bold;
+    color: $navy-blue;
+    font-variant-numeric: lining-nums;
+  }
+
+  .progress {
+    height: 1rem;
+    background-color: var(--blue-bg-2);
+  }
+
+  .milestone {
+    border: 1px solid var(--gray-border-2);
+    border-radius: $border-radius-lg;
+    padding: 0.75rem 1rem;
+    height: 100%;
+
+    &.milestone-reached {
+      border-color: $green;
+      background-color: rgba($green, 0.05);
+    }
+
+    &.milestone-next {
+      border-color: $blue;
+      background-color: var(--blue-bg-1);
+    }
+  }
+}

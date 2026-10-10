@@ -1,15 +1,12 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { AppProviders } from '../AppProviders'
+import { mockApi, renderWithProviders } from '../../test/render'
+import { publicConfig } from '../pool/fixtures'
 import { calculatorStorageKey, SavingsCalculator, type ValidatedLoan } from './SavingsCalculator'
 
 function renderCalculator(validated?: ValidatedLoan) {
-  return render(
-    <AppProviders>
-      <SavingsCalculator validated={validated} />
-    </AppProviders>,
-  )
+  return renderWithProviders(<SavingsCalculator validated={validated} />)
 }
 
 const monthlySaving = () => screen.getByTestId('monthly-saving').textContent
@@ -58,7 +55,7 @@ describe('SavingsCalculator', () => {
   })
 
   it('explains when the scenario would not save anything', async () => {
-    window.sessionStorage.setItem(calculatorStorageKey, JSON.stringify({ margin: 1.2 }))
+    window.sessionStorage.setItem(calculatorStorageKey, JSON.stringify({ margin: 0.9 }))
     renderCalculator()
 
     expect(screen.getByText(/juba sama madal või madalam/)).toBeInTheDocument()
@@ -83,6 +80,19 @@ describe('SavingsCalculator', () => {
     expect(screen.getAllByText('✓ lepingust')).toHaveLength(3)
     expect(screen.getByText(/98\s500\s€/)).toBeInTheDocument()
     expect(screen.getByText('1,95%')).toBeInTheDocument()
+  })
+
+  it('uses the Euribor and tiers served by the backend', async () => {
+    mockApi({
+      '/v1/config/public': {
+        ...publicConfig,
+        calculator: { ...publicConfig.calculator, euribor6m: 3.25 },
+      },
+    })
+    renderCalculator()
+
+    expect(await screen.findByText(/6 kuu Euribor 3,25%/, { selector: 'p' })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /Eesmärk/ })).toHaveAccessibleName(/1,00%/)
   })
 
   it('presents margins as goals with a disclaimer, not as an offer', () => {

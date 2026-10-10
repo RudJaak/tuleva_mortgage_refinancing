@@ -51,6 +51,7 @@ Every external integration has an offline stub. You switch between them in `.env
 |---|---|---|
 | `AUTH_MODE` | `stub` / `sk-demo` | `sk-demo` uses SK's public Smart-ID / Mobile-ID DEMO environment |
 | `EXTRACTION_MODE` | `stub` / `claude` | `claude` needs `ANTHROPIC_API_KEY` |
+| `DEMO_SEED` | `true` / `false` | Seeds a synthetic pool (~520 borrowers, ~€60M) on startup. `POST /v1/demo/reset` removes everything signed during a demo |
 
 ## Attribution
 

@@ -45,7 +45,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - **Done when:** the app boots against Postgres, Flyway runs `V1__init.sql`, and one slice test passes.
 - **Outcome:** `ee.tuleva.mortgage` on Boot 4.1.1 / Modulith 2.1.1, with Spotless (google-java-format). Tests: `HealthEndpointTests` (Testcontainers PG 18, Flyway + health UP) and `ModularityTests`. The module packages get created as their tasks land.
 
-### T03 Data model · D · 1.5h · after T02
+### T03 Data model · D · 1.5h · after T02 · 🟡 partly done
 - Flyway migrations. Use ESMA-style column comments (RREL*/RREC*) where they map.
 - `borrower`: id, personal code (encrypted at rest or hashed + last 4 shown), name, birth date, marital status, property regime, co-borrower flag, adults, dependants.
 - `loan`: lender, contract number, balance, margin, euribor tenor, maturity date, monthly payment, fixed-period end, mortgage amount and rank, wish (keep / extend / merge). **Each field has `{value, source: DECLARED|DOCUMENT|REGISTER, document_id, confidence, confirmed_at}`.** Store this as JSONB per field, or as a sibling `field_provenance` table.
@@ -56,6 +56,9 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - `commitment`: borrower, pool id, target margin M at signing, signed container reference, signed_at, withdrawn_at.
 - `pool`: id, deadline, target volume, ladder (JSON).
 - **Done when:** the migrations apply cleanly and repository slice tests pass.
+- **Outcome (part 1):**
+  - `V2__borrower_and_commitment.sql`. `borrower` has a nullable personal code and a `synthetic` flag. `commitment` stores the committed balance (RREL30), the current margin (RREL46) and a `SIGNED`/`WITHDRAWN` status, with one signed commitment per borrower.
+  - **The other tables (loan, property, liability, statement_summary, document, field provenance) are added with the tasks that use them** (T20, T22, T30–T32), so we don't design them before they're needed.
 
 ### T04 Auth: Mobile-ID + Smart-ID (SK demo) · A · 3h · after T02
 - Copy from `TulevaEE/onboarding-service` (MIT; reuse authorised): `auth/mobileid`, `auth/smartid`, `config/MobileIdConfiguration`, `SmartIdClientConfiguration`, `SmartIdTrustedCaCertificates`, the demo certificates, and the truststore.
@@ -71,13 +74,16 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
 - Switched by `EXTRACTION_MODE`.
 - **Done when:** a slice test gets typed results from the stub for `LOAN_CONTRACT` and `ACCOUNT_STATEMENT`.
 
-### T06 Config: pool, ladder, scenarios · D · 0.5h · after T02
+### T06 Config: pool, ladder, scenarios · D · 0.5h · after T02 · ✅ done
 - `application.yml`:
-  - pool deadline `2026-12-31`, target volume, ladder `[25M→1.30, 50M→1.20, 100M→1.10]` (D23);
+  - pool deadline `2026-12-31`, target volume, minimum €100M, ladder `[100M→1.20, 300M→1.00, 500M→0.80]` (D24);
   - default margin 1.70%; 6M Euribor anchor 2.936%; NPV discount 3%; switching cost €400;
   - risk-class thresholds.
 - `GET /v1/config/public` exposes what the frontend needs.
 - **Done when:** the frontend can read the config, and changing the YAML changes the UI.
+- **Outcome:**
+  - `app.pool.*` and `app.calculator.*` in `application.yml`, served at `GET /v1/config/public`.
+  - The calculator reads Euribor, the defaults and the tiers from this endpoint and falls back to built-in defaults while it loads or if it fails.
 
 ### T10 Frontend skeleton · B · 2h · after T01 · ✅ done
 - Vite + React + TS + Bootstrap 5.3.
@@ -119,7 +125,7 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
   - **Settings are static defaults for now** (`settings.ts` → `useCalculatorSettings`). T06 must feed them from `/v1/config/public`. The scenarios are the three ladder tiers (D23).
   - The review step (T34) still has to mount it in validated mode.
 
-### T13 Pool tracker: API + component · D+B · 3h · after T03, T06, T10
+### T13 Pool tracker: API + component · D+B · 3h · after T03, T06, T10 · ✅ done
 - **Backend:** `GET /v1/pool/stats` returns `{joinedCount, committedBalance, targetVolume, deadline, ladder[], currentStep, nextStep}`.
   - Aggregates only. Clamp small counts to avoid re-identification: hide or round the balance when fewer than ~10 people have joined.
 - **Frontend:**
@@ -130,6 +136,16 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
   - the compliance disclaimer (§ 29: goal, not offer).
 - Polls every 30 s.
 - **Done when:** the seeded data shows, and a new commitment (T42) moves the bar.
+- **Outcome:**
+  - `GET /v1/pool/stats` returns aggregates only: count and volume of SIGNED commitments, minimum reached, milestones with reached flags, and the current and next milestone. Count and volume are hidden while fewer than 10 people have joined.
+  - **Frontend:**
+    - big Merriweather figures;
+    - a progress bar towards the next milestone, with "Puudu X mln €";
+    - three milestone cards (€100M minimum, €300M, €500M);
+    - Tuleva flip-tile countdown to 31.12.2026;
+    - the § 29 disclaimer;
+    - polling every 30 s.
+  - "A new commitment moves the bar" will be checked once T42 exists.
 
 ### T14 Landing page assembly · B · 2h · after T12, T13
 - Hero with headline (Estonia ≈1.55 pp vs Finland ≈0.5 pp over Euribor; ECB MIR Aug 2026), calculator, tracker, "Kuidas see töötab" (how it works, 3 steps), placeholder blocks for teammates' facts, statistics and slogans (D17), FAQ placeholder, CTA "Liitu ühispakkumisega" (join the joint offer).
@@ -276,9 +292,13 @@ Build backlog for phases 2–5. The scope and decisions it implements (D1–D22)
   - an LHV-style CSV.
 - Keep them in `fixtures/` (committed, synthetic only) together with their expected-extraction JSON.
 
-### T51 Pool seed data · D · 1h · after T03
-- A Flyway repeatable migration or a dev-profile seeder that creates ~300 synthetic commitments totalling ~€32M, which puts the pool past step 1.
+### T51 Pool seed data · D · 1h · after T03 · ✅ done
+- A seeder that creates synthetic commitments, so the tracker shows a realistic pool (D25: ~520 borrowers, ~€60M, mid-way to the €100M minimum).
 - Includes a "reset demo" endpoint, active only in the dev profile.
+- **Outcome:**
+  - `demo` module. It seeds on startup when `app.demo.seed-enabled` (env `DEMO_SEED`, default true) and only if no synthetic borrowers exist yet.
+  - Balances are deterministic, log-normal around €110k, and add up to exactly €60M.
+  - `POST /v1/demo/reset` removes all non-synthetic borrowers and their commitments, so the live demo can be replayed.
 
 ### T52 Content integration · B · 1h · when teammates deliver
 - Drop the teammates' facts, statistics and slogans into `content.et.json`. Check the wording against § 29: goals, not offers.

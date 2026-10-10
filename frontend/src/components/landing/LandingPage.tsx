@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { SavingsCalculator } from '../calculator/SavingsCalculator'
 import { Placeholder } from '../layout/Placeholder'
 import { paths } from '../paths'
+import { PoolTracker } from '../pool/PoolTracker'
 
 export function LandingPage() {
   return (
@@ -25,9 +26,7 @@ export function LandingPage() {
           <SavingsCalculator />
         </div>
       </section>
-      <Placeholder>
-        <FormattedMessage id="landing.tracker.placeholder" />
-      </Placeholder>
+      <PoolTracker />
       <Placeholder>
         <FormattedMessage id="landing.content.placeholder" />
       </Placeholder>
