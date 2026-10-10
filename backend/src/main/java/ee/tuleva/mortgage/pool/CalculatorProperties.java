@@ -11,4 +11,5 @@ public record CalculatorProperties(
     BigDecimal defaultMargin,
     BigDecimal marketAverageMargin,
     BigDecimal switchingCost,
-    BigDecimal annualDiscountRate) {}
+    BigDecimal annualDiscountRate,
+    BigDecimal membershipFee) {}

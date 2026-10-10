@@ -38,7 +38,8 @@ class LoanAnalyzerTest {
               new BigDecimal("1.70"),
               new BigDecimal("1.60"),
               new BigDecimal("400"),
-              new BigDecimal("3")),
+              new BigDecimal("3"),
+              new BigDecimal("150")),
           new PoolProperties(
               OffsetDateTime.parse("2026-11-10T00:00:00+02:00"),
               1000,

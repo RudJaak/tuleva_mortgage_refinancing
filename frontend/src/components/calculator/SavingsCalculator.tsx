@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { compareMargins } from '../../calc/savings'
+import { useMembership } from '../membership/api'
 import { MarginSlider } from './MarginSlider'
 import { scenarioMargins, scenarios, useCalculatorSettings, type Scenario } from './settings'
 import { usePersistedState } from './usePersistedState'
@@ -42,6 +43,9 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
   const settings = useCalculatorSettings()
   const margins = scenarioMargins(settings)
   const [inputs, setInputs] = usePersistedState(calculatorStorageKey, initialInputs)
+  // Members have already paid the fee; for anyone else (or not yet known) it is a cost of joining
+  const member = useMembership().data?.member === true
+  const membershipCost = member ? 0 : settings.membershipFee
 
   const balance = validated?.balance ?? toNumber(inputs.balance)
   const remainingMonths =
@@ -57,7 +61,7 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
     euribor: settings.euribor6m,
     currentMargin,
     targetMargin,
-    switchingCost: settings.switchingCost,
+    switchingCost: settings.switchingCost + membershipCost,
     annualDiscountRate: settings.annualDiscountRate,
   })
 
@@ -272,11 +276,34 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
                   values={{ amount: euro(result.lifetimeSaving) }}
                 />
               </div>
-              <p className="small text-body-secondary mt-2 mb-0">
+              <ul className="small text-body-secondary list-unstyled mt-2 mb-1" data-testid="costs">
+                <li>
+                  <FormattedMessage
+                    id="calculator.cost.switching"
+                    values={{ cost: euro(settings.switchingCost) }}
+                  />
+                </li>
+                <li data-testid="membership-fee">
+                  {member ? (
+                    <FormattedMessage
+                      id="calculator.cost.membershipPaid"
+                      values={{
+                        fee: euro(settings.membershipFee),
+                        struck: (text) => <s>{text}</s>,
+                      }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="calculator.cost.membership"
+                      values={{ fee: euro(settings.membershipFee) }}
+                    />
+                  )}
+                </li>
+              </ul>
+              <p className="small text-body-secondary mb-0">
                 <FormattedMessage
                   id="calculator.savingDetails"
                   values={{
-                    cost: euro(settings.switchingCost),
                     npv: euro(result.netPresentValue),
                     months: Math.ceil(result.breakEvenMonths ?? 0),
                   }}

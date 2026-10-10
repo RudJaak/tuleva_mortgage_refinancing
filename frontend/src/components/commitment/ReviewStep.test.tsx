@@ -14,12 +14,21 @@ const notCommitted: CommitmentView = {
   signedAt: null,
 }
 
+const clearCheck = {
+  result: 'CLEAR',
+  activeDefaults: 0,
+  source: 'Creditinfo maksehäireregister (näidis)',
+  checkedAt: '2026-10-10T12:00:00Z',
+}
+
 function mockBackend({
+  creditCheck = clearCheck as unknown,
   loginMethod = 'SMART_ID',
   loan = confirmedLoan as unknown,
   commitment = notCommitted,
   signing = { status: 200, body: { signingId: 's1', verificationCode: '4321', firstName: 'Mari' } },
 }: {
+  creditCheck?: unknown
   loginMethod?: 'SMART_ID' | 'MOBILE_ID'
   loan?: unknown
   commitment?: CommitmentView
@@ -30,6 +39,12 @@ function mockBackend({
     const path = String(input)
     const reply = (body: unknown, status = 200) =>
       Promise.resolve(new Response(body === null ? null : JSON.stringify(body), { status }))
+    if (path === '/v1/me/credit-check' && init?.method === 'POST') {
+      return reply(clearCheck)
+    }
+    if (path === '/v1/me/credit-check') {
+      return creditCheck ? reply(creditCheck) : reply(null, 404)
+    }
     if (path === '/v1/me') {
       return reply({ firstName: 'Mari', lastName: 'Tamm', loginMethod })
     }
@@ -82,7 +97,7 @@ describe('ReviewStep', () => {
     const submit = screen.getByRole('button', { name: 'Allkirjastan Smart-ID-ga' })
     expect(submit).toBeDisabled()
 
-    await userEvent.click(screen.getByRole('checkbox'))
+    await userEvent.click(screen.getByRole('checkbox', { name: /Nõustun, et minu laenu/ }))
     await userEvent.click(submit)
 
     expect(await screen.findByTestId('verification-code')).toHaveTextContent('4321')
@@ -94,7 +109,7 @@ describe('ReviewStep', () => {
     const posts = mockBackend({ loginMethod: 'MOBILE_ID' })
     renderStep()
 
-    await userEvent.click(await screen.findByRole('checkbox'))
+    await userEvent.click(await screen.findByRole('checkbox', { name: /Nõustun, et minu laenu/ }))
     await userEvent.click(await screen.findByRole('button', { name: 'Allkirjastan Mobiil-ID-ga' }))
 
     expect(await screen.findByTestId('verification-code')).toHaveTextContent('4321')
@@ -102,12 +117,28 @@ describe('ReviewStep', () => {
     expect(screen.queryByLabelText('Telefoninumber')).not.toBeInTheDocument()
   })
 
+  it('runs the payment-default check with consent before signing is possible', async () => {
+    mockBackend({ creditCheck: null })
+    renderStep()
+
+    await userEvent.click(await screen.findByRole('checkbox', { name: /Nõustun, et minu laenu/ }))
+    expect(screen.getByRole('button', { name: 'Allkirjastan Smart-ID-ga' })).toBeDisabled()
+
+    const card = screen.getByTestId('credit-check')
+    expect(within(card).getByRole('button', { name: 'Kontrolli maksehäireid' })).toBeDisabled()
+    await userEvent.click(within(card).getByRole('checkbox'))
+    await userEvent.click(within(card).getByRole('button', { name: 'Kontrolli maksehäireid' }))
+
+    expect(await within(card).findByText('Kehtivaid maksehäireid ei leitud')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Allkirjastan Smart-ID-ga' })).toBeEnabled()
+  })
+
   it('asks for the loan before anyone can sign', async () => {
     mockBackend({ loan: null })
     renderStep()
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Kinnita enne oma laenu andmed')
-    await userEvent.click(screen.getByRole('checkbox'))
+    await userEvent.click(screen.getByRole('checkbox', { name: /Nõustun, et minu laenu/ }))
     expect(screen.getByRole('button', { name: 'Allkirjastan Smart-ID-ga' })).toBeDisabled()
   })
 
@@ -115,7 +146,7 @@ describe('ReviewStep', () => {
     mockBackend({ signing: { status: 422, body: { reason: 'NO_POSSIBLE_GAIN' } } })
     renderStep()
 
-    await userEvent.click(await screen.findByRole('checkbox'))
+    await userEvent.click(await screen.findByRole('checkbox', { name: /Nõustun, et minu laenu/ }))
     await userEvent.click(screen.getByRole('button', { name: 'Allkirjastan Smart-ID-ga' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('parimast eesmärgist madalam')

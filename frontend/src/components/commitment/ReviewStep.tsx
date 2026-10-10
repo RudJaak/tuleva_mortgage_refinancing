@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ApiError } from '../../api/client'
 import { Loader } from '../common/Loader'
 import { useLoan } from '../loan/api'
+import { CreditCheckCard } from '../creditcheck/CreditCheckCard'
+import { useCreditCheck } from '../creditcheck/api'
 import { useMe } from '../login/api'
 import { VerificationCodeLoader } from '../login/VerificationCodeLoader'
 import { paths } from '../paths'
@@ -24,6 +26,7 @@ export function ReviewStep() {
   const commitment = useCommitment()
   const { state, sign, cancel } = useSigning()
   const me = useMe()
+  const creditCheck = useCreditCheck()
   const [consent, setConsent] = useState(false)
   // Signing reuses the login's method; the backend keeps it (and the Mobile-ID phone) in the session
   const method = me.data?.loginMethod ?? 'SMART_ID'
@@ -196,6 +199,8 @@ export function ReviewStep() {
         )}
       </section>
 
+      <CreditCheckCard />
+
       <form className="card rounded-4 p-4 d-flex flex-column gap-3" onSubmit={submit} noValidate>
         <h2 className="h5 text-navy mb-0">
           <FormattedMessage id="review.commitment.heading" />
@@ -233,7 +238,7 @@ export function ReviewStep() {
           <button
             type="submit"
             className="btn btn-primary btn-lg"
-            disabled={!consent || !loanReady}
+            disabled={!consent || !loanReady || !creditCheck.data}
           >
             <FormattedMessage id={`review.sign.submit.${method}`} />
           </button>
@@ -245,6 +250,7 @@ export function ReviewStep() {
 
 const knownReasons = [
   'LOAN_NOT_CONFIRMED',
+  'CREDIT_CHECK_MISSING',
   'NO_POSSIBLE_GAIN',
   'ALREADY_COMMITTED',
   'PHONE_NUMBER_INVALID',

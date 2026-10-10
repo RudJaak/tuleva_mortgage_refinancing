@@ -123,4 +123,20 @@ describe('SavingsCalculator', () => {
 
     expect(screen.getByText(/mitte pakkumine/)).toBeInTheDocument()
   })
+
+  it('counts the membership fee for someone who is not a known member', async () => {
+    renderCalculator({ balance: 150000, remainingMonths: 240, margin: 1.9 })
+
+    expect(await screen.findByTestId('membership-fee')).toHaveTextContent(
+      /^Tuleva liikmeks astumine 150\s€$/,
+    )
+  })
+
+  it('strikes the fee out for a member and leaves it out of the saving', async () => {
+    mockApi({ '/v1/me/membership': { member: true } })
+    renderCalculator({ balance: 150000, remainingMonths: 240, margin: 1.9 })
+
+    const fee = await screen.findByText(/oled juba liige/)
+    expect(fee.querySelector('s')).toHaveTextContent(/150\s€/)
+  })
 })

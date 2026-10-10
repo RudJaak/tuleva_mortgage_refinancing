@@ -7,6 +7,7 @@ class CommitmentRejectedException extends RuntimeException {
 
   enum Reason {
     LOAN_NOT_CONFIRMED,
+    CREDIT_CHECK_MISSING,
     NO_POSSIBLE_GAIN,
     ALREADY_COMMITTED,
     PHONE_NUMBER_INVALID

@@ -12,6 +12,7 @@ import ee.tuleva.mortgage.auth.AuthMethod;
 import ee.tuleva.mortgage.auth.AuthProvider;
 import ee.tuleva.mortgage.borrower.Borrower;
 import ee.tuleva.mortgage.borrower.BorrowerService;
+import ee.tuleva.mortgage.creditcheck.CreditChecks;
 import ee.tuleva.mortgage.loan.ConfirmedLoans;
 import ee.tuleva.mortgage.pool.Commitment;
 import ee.tuleva.mortgage.pool.CommitmentRepository;
@@ -37,12 +38,14 @@ class CommitmentServiceTest {
   private final AuthProvider auth = mock(AuthProvider.class);
   private final BorrowerService borrowers = mock(BorrowerService.class);
   private final ConfirmedLoans loans = mock(ConfirmedLoans.class);
+  private final CreditChecks creditChecks = mock(CreditChecks.class);
   private final CommitmentRepository commitments = mock(CommitmentRepository.class);
   private final CommitmentService service =
       new CommitmentService(
           auth,
           borrowers,
           loans,
+          creditChecks,
           commitments,
           new PoolProperties(
               OffsetDateTime.parse("2026-11-10T00:00:00+02:00"),
@@ -129,7 +132,21 @@ class CommitmentServiceTest {
     verify(auth, never()).poll(any());
   }
 
+  @Test
+  void needsThePaymentDefaultCheckFirst() {
+    loan("150000", "1.85");
+    given(creditChecks.done(ID)).willReturn(false);
+
+    assertThatThrownBy(() -> service.startSigning(ID, AuthMethod.SMART_ID, null))
+        .isInstanceOfSatisfying(
+            CommitmentRejectedException.class,
+            e ->
+                assertThat(e.getReason())
+                    .isEqualTo(CommitmentRejectedException.Reason.CREDIT_CHECK_MISSING));
+  }
+
   private void loan(String balance, String margin) {
+    given(creditChecks.done(ID)).willReturn(true);
     given(loans.of(ID))
         .willReturn(
             Optional.of(

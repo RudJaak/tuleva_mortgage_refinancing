@@ -18,7 +18,9 @@ This is the Spring Boot API for the borrower flow. Project context and decisions
   - `extraction`: shared Claude client (`ClaudeDocumentReader`: PDF in, structured output out);
   - `statement`: account-statement extraction (stub or Claude), analysis and summary;
   - `loan`: loan-contract extraction with per-field evidence, derived figures and screening flags;
-  - `commitment`: the review step's emulated signing, which creates the pool commitment.
+  - `commitment`: the review step's emulated signing, which creates the pool commitment;
+  - `membership`: the stubbed Tuleva membership check after login (D32);
+  - `creditcheck`: the stubbed Creditinfo payment-default check, required before signing (D32).
 
   Cross-module references use IDs (UUID), not JPA relations.
 - Runs on port **9000**. The Vite dev server is on 5173 and is allowed by CORS on `/v1/**`.

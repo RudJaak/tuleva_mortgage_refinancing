@@ -10,6 +10,7 @@ import java.util.UUID;
 public record BorrowerDataReset(UUID borrowerId) {
 
   public static final int COMMITMENT_ORDER = 0;
+  public static final int CREDIT_CHECK_ORDER = 0;
   public static final int LOAN_ORDER = 1;
   public static final int STATEMENT_ORDER = 2;
   public static final int DOCUMENT_ORDER = 3;

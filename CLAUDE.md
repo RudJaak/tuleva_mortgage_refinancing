@@ -23,7 +23,7 @@ Related ideas, to stay distinct from:
 
 **Borrower flow only.** There is no bank-facing pool dashboard or export in the demo. The data model should still be pool-ready, with fields named after the ESMA template. The borrower sees an indicative **risk class**.
 
-Target users: **anyone in Estonia with a mortgage**, not only Tuleva members. Joining Tuleva is *not* part of the funnel.
+Target users: **anyone in Estonia with a mortgage**. Joining the pool requires Tuleva membership (€150, D32); existing members skip it.
 
 The landing page has a Tuleva-style **savings calculator** (worst, expected and best case margin) and a live **pool tracker**: people joined, combined balance, target volume, deadline, and a margin ladder that falls as the pool grows. After document upload, the calculator re-runs on validated numbers.
 

@@ -12,6 +12,7 @@ export type PublicConfig = {
     marketAverageMargin: number
     switchingCost: number
     annualDiscountRate: number
+    membershipFee: number
   }
   pool: {
     deadline: string

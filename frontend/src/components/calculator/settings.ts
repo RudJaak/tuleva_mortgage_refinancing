@@ -9,6 +9,7 @@ export type CalculatorSettings = {
   marketAverageMargin: number
   switchingCost: number
   annualDiscountRate: number
+  membershipFee: number
   ladder: [LadderStep, LadderStep, LadderStep]
 }
 
@@ -19,6 +20,7 @@ export const defaultCalculatorSettings: CalculatorSettings = {
   marketAverageMargin: 1.6,
   switchingCost: 400,
   annualDiscountRate: 3,
+  membershipFee: 150,
   ladder: [
     { members: 1000, margin: 1.35 },
     { members: 2500, margin: 1.3 },

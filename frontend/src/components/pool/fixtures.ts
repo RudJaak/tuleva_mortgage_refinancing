@@ -14,6 +14,7 @@ export const publicConfig: PublicConfig = {
     marketAverageMargin: 1.6,
     switchingCost: 400,
     annualDiscountRate: 3,
+    membershipFee: 150,
   },
   pool: { deadline: '2026-11-10T00:00:00+02:00', minimumMembers: 1000, milestones },
 }

@@ -1,6 +1,7 @@
 package ee.tuleva.mortgage.commitment;
 
 import static ee.tuleva.mortgage.commitment.CommitmentRejectedException.Reason.ALREADY_COMMITTED;
+import static ee.tuleva.mortgage.commitment.CommitmentRejectedException.Reason.CREDIT_CHECK_MISSING;
 import static ee.tuleva.mortgage.commitment.CommitmentRejectedException.Reason.LOAN_NOT_CONFIRMED;
 import static ee.tuleva.mortgage.commitment.CommitmentRejectedException.Reason.NO_POSSIBLE_GAIN;
 
@@ -8,6 +9,7 @@ import ee.tuleva.mortgage.auth.AuthMethod;
 import ee.tuleva.mortgage.auth.AuthProvider;
 import ee.tuleva.mortgage.borrower.Borrower;
 import ee.tuleva.mortgage.borrower.BorrowerService;
+import ee.tuleva.mortgage.creditcheck.CreditChecks;
 import ee.tuleva.mortgage.loan.ConfirmedLoans;
 import ee.tuleva.mortgage.pool.Commitment;
 import ee.tuleva.mortgage.pool.CommitmentRepository;
@@ -52,6 +54,7 @@ class CommitmentService {
   private final AuthProvider authProvider;
   private final BorrowerService borrowers;
   private final ConfirmedLoans confirmedLoans;
+  private final CreditChecks creditChecks;
   private final CommitmentRepository commitments;
   private final PoolProperties pool;
   private final Clock clock;
@@ -78,6 +81,10 @@ class CommitmentService {
                 () ->
                     new CommitmentRejectedException(
                         LOAN_NOT_CONFIRMED, "Confirm the loan's balance and margin first"));
+    if (!creditChecks.done(borrowerId)) {
+      throw new CommitmentRejectedException(
+          CREDIT_CHECK_MISSING, "Run the payment-default check first");
+    }
     if (loan.margin().compareTo(bestTargetMargin()) <= 0) {
       throw new CommitmentRejectedException(
           NO_POSSIBLE_GAIN, "The margin is already at or below the pool's best target");

@@ -1,6 +1,7 @@
 import { FormattedMessage } from 'react-intl'
 import { Link } from 'react-router-dom'
 import { FocusedParagraph } from '../common/FocusedParagraph'
+import { MembershipCheck } from '../membership/MembershipCheck'
 import { paths } from '../paths'
 
 export function LoginSuccess({ firstName }: { firstName: string | null }) {
@@ -16,6 +17,7 @@ export function LoginSuccess({ firstName }: { firstName: string | null }) {
           <FormattedMessage id="login.success.title" />
         )}
       </h2>
+      <MembershipCheck />
       <FocusedParagraph className="m-0 text-body-secondary">
         <FormattedMessage id="login.success.lead" />
       </FocusedParagraph>
