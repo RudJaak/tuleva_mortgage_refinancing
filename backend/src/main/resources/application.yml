@@ -85,8 +85,8 @@ app:
     seed-enabled: ${DEMO_SEED:true}
     # Every login starts the flow over (the stub login always signs in the same person)
     fresh-start-on-login: ${DEMO_FRESH_LOGIN:true}
-    seed-borrowers: 520
-    seed-volume: 60000000
+    seed-borrowers: 1069
+    seed-volume: 123000000
     # Adds an in-memory "joiner" to the tracker every 5 s; survives page reloads, resets on restart
     simulated-joiners:
       enabled: ${DEMO_LIVE:true}

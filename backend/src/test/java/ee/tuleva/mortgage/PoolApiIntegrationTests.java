@@ -20,14 +20,14 @@ class PoolApiIntegrationTests {
   @Autowired private TestRestTemplate restTemplate;
 
   @Test
-  void seededDemoPoolIsMidWayToTheMinimum() {
+  void seededDemoPoolIsJustPastTheMinimum() {
     var stats = restTemplate.getForObject("/v1/pool/stats", JsonNode.class);
 
-    assertThat(stats.get("joinedCount").asLong()).isEqualTo(520);
-    assertThat(stats.get("committedVolume").decimalValue()).isEqualByComparingTo("60000000");
-    assertThat(stats.get("minimumReached").asBoolean()).isFalse();
+    assertThat(stats.get("joinedCount").asLong()).isEqualTo(1069);
+    assertThat(stats.get("committedVolume").decimalValue()).isEqualByComparingTo("123000000");
+    assertThat(stats.get("minimumReached").asBoolean()).isTrue();
     assertThat(stats.get("nextMilestone").get("margin").decimalValue())
-        .isEqualByComparingTo("1.30");
+        .isEqualByComparingTo("1.25");
   }
 
   @Test
@@ -36,6 +36,6 @@ class PoolApiIntegrationTests {
     var stats = restTemplate.getForObject("/v1/pool/stats", JsonNode.class);
 
     assertThat(reset.get("removedBorrowers").asInt()).isZero();
-    assertThat(stats.get("joinedCount").asLong()).isEqualTo(520);
+    assertThat(stats.get("joinedCount").asLong()).isEqualTo(1069);
   }
 }
