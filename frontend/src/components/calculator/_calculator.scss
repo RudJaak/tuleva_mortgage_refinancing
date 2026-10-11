@@ -85,3 +85,10 @@
     text-align: right;
   }
 }
+
+// The saving over the whole loan is the headline figure
+.calculator-total {
+  font-family: $font-family-serif;
+  font-size: 2rem;
+  font-variant-numeric: lining-nums;
+}

@@ -230,24 +230,22 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
         <div className="px-3 mb-2 text-navy">
           {result.hasSaving ? (
             <>
-              <div className="d-flex align-items-baseline justify-content-between gap-3">
+              {/* The whole-loan saving is the point; the monthly figure only puts it in scale */}
+              <div className="d-flex flex-wrap align-items-baseline justify-content-between column-gap-3">
                 <span className="fw-medium">
                   <FormattedMessage id="calculator.saving" />
                 </span>
                 <span
-                  className="fs-5 lh-1 fw-bold text-success text-nowrap"
-                  data-testid="monthly-saving"
+                  className="calculator-total lh-1 fw-bold text-success text-nowrap"
+                  data-testid="lifetime-saving"
                 >
-                  <FormattedMessage
-                    id="calculator.perMonth"
-                    values={{ amount: euro(result.monthlySaving) }}
-                  />
+                  {euro(result.lifetimeSaving)}
                 </span>
               </div>
-              <div className="text-end fw-bold text-success" data-testid="lifetime-saving">
+              <div className="text-end text-success fw-medium mt-1" data-testid="monthly-saving">
                 <FormattedMessage
-                  id="calculator.lifetimeSaving"
-                  values={{ amount: euro(result.lifetimeSaving) }}
+                  id="calculator.monthlySaving"
+                  values={{ amount: euro(result.monthlySaving) }}
                 />
               </div>
               <ul className="small text-body-secondary list-unstyled mt-2 mb-1" data-testid="costs">

@@ -13,12 +13,12 @@ const monthlySaving = () => screen.getByTestId('monthly-saving').textContent
 const lifetimeSaving = () => screen.getByTestId('lifetime-saving').textContent
 
 describe('SavingsCalculator', () => {
-  it('shows a saving for the default loan at the goal margin', () => {
+  it('leads with the saving over the whole loan, then the monthly one', () => {
     renderCalculator()
 
     expect(screen.getByRole('radio', { name: /Eesmärk/ })).toBeChecked()
-    expect(monthlySaving()).toMatch(/^\d+\s€ kuus$/)
-    expect(lifetimeSaving()).toMatch(/laenu lõpuni$/)
+    expect(lifetimeSaving()).toMatch(/^[\d\s]+€$/)
+    expect(monthlySaving()).toMatch(/^ehk \d+\s€ kuus$/)
   })
 
   it('recalculates when the balance changes', async () => {
