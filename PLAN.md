@@ -48,6 +48,7 @@ Build a **borrower-facing** app that:
 | D34 | **Margin ladder** (updates D31): 1 000 people → 1.30%, 2 500 → 1.25%, 5 000 → 1.20% (worst / expected / best scenario; placeholders, D18) | 2026-10-10 |
 | D35 | **The signature is presented as a non-binding statement of intent** (softens D1): the UI calls it an *osalemissoov*, says it is not a contract or a loan application, and that the borrower decides only after seeing the offer and can withdraw at any time. The signature and documents show banks the interest is real. The mechanics of the commitment model are unchanged | 2026-10-10 |
 | D36 | **The calculator uses one margin: the pool's minimum goal** (the first milestone, 1.30%), with a note that more joiners can bring it lower. No worst / expected / best scenarios any more (supersedes that part of D7, D23, D31 and D34); the tracker still shows the whole ladder | 2026-10-11 |
+| D37 | **No payment-default (Creditinfo) check in the flow** (reverses that part of D32): signing no longer needs it, and the stub, its endpoint and table are removed (V9). The banks run their own credit checks after the tender (docs/research/11 keeps the research) | 2026-10-11 |
 
 ## Non-goals for the hackathon
 

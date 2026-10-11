@@ -101,9 +101,6 @@ app:
     # Emulated Tuleva membership check (D32): every demo login is a member
     stub-member: true
     stub-delay: 1500ms
-  credit-check:
-    # Emulated Creditinfo payment-default query (D32): run after the documents, with consent
-    stub-delay: 2s
   documents:
     # Statements only (contracts are signed by people). Off: a missing or untrusted seal only
     # lowers the verification level

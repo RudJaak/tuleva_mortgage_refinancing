@@ -27,7 +27,6 @@ import org.springframework.test.web.servlet.MockMvc;
       "app.auth.stub-code-display=0s",
       "app.auth.stub-verifying=0s",
       "app.membership.stub-delay=0s",
-      "app.credit-check.stub-delay=0s",
       "app.demo.seed-enabled=true",
       "app.demo.fresh-start-on-login=true",
       "app.demo.simulated-joiners.enabled=false",
@@ -66,30 +65,6 @@ class DemoFlowResetIntegrationTests {
     mockMvc
         .perform(get("/v1/me/membership").session(session))
         .andExpect(jsonPath("$.member").value(true));
-    mockMvc
-        .perform(
-            post("/v1/me/commitment/signing")
-                .session(session)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{}"))
-        .andExpect(status().isUnprocessableContent())
-        .andExpect(jsonPath("$.reason").value("CREDIT_CHECK_MISSING"));
-    mockMvc
-        .perform(
-            post("/v1/me/credit-check")
-                .session(session)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"consent\": false}"))
-        .andExpect(status().isBadRequest());
-    mockMvc
-        .perform(
-            post("/v1/me/credit-check")
-                .session(session)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"consent\": true}"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.result").value("CLEAR"))
-        .andExpect(jsonPath("$.activeDefaults").value(0));
     mockMvc
         .perform(get("/v1/me").session(session))
         .andExpect(jsonPath("$.loginMethod").value("SMART_ID"));
@@ -135,7 +110,6 @@ class DemoFlowResetIntegrationTests {
 
     mockMvc.perform(post("/v1/demo/flow/reset").session(session)).andExpect(status().isNoContent());
     assertThat(joined()).isEqualTo(before);
-    mockMvc.perform(get("/v1/me/credit-check").session(session)).andExpect(status().isNotFound());
   }
 
   private int joined() throws Exception {
