@@ -3,7 +3,6 @@ import { FormattedMessage } from 'react-intl'
 import { Link } from 'react-router-dom'
 import { ApiError } from '../../api/client'
 import { Loader } from '../common/Loader'
-import { DocumentUpload } from '../documents/DocumentUpload'
 import { failureMessageId } from '../documents/failure'
 import { ProcessingProgress } from '../documents/ProcessingProgress'
 import { SealBadge } from '../documents/SealBadge'
@@ -12,6 +11,7 @@ import { useLoan, useLoanContracts, useUploadLoanContract } from './api'
 import { ConfirmedLoan } from './ConfirmedLoan'
 import { toFormValues } from './form'
 import { LoanConfirmForm } from './LoanConfirmForm'
+import { LoanSourceOptions } from './LoanSourceOptions'
 import { contractStages } from './stages'
 
 export function LoanStep() {
@@ -52,12 +52,12 @@ export function LoanStep() {
 
   return (
     <div className="d-flex flex-column gap-4">
-      <DocumentUpload
-        hintId="loan.upload.hint"
-        chooseId="loan.upload.choose"
-        onSelect={([file]) => upload.mutate(file)}
+      <LoanSourceOptions
+        onContract={(file) => upload.mutate(file)}
         pending={upload.isPending}
         error={upload.error}
+        manual={manual}
+        onManual={() => setManual(true)}
       />
 
       {latest && (
@@ -109,15 +109,7 @@ export function LoanStep() {
           estimatedBalance={null}
           onConfirmed={done}
         />
-      ) : (
-        latest?.status !== 'RECEIVED' && (
-          <div>
-            <button type="button" className="btn btn-link px-0" onClick={() => setManual(true)}>
-              <FormattedMessage id="loan.manual" />
-            </button>
-          </div>
-        )
-      )}
+      ) : null}
     </div>
   )
 }

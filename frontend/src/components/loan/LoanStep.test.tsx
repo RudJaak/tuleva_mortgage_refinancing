@@ -150,15 +150,32 @@ describe('LoanStep', () => {
     expect(screen.getByRole('radio', { name: /Parim/ })).toHaveAccessibleName(/1,20%/)
   })
 
+  it('offers a screenshot, the contract or manual entry side by side', async () => {
+    mockBackend({ loan: null, contracts: [] })
+    renderStep()
+
+    expect(await screen.findByLabelText('Lisa ekraanipilt')).toBeInTheDocument()
+    expect(screen.getByLabelText('Lisa laenuleping')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sisestan andmed ise' })).toBeInTheDocument()
+  })
+
+  it('says screenshots are not read yet', async () => {
+    mockBackend({ loan: null, contracts: [] })
+    renderStep()
+
+    await userEvent.upload(
+      await screen.findByLabelText('Lisa ekraanipilt'),
+      new File(['png'], 'laen.png', { type: 'image/png' }),
+    )
+
+    expect(screen.getByText(/Ekraanipildi lugemine tuleb peagi/)).toBeInTheDocument()
+  })
+
   it('lets the borrower enter the loan without a contract', async () => {
     mockBackend({ loan: null, contracts: [] })
     renderStep()
 
-    await userEvent.click(
-      await screen.findByRole('button', {
-        name: 'Mul pole lepingut käepärast, sisestan andmed ise',
-      }),
-    )
+    await userEvent.click(await screen.findByRole('button', { name: 'Sisestan andmed ise' }))
 
     expect(screen.getByLabelText('Marginaal')).toHaveValue('')
     expect(screen.queryAllByTestId('evidence')).toHaveLength(0)

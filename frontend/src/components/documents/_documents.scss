@@ -43,3 +43,10 @@
     background-color: var(--blue-bg-1);
   }
 }
+
+.loan-source {
+  &.loan-source-active {
+    border-color: $blue;
+    background-color: var(--blue-bg-1);
+  }
+}

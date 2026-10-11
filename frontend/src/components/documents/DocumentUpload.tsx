@@ -5,15 +5,25 @@ import { failureMessageId } from './failure'
 
 /** A file picker that also takes files dropped on it; {@code multiple} allows several at once. */
 export function DocumentUpload({
+  headingId,
+  badgeId,
   hintId,
   chooseId,
+  dropId,
+  accept = '.asice,.bdoc,.pdf,application/pdf',
+  className = '',
   multiple = false,
   onSelect,
   pending,
   error,
 }: {
+  headingId?: string
+  badgeId?: string
   hintId: string
   chooseId: string
+  dropId?: string
+  accept?: string
+  className?: string
   multiple?: boolean
   onSelect: (files: File[]) => void
   pending: boolean
@@ -42,7 +52,7 @@ export function DocumentUpload({
 
   return (
     <div
-      className={`card rounded-4 p-4 d-flex flex-column gap-3 document-drop ${dragging ? 'document-drop-active' : ''}`}
+      className={`card rounded-4 p-4 d-flex flex-column gap-3 document-drop ${dragging ? 'document-drop-active' : ''} ${className}`}
       data-testid="document-drop"
       onDragOver={(event) => {
         event.preventDefault()
@@ -51,10 +61,20 @@ export function DocumentUpload({
       onDragLeave={() => setDragging(false)}
       onDrop={onDrop}
     >
+      {headingId && (
+        <h2 className="h6 text-navy mb-0 d-flex flex-wrap align-items-center gap-2">
+          <FormattedMessage id={headingId} />
+          {badgeId && (
+            <span className="badge rounded-pill text-success bg-success-subtle">
+              <FormattedMessage id={badgeId} />
+            </span>
+          )}
+        </h2>
+      )}
       <p className="mb-0">
         <FormattedMessage id={hintId} />
       </p>
-      <div className="d-flex flex-wrap align-items-center gap-3">
+      <div className="d-flex flex-wrap align-items-center gap-3 mt-auto">
         <label className={`btn btn-primary mb-0 ${pending ? 'disabled' : ''}`}>
           {pending ? (
             <>
@@ -68,7 +88,7 @@ export function DocumentUpload({
             ref={input}
             type="file"
             className="visually-hidden"
-            accept=".asice,.bdoc,.pdf,application/pdf"
+            accept={accept}
             multiple={multiple}
             disabled={pending}
             onChange={(event) => {
@@ -80,7 +100,9 @@ export function DocumentUpload({
           />
         </label>
         <span className="small text-body-secondary">
-          <FormattedMessage id={multiple ? 'documents.upload.dropMany' : 'documents.upload.drop'} />
+          <FormattedMessage
+            id={dropId ?? (multiple ? 'documents.upload.dropMany' : 'documents.upload.drop')}
+          />
         </span>
       </div>
       {messageId && (
