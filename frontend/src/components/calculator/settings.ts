@@ -28,15 +28,9 @@ export const defaultCalculatorSettings: CalculatorSettings = {
   ],
 }
 
-export type Scenario = 'worst' | 'expected' | 'best'
-
-export const scenarios: Scenario[] = ['worst', 'expected', 'best']
-
-export function scenarioMargins(settings: CalculatorSettings): Record<Scenario, number> {
-  const [worst, expected, best] = [...settings.ladder]
-    .sort((a, b) => a.members - b.members)
-    .map((step) => step.margin)
-  return { worst, expected, best }
+/** The calculator uses the pool's minimum goal: the margin at the first (smallest) milestone. */
+export function minimumGoalMargin(settings: CalculatorSettings): number {
+  return [...settings.ladder].sort((a, b) => a.members - b.members)[0].margin
 }
 
 export function toCalculatorSettings(config: PublicConfig): CalculatorSettings {

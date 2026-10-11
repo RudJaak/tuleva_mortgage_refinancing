@@ -26,10 +26,6 @@
   "calculator.years": "Laenu lõpuni",
   "calculator.margin": "Sinu praegune marginaal",
   "calculator.marketAverage": "Uute laenude keskmine ~{margin}",
-  "calculator.scenario": "Ühispakkumise tulemus",
-  "calculator.scenario.worst": "Tagasihoidlik",
-  "calculator.scenario.expected": "Eesmärk",
-  "calculator.scenario.best": "Parim",
   "calculator.current": "Praegu maksad",
   "calculator.target": "Ühispakkumisega",
   "calculator.perMonth": "{amount} kuus",
@@ -37,7 +33,7 @@
   "calculator.saving": "Säästaksid laenu lõpuni",
   "calculator.monthlySaving": "ehk {amount} kuus",
   "calculator.savingDetails": "Pärast kulusid on säästu nüüdisväärtus {npv}. Kulud tasuvad end ära {months} kuuga.",
-  "calculator.noSaving": "Sinu marginaal on juba sama madal või madalam kui selle stsenaariumi oma.",
+  "calculator.noSaving": "Sinu marginaal on juba sama madal või madalam kui ühispakkumise miinimumeesmärk.",
   "calculator.disclaimer": "Illustratiivne arvutus, 6 kuu Euribor {euribor} ({date}). Marginaalid on ühispakkumise eesmärgid, mitte pakkumine: lõplikud tingimused sõltuvad pankade pakkumistest ja iga panga krediidiotsusest.",
   "calculator.validated": "✓ lepingust",
   "tracker.heading": "Ühispakkumise seis",
@@ -297,5 +293,6 @@
   "loan.source.contract.hint": "Kõige parem on digiallkirjastatud leping (.asice või .bdoc) koos lisadega. Näitame iga välja juures, kust lepingus väärtus pärineb.",
   "loan.source.manual.heading": "Sisestan ise",
   "loan.source.manual.hint": "Pole lepingut käepärast? Sisesta laenujääk, marginaal ja tähtaeg internetipanga põhjal.",
-  "loan.source.manual.choose": "Sisestan andmed ise"
+  "loan.source.manual.choose": "Sisestan andmed ise",
+  "calculator.goalNote": "Arvutame ühispakkumise miinimumeesmärgiga: marginaal <strong>{margin}</strong>. Mida rohkem inimesi liitub, seda madalam võib marginaal tulla."
 }

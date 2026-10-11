@@ -1,5 +1,5 @@
 import { FormattedMessage, useIntl } from 'react-intl'
-import { scenarioMargins, useCalculatorSettings } from '../calculator/settings'
+import { minimumGoalMargin, useCalculatorSettings } from '../calculator/settings'
 import type { LoanSummary, LoanTerms } from './api'
 
 type Check = { id: string; state: 'ok' | 'attention' | 'info'; values?: Record<string, string> }
@@ -11,7 +11,7 @@ type Check = { id: string; state: 'ok' | 'attention' | 'info'; values?: Record<s
 export function LoanChecks({ terms, summary }: { terms: LoanTerms; summary: LoanSummary }) {
   const intl = useIntl()
   const settings = useCalculatorSettings()
-  const firstTarget = scenarioMargins(settings).worst
+  const firstTarget = minimumGoalMargin(settings)
   const flags = new Set(summary.flags)
   const percent = (value: number) =>
     intl.formatNumber(value / 100, { style: 'percent', minimumFractionDigits: 2 })

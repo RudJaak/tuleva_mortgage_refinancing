@@ -140,14 +140,13 @@ describe('LoanStep', () => {
     expect(await screen.findByLabelText('Praegune laenujääk')).toHaveValue('66000')
   })
 
-  it('compares the confirmed margin with the pool targets', async () => {
+  it('compares the confirmed margin with the minimum goal', async () => {
     mockBackend({ loan: confirmedLoan, contracts: [processedContract] })
     renderStep()
 
     await screen.findByTestId('confirmed-loan')
-    expect(screen.getByRole('radio', { name: /Tagasihoidlik/ })).toHaveAccessibleName(/1,30%/)
-    expect(screen.getByRole('radio', { name: /Eesmärk/ })).toHaveAccessibleName(/1,25%/)
-    expect(screen.getByRole('radio', { name: /Parim/ })).toHaveAccessibleName(/1,20%/)
+    expect(screen.getByTestId('goal-note')).toHaveTextContent(/miinimumeesmärgiga: marginaal 1,30%/)
+    expect(screen.queryByRole('radio')).not.toBeInTheDocument()
   })
 
   it('offers a screenshot, the contract or manual entry side by side', async () => {

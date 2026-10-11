@@ -3,7 +3,7 @@ import { FormattedMessage, useIntl } from 'react-intl'
 import { compareMargins } from '../../calc/savings'
 import { useMembership } from '../membership/api'
 import { MarginSlider } from './MarginSlider'
-import { scenarioMargins, scenarios, useCalculatorSettings, type Scenario } from './settings'
+import { minimumGoalMargin, useCalculatorSettings } from './settings'
 
 export type ValidatedLoan = {
   balance: number
@@ -17,7 +17,6 @@ type CalculatorInputs = {
   months: string
   // null until the borrower moves the slider: the configured default margin applies
   margin: number | null
-  scenario: Scenario
 }
 
 const initialInputs: CalculatorInputs = {
@@ -25,7 +24,6 @@ const initialInputs: CalculatorInputs = {
   years: '20',
   months: '6',
   margin: null,
-  scenario: 'expected',
 }
 
 function toNumber(value: string) {
@@ -37,7 +35,6 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
   const intl = useIntl()
   const id = useId()
   const settings = useCalculatorSettings()
-  const margins = scenarioMargins(settings)
   const [inputs, setInputs] = useState(initialInputs)
   // Members have already paid the fee; for anyone else (or not yet known) it is a cost of joining
   const member = useMembership().data?.member === true
@@ -48,7 +45,7 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
     validated?.remainingMonths ??
     Math.round(toNumber(inputs.years) * 12) + Math.min(Math.round(toNumber(inputs.months)), 11)
   const currentMargin = validated?.margin ?? inputs.margin ?? settings.defaultMargin
-  const targetMargin = margins[inputs.scenario]
+  const targetMargin = minimumGoalMargin(settings)
 
   const result = compareMargins({
     balance,
@@ -184,23 +181,12 @@ export function SavingsCalculator({ validated }: { validated?: ValidatedLoan }) 
           )}
         </div>
 
-        <fieldset className="mt-3 px-1">
-          <legend className="visually-hidden">
-            <FormattedMessage id="calculator.scenario" />
-          </legend>
-          <div className="btn-group d-flex" role="group">
-            {scenarios.map((scenario) => (
-              <ScenarioOption
-                key={scenario}
-                name={`${id}-scenario`}
-                scenario={scenario}
-                margin={percent(margins[scenario])}
-                checked={inputs.scenario === scenario}
-                onSelect={() => update({ scenario })}
-              />
-            ))}
-          </div>
-        </fieldset>
+        <p className="mt-3 mb-0 px-3 small text-navy" data-testid="goal-note">
+          <FormattedMessage
+            id="calculator.goalNote"
+            values={{ margin: percent(targetMargin), strong: (text) => <strong>{text}</strong> }}
+          />
+        </p>
 
         <div className="mt-3 px-3 text-navy" aria-live="polite">
           <ResultRow
@@ -319,39 +305,6 @@ function ValidatedRows({ rows }: { rows: [string, string][] }) {
         </div>
       ))}
     </dl>
-  )
-}
-
-function ScenarioOption({
-  name,
-  scenario,
-  margin,
-  checked,
-  onSelect,
-}: {
-  name: string
-  scenario: Scenario
-  margin: string
-  checked: boolean
-  onSelect: () => void
-}) {
-  const optionId = `${name}-${scenario}`
-  return (
-    <>
-      <input
-        type="radio"
-        className="btn-check"
-        name={name}
-        id={optionId}
-        checked={checked}
-        onChange={onSelect}
-        autoComplete="off"
-      />
-      <label htmlFor={optionId} className="btn btn-outline-primary w-100 lh-sm py-2">
-        <FormattedMessage id={`calculator.scenario.${scenario}`} />
-        <span className="d-block small text-reset">{margin}</span>
-      </label>
-    </>
   )
 }
 

@@ -13,7 +13,7 @@ describe('LandingPage', () => {
     )
 
     const tracker = screen.getByRole('heading', { name: 'Ühispakkumise seis' })
-    const calculator = screen.getByRole('radio', { name: /Eesmärk/ })
+    const calculator = screen.getByTestId('goal-note')
     const join = screen.getByRole('link', { name: 'Liitu ühispakkumisega' })
     const follows = (a: Element, b: Element) =>
       Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)

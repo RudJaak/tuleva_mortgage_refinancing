@@ -1,22 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { publicConfig } from '../pool/fixtures'
-import { defaultCalculatorSettings, scenarioMargins, toCalculatorSettings } from './settings'
+import { defaultCalculatorSettings, minimumGoalMargin, toCalculatorSettings } from './settings'
 
-describe('scenarioMargins', () => {
-  it('maps the three ladder tiers to the modest, goal and best scenarios', () => {
-    expect(scenarioMargins(defaultCalculatorSettings)).toEqual({
-      worst: 1.3,
-      expected: 1.25,
-      best: 1.2,
-    })
-  })
-
-  it('orders tiers by the number of people regardless of input order', () => {
+describe('minimumGoalMargin', () => {
+  it('takes the margin at the smallest milestone, whatever the order', () => {
     const [first, second, third] = defaultCalculatorSettings.ladder
 
+    expect(minimumGoalMargin(defaultCalculatorSettings)).toBe(1.3)
     expect(
-      scenarioMargins({ ...defaultCalculatorSettings, ladder: [third, first, second] }),
-    ).toEqual({ worst: 1.3, expected: 1.25, best: 1.2 })
+      minimumGoalMargin({ ...defaultCalculatorSettings, ladder: [third, first, second] }),
+    ).toBe(1.3)
   })
 })
 
@@ -28,7 +21,7 @@ describe('toCalculatorSettings', () => {
     })
 
     expect(settings.euribor6m).toBe(3.1)
-    expect(scenarioMargins(settings)).toEqual({ worst: 1.3, expected: 1.25, best: 1.2 })
+    expect(minimumGoalMargin(settings)).toBe(1.3)
   })
 
   it('keeps the default ladder when the config has fewer than three milestones', () => {

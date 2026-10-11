@@ -16,7 +16,7 @@ describe('SavingsCalculator', () => {
   it('leads with the saving over the whole loan, then the monthly one', () => {
     renderCalculator()
 
-    expect(screen.getByRole('radio', { name: /Eesmärk/ })).toBeChecked()
+    expect(screen.getByTestId('goal-note')).toHaveTextContent(/1,30%/)
     expect(lifetimeSaving()).toMatch(/^[\d\s]+€$/)
     expect(monthlySaving()).toMatch(/^ehk \d+\s€ kuus$/)
   })
@@ -53,17 +53,6 @@ describe('SavingsCalculator', () => {
     expect(lifetimeSaving()).toBe(elevenMonths)
   })
 
-  it('saves more in the best case than in the modest case', async () => {
-    renderCalculator()
-
-    await userEvent.click(screen.getByRole('radio', { name: /Tagasihoidlik/ }))
-    const modest = Number(monthlySaving()!.replace(/\D/g, ''))
-    await userEvent.click(screen.getByRole('radio', { name: /Parim/ }))
-    const best = Number(monthlySaving()!.replace(/\D/g, ''))
-
-    expect(best).toBeGreaterThan(modest)
-  })
-
   it('starts from a typical loan with the configured default margin', () => {
     renderCalculator()
 
@@ -72,7 +61,7 @@ describe('SavingsCalculator', () => {
     expect(screen.getByLabelText('Sinu praegune marginaal')).toHaveValue('1.8')
   })
 
-  it('explains when the scenario would not save anything', async () => {
+  it('explains when the minimum goal would not save anything', async () => {
     renderCalculator()
 
     fireEvent.change(screen.getByLabelText('Sinu praegune marginaal'), { target: { value: '0.9' } })
@@ -103,7 +92,7 @@ describe('SavingsCalculator', () => {
     expect(screen.getByText('1,95%')).toBeInTheDocument()
   })
 
-  it('uses the Euribor and tiers served by the backend', async () => {
+  it('uses the Euribor and the minimum goal served by the backend', async () => {
     mockApi({
       '/v1/config/public': {
         ...publicConfig,
@@ -113,7 +102,7 @@ describe('SavingsCalculator', () => {
     renderCalculator()
 
     expect(await screen.findByText(/6 kuu Euribor 3,25%/, { selector: 'p' })).toBeInTheDocument()
-    expect(screen.getByRole('radio', { name: /Eesmärk/ })).toHaveAccessibleName(/1,25%/)
+    expect(screen.getByTestId('goal-note')).toHaveTextContent(/1,30%/)
   })
 
   it('presents margins as goals with a disclaimer, not as an offer', () => {

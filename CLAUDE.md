@@ -25,7 +25,7 @@ Related ideas, to stay distinct from:
 
 Target users: **anyone in Estonia with a mortgage**. Joining the pool requires Tuleva membership (€150, D32); existing members skip it.
 
-The landing page has a Tuleva-style **savings calculator** (worst, expected and best case margin) and a live **pool tracker**: people joined, combined balance, target volume, deadline, and a margin ladder that falls as the pool grows. After document upload, the calculator re-runs on validated numbers.
+The landing page has a Tuleva-style **savings calculator** (at the pool's minimum goal margin, D36) and a live **pool tracker**: people joined, combined balance, target volume, deadline, and a margin ladder that falls as the pool grows. After document upload, the calculator re-runs on validated numbers.
 
 ## Constraints and decisions so far
 
